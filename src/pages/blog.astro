@@ -1,0 +1,71 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+import type { CollectionEntry } from "astro:content";
+import CardBlog from "../components/CardBlog.astro";
+import Hero from "../components/Hero.astro";
+import Button from "../components/Button.astro";
+import Icon from "../components/Icon.astro";
+import { cardBlogBackgroundColors } from "../data/colors";
+const posts: CollectionEntry<"blog">[] = (await getCollection("blog")).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+
+---
+
+<BaseLayout title="Blog - Shubham Goel" description="Shubham Goel's blog on ML, AI agents, multimodal LLMs, and side projects.">
+    <Hero h1="Blog" subtitle="ML, AI agents, and things I find interesting." height="40svh">
+    </Hero>
+    <nav class="sub-nav-container">
+        <ul role="list">
+            <li><a href="/tags">Tag Index</a></li>
+            <li style="display: flex; align-items: center;"><a href="/rss.xml"><Icon name="rss" label="RSS icon" size="1.125rem" class="rss-icon"/></a></li>
+        </ul>
+    </nav>
+    <h2 class="visually-hidden">All blog posts</h2>
+    <ul role="list" class="blog-posts-container margin-top-l margin-bottom-xl">
+        {
+            posts.map((post, index) => (
+                <li>
+                    <CardBlog post={post} backgroundColor={cardBlogBackgroundColors[index % cardBlogBackgroundColors.length]} transitionIcon />
+                </li>
+            ))
+        }
+    </ul>
+</BaseLayout>
+
+<style>
+    .blog-posts-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--space-m) var(--space-m);
+    }
+    .sub-nav-container ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: row;
+        justify-content: center;
+        gap: var(--space-xs) var(--space-s);
+        padding-block: var(--space-xs);
+        li a {
+            color: var(--color-neutral-300);
+            text-decoration: none;
+            font-size: 0.75em;
+            &:hover {
+                color: var(--a-hover-color);
+            }
+        }
+    }
+    @media (min-width: 32rem) {
+        .blog-posts-container {
+            gap: var(--space-2xl) var(--space-l);
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    @media (min-width: 74rem) {
+        .blog-posts-container {
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+        }
+    }
+
+</style>

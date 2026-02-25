@@ -1,0 +1,43 @@
+---
+import Card from "../components/Card.astro";
+import CardGrid from "../components/CardGrid.astro";
+import Hero from "../components/Hero.astro";
+import Icon from "../components/Icon.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout title="Projects - Shubham Goel" description="Side projects and research work by Shubham Goel.">
+    <Hero h1="Projects" subtitle="Things I've built"/>
+    <h2 class="post-hero-h2 text-align-center">Recent Projects</h2>
+    <CardGrid>
+        <Card title="Unrot Me" href="https://github.com/shubhamgoel27/unrot-me">
+            <p>A Streamlit web app for mindful movie and video recommendations.</p>
+            <Icon name="lightbulb" label="lightbulb icon" size="1.5rem" slot="icon-row"/>
+        </Card>
+        <Card title="Gemini Image Labeler" href="https://github.com/shubhamgoel27/gemini-image-labeler">
+            <p>Image labeling tool powered by Google Gemini for automated annotation using multimodal LLMs.</p>
+            <Icon name="magnifier" label="magnifier icon" size="1.5rem" slot="icon-row"/>
+        </Card>
+        <Card title="Chandni Chowk Bros" href="https://github.com/shubhamgoel27/chandni-chowk-mario">
+            <p>A fun Mario-style game set in Chandni Chowk.</p>
+            <Icon name="puzzle" label="puzzle icon" size="1.5rem" slot="icon-row"/>
+        </Card>
+        <Card title="Satellite Image Downloader" href="https://github.com/shubhamgoel27/satellite-image-downloader">
+            <p>Downloads, stitches, and georeferences tiles from Google Static Maps API. 5 stars on GitHub.</p>
+            <Icon name="star" label="star icon" size="1.5rem" slot="icon-row"/>
+        </Card>
+    </CardGrid>
+    <h2 class="text-align-center margin-top-xl margin-bottom-m">Research</h2>
+    <CardGrid columnWidth="max-3 margin-bottom-xl">
+        <Card title="Hurricane Damage Estimation" href="#">
+            <p>Cyclone damage prediction using pre/post disaster satellite imagery and insurance data. Siamese Change Detection network achieving 0.804 IoU. Invited to GeoPython 2020.</p>
+            <Icon name="magnifier" label="magnifier icon" size="1.5rem" slot="icon-row"/>
+        </Card>
+        <Card title="Building Detection" href="#">
+            <p>Co-authored "Building detection in dense regions using Reverse Mask R-CNN" at Reliance Jio. Beat SOTA mIoU 75% to 84.3%. Automated population estimation for JioFiber rollout.</p>
+            <Icon name="book" label="book icon" size="1.5rem" slot="icon-row"/>
+        </Card>
+    </CardGrid>
+</BaseLayout>
+
+<style>
+</style>

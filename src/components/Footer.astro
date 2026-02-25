@@ -1,0 +1,76 @@
+---
+import Icon from "./Icon.astro";
+import socials from "../data/socials";
+---
+
+<footer class="set-base-layout-max-width">
+    <div class="flex-center flex-column">
+        <p class="text-align-center">Shubham Goel</p><p class="text-align-center">
+            © 2025 - {String(new Date().getFullYear().toString())}
+        </p>
+    </div>
+    <ul role="list" class="flex-center">
+        <li>
+            <a href={socials.github.href} title={socials.github.name} aria-label={"Go to Shubham's " + socials.github.name} target="_blank">
+                <Icon name="github" label="GitHub icon" size="1.5rem"/>
+            </a>
+        </li>
+        <li>
+            <a href={socials.linkedin.href} title={socials.linkedin.name} aria-label={"Go to Shubham's " + socials.linkedin.name} target="_blank">
+                <Icon name="linkedin" label="LinkedIn icon" size="1.5rem"/>
+            </a>
+        </li>
+        <li>
+            <a href="/rss.xml" target="_blank" title="RSS" aria-label="Go to RSS feed">
+                <Icon name="rss" label="RSS icon" size="1.5rem"/>
+            </a>
+        </li>
+    </ul>
+    <ul role="list" class="flex-center navigation-container">
+        <li><p><a href="/">Home</a></p></li>
+        <li><p><a href="/blog">Blog</a></p></li>
+        <li><p><a href="/projects">Projects</a></p></li>
+        <li><p><a href="/about">About</a></p></li>
+        <li><p><a href="/now">Now</a></p></li>
+        <li><p><a href="/privacy">Privacy</a></p></li>
+        <li><p><a href="/sitemap-index.xml">Sitemap</a></p></li>
+    </ul>
+</footer>
+
+<style>
+    footer {
+        display: grid;
+        grid-template-columns: 1fr;
+        min-height: var(--footer-height);
+        align-items: center;
+        margin-inline: auto;
+        border-top: 1px solid var(--color-neutral-700);
+        >* {
+            height: max-content;
+            margin-block: var(--space-s);
+        }
+    }
+    ul {
+        gap: var(--space-s);
+    }
+    .navigation-container {
+        max-width: 75%;
+        margin-inline: auto;
+        & a {
+            font-size: var(--font-size-small);
+        }
+    }
+    p, li, img, a {
+        color: var(--color-neutral-300);
+        transition: color var(--transition-normal);
+    }
+    a:hover, a:focus-within {
+        color: var(--a-hover-color);
+    }
+
+    @media only screen and (min-width: 48rem) {
+        footer {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+    }
+</style>
