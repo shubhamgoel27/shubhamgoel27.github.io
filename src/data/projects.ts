@@ -49,6 +49,7 @@ export const projects: Project[] = [
     tags: ["Streamlit", "RL", "PufferLib"],
     links: [{ label: "GitHub", href: "https://github.com/shubhamgoel27/rl-arcade" }],
     status: "shipped",
+    featured: true,
     image: rlArcadeImg,
   },
   {
@@ -62,6 +63,7 @@ export const projects: Project[] = [
       { label: "GitHub", href: "https://github.com/shubhamgoel27/chandni-chowk-bros" },
     ],
     status: "shipped",
+    featured: true,
     image: chandniImg,
   },
   {
@@ -90,7 +92,6 @@ export const projects: Project[] = [
     tags: ["YOLOv8", "SAHI", "computer vision", "LLM", "TTS"],
     links: [],
     status: "building",
-    featured: true,
     image: auraFcImg,
   },
   {
@@ -100,7 +101,6 @@ export const projects: Project[] = [
     tags: ["PyTorch", "VLMs", "VLAs", "evals"],
     links: [],
     status: "building",
-    featured: true,
   },
   {
     name: "graph quest",
