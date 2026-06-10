@@ -4,9 +4,8 @@ const year = 2026;
 ---
 <footer class="site-footer">
   <div class="wrap inner">
-    <p class="note">
-      Built with <a href="https://astro.build" class="body-link" target="_blank" rel="noopener">Astro</a>,
-      a little terracotta, and an unreasonable number of side projects.
+    <p class="note" id="footer-quip">
+      If you can read this, my evals passed.
     </p>
     <ul class="socials">
       {socialOrder.map((key) => (
@@ -18,9 +17,21 @@ const year = 2026;
         </li>
       ))}
     </ul>
-    <p class="copy">© {year} Shubham Goel</p>
+    <p class="copy">© {year} Shubham Goel · <a href="/ai" class="ai-link">a note for AI agents</a></p>
   </div>
 </footer>
+
+<script>
+  const quips = [
+    null, // keep the server-rendered line as one of the rotation slots
+    "Built in San Francisco, seasoned in Old Delhi.",
+    "Powered by chai, xG charts, and the Arsenal injury report.",
+    "Hand-built, warm-toned, and slightly obsessed with futbol.",
+  ];
+  const pick = quips[Math.floor(Math.random() * quips.length)];
+  const el = document.getElementById("footer-quip");
+  if (pick && el) el.textContent = pick;
+</script>
 
 <style>
   .site-footer {
@@ -40,4 +51,6 @@ const year = 2026;
   .socials a { color: var(--ink-soft); font-size: 0.92rem; }
   .socials a:hover { color: var(--accent-ink); }
   .copy { color: var(--ink-faint); font-size: 0.85rem; font-family: var(--font-mono); width: 100%; }
+  .ai-link { color: var(--ink-faint); }
+  .ai-link:hover { color: var(--accent-ink); }
 </style>

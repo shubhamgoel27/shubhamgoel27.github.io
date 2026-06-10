@@ -1,11 +1,15 @@
 ---
 import Base from "../layouts/Base.astro";
+import KeepyUppy from "../components/KeepyUppy.astro";
 ---
 <Base title="Not found" description="That page doesn't exist.">
   <section class="wrap narrow nf">
     <p class="eyebrow">404</p>
     <h1>This page wandered off.</h1>
-    <p class="muted">Probably offside. Let's get you back onside.</p>
+    <p class="muted">Probably offside. While the ref sorts it out: keepy-uppy?</p>
+
+    <KeepyUppy />
+
     <div class="actions">
       <a href="/" class="link-underline">← Home</a>
       <a href="/building" class="link-underline">Things I'm building</a>
@@ -15,7 +19,7 @@ import Base from "../layouts/Base.astro";
 </Base>
 
 <style>
-  .nf { padding-top: var(--space-3xl); padding-bottom: var(--space-2xl); text-align: center; }
+  .nf { padding-top: var(--space-2xl); padding-bottom: var(--space-2xl); text-align: center; }
   .nf h1 { margin-top: var(--space-s); }
   .nf .muted { margin-top: var(--space-xs); }
   .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-m); margin-top: var(--space-l); }

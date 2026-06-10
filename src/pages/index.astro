@@ -17,9 +17,9 @@ const posts = (await getCollection("blog"))
 ---
 <Base>
   <section class="hero wrap">
-    <span class="avatar">
+    <button class="avatar" id="avatar-egg" aria-label="Shubham's photo. Click for a surprise." title="click me">
       <Image src={profilePic} alt="Shubham Goel" width={352} height={352} loading="eager" />
-    </span>
+    </button>
     <h1 class="greeting">Hey, I'm Shubham.<Squiggle /></h1>
     <div class="lede narrow stack">
       <p>
@@ -31,7 +31,7 @@ const posts = (await getCollection("blog"))
         I love building side projects, like
         <a href="https://github.com/shubhamgoel27/artifold" class="body-link">artifold</a> and
         <a href="https://github.com/shubhamgoel27/rl-arcade" class="body-link">rl-arcade</a>,
-        and I have a serious obsession with futbol.
+        and I have a serious obsession with <a href="/futbol" class="body-link">futbol</a>.
       </p>
     </div>
     <div class="hero-actions">
@@ -98,6 +98,7 @@ const posts = (await getCollection("blog"))
     display: block;
     width: 5.5rem;
     height: 5.5rem;
+    padding: 0;
     border-radius: 50%;
     overflow: hidden;
     border: 3px solid var(--paper-raised);
@@ -105,8 +106,12 @@ const posts = (await getCollection("blog"))
     margin-bottom: var(--space-m);
     transform: rotate(-3deg);
     transition: transform var(--t-norm);
+    cursor: pointer;
+    background: none;
   }
   .avatar:hover { transform: rotate(3deg) scale(1.06); }
+  .avatar.spin { animation: avatar-spin 0.55s var(--ease); }
+  @keyframes avatar-spin { to { transform: rotate(357deg); } }
   .avatar :global(img) {
     /* zoom the circle crop in on the face */
     width: 200%;
@@ -161,3 +166,87 @@ const posts = (await getCollection("blog"))
   .connect-label { font-weight: 560; }
   .connect-handle { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-faint); }
 </style>
+
+<style is:global>
+  .confetti {
+    position: fixed;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .coyg-toast {
+    position: fixed;
+    transform: translate(-50%, -120%);
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--paper-raised);
+    background: #EF0107;
+    padding: 0.35rem 0.9rem;
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-md);
+    pointer-events: none;
+    z-index: 1000;
+    animation: coyg-pop 1.6s var(--ease) forwards;
+  }
+  @keyframes coyg-pop {
+    0% { opacity: 0; scale: 0.6; }
+    15% { opacity: 1; scale: 1.05; }
+    25% { scale: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; translate: 0 -12px; }
+  }
+</style>
+
+<script>
+  const avatar = document.getElementById("avatar-egg");
+  const ARSENAL = ["#EF0107", "#FFFDF8", "#9C824A", "#C1452A"];
+  let clicks = 0;
+
+  avatar?.addEventListener("click", () => {
+    clicks++;
+    avatar.classList.remove("spin");
+    void avatar.offsetWidth;
+    avatar.classList.add("spin");
+    if (clicks % 5 === 0) celebrate();
+  });
+
+  function celebrate() {
+    const r = avatar!.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    toast(cx, r.top);
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    for (let i = 0; i < 36; i++) {
+      const p = document.createElement("span");
+      p.className = "confetti";
+      p.style.background = ARSENAL[i % ARSENAL.length];
+      p.style.left = `${cx}px`;
+      p.style.top = `${cy}px`;
+      document.body.appendChild(p);
+      const ang = Math.random() * Math.PI * 2;
+      const v = 90 + Math.random() * 170;
+      const dx = Math.cos(ang) * v;
+      const dy = Math.sin(ang) * v - 140;
+      p.animate(
+        [
+          { transform: "translate(0,0) rotate(0deg)", opacity: 1 },
+          { transform: `translate(${dx}px, ${dy + 260}px) rotate(${Math.random() * 720 - 360}deg)`, opacity: 0 },
+        ],
+        { duration: 950 + Math.random() * 650, easing: "cubic-bezier(0.2,0.6,0.3,1)" }
+      ).onfinish = () => p.remove();
+    }
+  }
+
+  function toast(x: number, topY: number) {
+    const t = document.createElement("div");
+    t.className = "coyg-toast";
+    t.textContent = "COYG! ⚽";
+    t.style.left = `${x}px`;
+    t.style.top = `${topY}px`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1700);
+  }
+</script>

@@ -1,0 +1,118 @@
+---
+// Keepy-uppy mini game. Pointer-based kicks (click events miss a moving ball),
+// generous hit radius, streak + persistent best score.
+---
+<div class="pitch" id="pitch">
+  <button class="ball" id="ball" aria-label="Juggle the ball">⚽</button>
+</div>
+<p class="score" id="score">Click the ball to start a streak.</p>
+
+<style>
+  .pitch {
+    position: relative;
+    height: 16rem;
+    margin-top: var(--space-l);
+    border-bottom: 2px dashed var(--line-strong);
+    overflow: hidden;
+    touch-action: manipulation;
+  }
+  .ball {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    font-size: 3rem;
+    line-height: 1;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem;
+    transform: translateX(-50%);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .ball:focus-visible { outline: 2px solid var(--accent); border-radius: 50%; }
+  .score {
+    margin-top: var(--space-s);
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    min-height: 1.4em;
+    text-align: center;
+  }
+</style>
+
+<script>
+  const ball = document.getElementById("ball")!;
+  const pitch = document.getElementById("pitch")!;
+  const score = document.getElementById("score")!;
+
+  const KEY = "keepy-best";
+  let best = Number(localStorage.getItem(KEY) || 0);
+  let streak = 0;
+  let y = 0;
+  let x = 0;
+  let vy = 0;
+  let vx = 0;
+  let raf: number | null = null;
+  let last = 0;
+
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (best > 0) score.textContent = `Best streak: ${best}. Click the ball.`;
+
+  // Pointer-based kicks: a moving ball breaks `click` (press and release must
+  // hit the same spot), so kick on pointerdown anywhere near the ball.
+  pitch.addEventListener("pointerdown", (e) => {
+    const r = ball.getBoundingClientRect();
+    const dist = Math.hypot(e.clientX - (r.x + r.width / 2), e.clientY - (r.y + r.height / 2));
+    if (dist < 95) kick();
+  });
+
+  // Keyboard accessibility: button "click" with detail 0 means Enter/Space.
+  ball.addEventListener("click", (e) => { if (e.detail === 0) kick(); });
+
+  function kick() {
+    streak++;
+    score.textContent = `Streak: ${streak}${best ? ` · Best: ${best}` : ""}`;
+    if (reduced) {
+      if (streak > best) { best = streak; localStorage.setItem(KEY, String(best)); }
+      return;
+    }
+    vy = 520 + Math.random() * 160;
+    vx = (Math.random() - 0.5) * 320;
+    if (raf === null) { last = performance.now(); raf = requestAnimationFrame(step); }
+  }
+
+  function step(now: number) {
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    vy -= 1400 * dt;
+    y += vy * dt;
+    x += vx * dt;
+    const half = pitch.clientWidth / 2 - 40;
+    if (x > half) { x = half; vx = -Math.abs(vx) * 0.8; }
+    if (x < -half) { x = -half; vx = Math.abs(vx) * 0.8; }
+    const ceiling = pitch.clientHeight - 70;
+    if (y > ceiling) { y = ceiling; vy = -Math.abs(vy) * 0.4; }
+    if (y <= 0 && vy < 0) {
+      y = 0;
+      drop();
+      return;
+    }
+    ball.style.transform = `translateX(calc(-50% + ${x}px)) translateY(${-y}px) rotate(${x * 1.5}deg)`;
+    raf = requestAnimationFrame(step);
+  }
+
+  function drop() {
+    ball.style.transform = `translateX(calc(-50% + ${x}px))`;
+    raf = null;
+    vy = 0; vx = 0;
+    if (streak > 0) {
+      const isRecord = streak > best;
+      if (isRecord) { best = streak; localStorage.setItem(KEY, String(best)); }
+      score.textContent = isRecord
+        ? `Dropped at ${streak}. New record! 🏆`
+        : `Dropped at ${streak} · Best: ${best}`;
+      streak = 0;
+    }
+  }
+</script>

@@ -1,0 +1,24 @@
+---
+import Base from "../layouts/Base.astro";
+import KeepyUppy from "../components/KeepyUppy.astro";
+---
+<Base title="Futbol" description="The beautiful game gets its own page. Keepy-uppy included.">
+  <section class="wrap narrow fb">
+    <p class="eyebrow">Futbol</p>
+    <h1>The beautiful game gets its own page.</h1>
+    <p class="muted">
+      Gunner since before it was character-building. When I'm not watching, I'm building with
+      it: a real-time <a href="/building" class="body-link">AI soccer commentator</a>, match
+      highlights restyled as anime, and whatever this is below. Current record holder: me,
+      on my own website. Take that from me.
+    </p>
+
+    <KeepyUppy />
+  </section>
+</Base>
+
+<style>
+  .fb { padding-top: var(--space-2xl); padding-bottom: var(--space-xl); text-align: center; }
+  .fb h1 { margin-top: var(--space-s); }
+  .fb .muted { margin-top: var(--space-s); max-width: 34rem; margin-inline: auto; }
+</style>
