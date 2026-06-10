@@ -20,22 +20,18 @@ const posts = (await getCollection("blog"))
     <span class="avatar">
       <Image src={profilePic} alt="Shubham Goel" width={352} height={352} loading="eager" />
     </span>
-    <p class="eyebrow">ML Engineer · Multimodal, RecSys, Computer Vision</p>
     <h1 class="greeting">Hey, I'm Shubham.<Squiggle /></h1>
     <div class="lede narrow stack">
-      <p>
-        I build machine learning systems where <strong>vision, language, and ranking</strong> meet.
-        Most recently at Meta on Instagram Ads Ranking, I built multimodal LLM pipelines that
-        generate ranking features and post-trained open models against custom eval harnesses.
-      </p>
+      <p>ML engineer. <strong>Vision, language, ranking.</strong></p>
       <p class="muted">
-        The part I enjoy most is the post-training and evals loop: teach a model one specific
-        job, measure it honestly, repeat. Off the clock, I'm usually building something.
+        Most recently: multimodal LLM pipelines and post-training for Instagram Ads at Meta.
+        Before that: billion-scale multimodal search, satellite imagery, computer vision.
       </p>
+      <p class="muted">I like models with one job, and evals that prove it.</p>
     </div>
     <div class="hero-actions">
-      <a href="/building" class="btn btn-primary">See what I'm building</a>
-      <a href="/about" class="btn btn-ghost">About me</a>
+      <a href="/building" class="btn btn-primary">Projects</a>
+      <a href="/about" class="btn btn-ghost">About</a>
     </div>
     <p class="now-line">
       <span class="pulse" aria-hidden="true"></span>
