@@ -1,0 +1,47 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  description: string;
+  pubDate: Date;
+  minutesRead?: number;
+  tags?: string[];
+  compact?: boolean;
+}
+const { href, title, description, pubDate, minutesRead, tags = [], compact = false } = Astro.props;
+const dateStr = pubDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+---
+<article class:list={["post", { compact }]}>
+  <a href={href} class="cover" aria-label={title}></a>
+  <div class="meta">
+    <time datetime={pubDate.toISOString()}>{dateStr}</time>
+    {minutesRead && <><span class="sep">·</span><span>{minutesRead} min read</span></>}
+  </div>
+  <h3 class="title"><a href={href} class="link-underline">{title}</a></h3>
+  {!compact && <p class="desc">{description}</p>}
+  {tags.length > 0 && !compact && (
+    <ul class="tags">{tags.map((t) => <li><a href={`/tags/${t}`} class="tag">#{t}</a></li>)}</ul>
+  )}
+</article>
+
+<style>
+  .post {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    padding: var(--space-m) 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .post.compact { padding: var(--space-s) 0; }
+  .cover { position: absolute; inset: 0; }
+  .meta {
+    display: flex; align-items: center; gap: 0.5em;
+    font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-faint);
+  }
+  .title { font-size: var(--step-1); }
+  .title a { color: var(--ink); position: relative; z-index: 1; }
+  .post:hover .title a { color: var(--accent-ink); }
+  .desc { color: var(--ink-soft); font-size: 0.95rem; }
+  .tags { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; padding: 0; margin-top: var(--space-2xs); }
+</style>

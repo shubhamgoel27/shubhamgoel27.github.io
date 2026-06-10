@@ -1,167 +1,162 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import Button from "../components/Button.astro";
-import CardBlog from "../components/CardBlog.astro";
 import { getCollection } from "astro:content";
-import Card from "../components/Card.astro";
-import Icon from "../components/Icon.astro";
-import socials from "../data/socials";
-const blogPosts = (await getCollection("blog")).sort(
-  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-);
-import { cardBlogBackgroundColors } from "../data/colors";
----
+import Base from "../layouts/Base.astro";
+import Squiggle from "../components/Squiggle.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import PostCard from "../components/PostCard.astro";
+import { featuredProjects } from "../data/projects";
+import { socials, socialOrder } from "../data/socials";
+import { minutesRead } from "../utils/reading";
+import { Image } from "astro:assets";
+import profilePic from "../assets/profile.png";
 
-<BaseLayout
-	title="Shubham Goel"
-	description="ML Engineer building with multimodal LLMs and AI agents."
->
-	<section class="intro-section-container padding-top-l padding-bottom-l">
-		<div class="intro-container">
-			<div class="intro margin-bottom-s">
-				<h1>Hi, I'm<br />Shubham Goel.</h1>
-			</div>
-			<p>ML Engineer, building with multimodal LLMs and AI agents.</p>
-		</div>
-		<div class="intro-button-navigation">
-			<Button text="Blog" href="/blog" buttonStyle="gradient set-size"/>
-			<Button text="Projects" href="/projects" buttonStyle="neutral-strong set-size"/>
-			<Button text="About" href="/about" buttonStyle="neutral-strong set-size"/>
-		</div>
-	</section>
-	<div class="content-sections-container">
-		<section class="content-cards-container">
-			<div class="first-row">
-				<h2>Blog</h2>
-				<Button text="All blog posts" href="/blog" buttonStyle="line gradient-underline icon-left" icon="rightarrow"/>
-			</div>
-			<div class="blog-content-cards">
-				{
-					blogPosts.slice(0, 3).map((post, index) => (
-						<CardBlog post={post} compact backgroundColor={cardBlogBackgroundColors[index % cardBlogBackgroundColors.length]} transitionIcon/>
-					))
-				}
-			</div>
-		</section>
-		<section class="content-cards-container">
-			<div class="first-row">
-				<h2>Projects</h2>
-				<Button text="All projects" href="/projects" buttonStyle="line icon-left" icon="rightarrow"/>
-			</div>
-			<div class="projects-content-cards">
-				<Card title="Unrot Me" href="https://github.com/shubhamgoel27/unrot-me">
-					<p>Mindful movie and video recommendations powered by Streamlit.</p>
-					<Icon name="lightbulb" label="lightbulb icon" size="1.5rem" slot="icon-row"/>
-				</Card>
-				<Card title="Gemini Image Labeler" href="https://github.com/shubhamgoel27/gemini-image-labeler">
-					<p>Automated image annotation using Google Gemini multimodal LLMs.</p>
-					<Icon name="magnifier" label="magnifier icon" size="1.5rem" slot="icon-row"/>
-				</Card>
-				<Card title="Satellite Image Downloader" href="https://github.com/shubhamgoel27/satellite-image-downloader">
-					<p>Download, stitch, and georeference tiles from Google Static Maps API.</p>
-					<Icon name="puzzle" label="puzzle icon" size="1.5rem" slot="icon-row"/>
-				</Card>
-			</div>
-		</section>
-		<section class="content-cards-container">
-			<div class="first-row">
-				<h2>Connect</h2>
-			</div>
-			<div class="some-content-row">
-				<a href={socials.github.href} target="_blank" class="social-link">
-					<Icon name="github" label="GitHub icon" size="2.5rem"/>
-					<span>GitHub</span>
-				</a>
-				<a href={socials.linkedin.href} target="_blank" class="social-link">
-					<Icon name="linkedin" label="LinkedIn icon" size="2.5rem"/>
-					<span>LinkedIn</span>
-				</a>
-			</div>
-		</section>
-	</div>
-</BaseLayout>
+const posts = (await getCollection("blog"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .slice(0, 3);
+---
+<Base>
+  <section class="hero wrap">
+    <span class="avatar">
+      <Image src={profilePic} alt="Shubham Goel" width={352} height={352} loading="eager" />
+    </span>
+    <p class="eyebrow">ML Engineer · Multimodal, RecSys, Computer Vision</p>
+    <h1 class="greeting">Hey, I'm Shubham.<Squiggle /></h1>
+    <div class="lede narrow stack">
+      <p>
+        I work on <strong>multimodal learning</strong>. Most recently at Meta on Instagram
+        Ads Ranking, I built multimodal LLM pipelines that generate ranking features and
+        post-trained open models against custom eval harnesses to push extraction quality.
+      </p>
+      <p class="muted">
+        The part I enjoy most is the post-training and evals loop: teach a model one specific
+        job, measure it honestly, repeat. Off the clock, I'm usually building something.
+      </p>
+    </div>
+    <div class="hero-actions">
+      <a href="/building" class="btn btn-primary">See what I'm building</a>
+      <a href="/about" class="btn btn-ghost">About me</a>
+    </div>
+    <p class="now-line">
+      <span class="pulse" aria-hidden="true"></span>
+      Currently going deep on multimodal post-training and evals.
+      <a href="/now" class="link-underline">what I'm up to now →</a>
+    </p>
+  </section>
+
+  <section class="wrap block">
+    <div class="block-head">
+      <h2>Things I'm building</h2>
+      <a href="/building" class="more link-underline">All projects →</a>
+    </div>
+    <div class="grid">
+      {featuredProjects.map((p) => <ProjectCard project={p} />)}
+    </div>
+  </section>
+
+  {posts.length > 0 && (
+    <section class="wrap block narrow">
+      <div class="block-head">
+        <h2>Writing</h2>
+        <a href="/blog" class="more link-underline">All posts →</a>
+      </div>
+      <div class="posts">
+        {posts.map((post) => (
+          <PostCard
+            href={`/blog/${post.id}`}
+            title={post.data.title}
+            description={post.data.description}
+            pubDate={post.data.pubDate}
+            minutesRead={minutesRead(post.body)}
+            tags={post.data.tags}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="wrap block narrow">
+    <h2>Say hi</h2>
+    <p class="muted connect-lede">Always happy to talk multimodal models, recsys, football, or whatever you're building.</p>
+    <ul class="connect">
+      {socialOrder.map((key) => (
+        <li>
+          <a href={socials[key].href} class="connect-link" target={key === "email" ? undefined : "_blank"} rel="noopener">
+            <span class="connect-label">{socials[key].label}</span>
+            <span class="connect-handle">{socials[key].handle}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
 
 <style>
-	.intro-section-container {
-		display: flex;
-		flex-direction: column;
-		min-height: calc(100svh - var(--footer-height) - var(--navbar-height));
-		justify-content: center;
-	}
-	.intro-container {
-		margin-inline: auto;
-		max-width: max-content;
-		& .intro {
-			display: flex;
-			flex-direction: column-reverse;
-			gap: var(--space-xs);
-		}
-	}
-	.intro-button-navigation {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: center;
-		margin-block: var(--space-l);
-		gap: var(--space-m) var(--space-l);
-	}
-	.content-sections-container {
-		max-width: 64rem;
-		width: 100%;
-		margin-inline: auto;
-	}
-	.content-cards-container {
-		margin-bottom: var(--space-2xl);
-		.first-row {
-			display: flex;
-			flex-direction: row;
-			flex-wrap: wrap;
-			align-items: center;
-			gap: var(--space-m);
-			margin-bottom: var(--space-m);
-			h2 {
-				margin-right: var(--space-s);
-			}
-		}
-	}
-	.blog-content-cards, .projects-content-cards {
-		display: grid;
-		gap: var(--space-l);
-		grid-template-columns: 1fr;
-	}
-	.some-content-row {
-		display: flex;
-		gap: var(--space-l);
-	}
-	.social-link {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: var(--space-xs);
-		text-decoration: none;
-		color: var(--color-neutral-300);
-		transition: color var(--transition-normal);
-		&:hover {
-			color: var(--a-hover-color);
-		}
-	}
-	@media only screen and (min-width: 48rem) {
-		.intro-container .intro {
-			flex-direction: row;
-		}
-		.intro-button-navigation {
-			margin-block: var(--space-l);
-			gap: var(--space-m) var(--space-l);
-		}
-		.blog-content-cards, .projects-content-cards {
-			grid-template-columns: 1fr 1fr 1fr;
-		}
-	}
-	@media only screen and (max-width: 35.999rem) {
-		.content-cards-container .first-row {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: var(--space-s);
-		}
-	}
+  .hero { padding-top: var(--space-2xl); padding-bottom: var(--space-xl); }
+  .avatar {
+    display: block;
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--paper-raised);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--space-m);
+    transform: rotate(-3deg);
+    transition: transform var(--t-norm);
+  }
+  .avatar:hover { transform: rotate(3deg) scale(1.06); }
+  .avatar :global(img) {
+    /* zoom the circle crop in on the face */
+    width: 200%;
+    max-width: none;
+    height: auto;
+    margin-left: -50%;
+  }
+  .greeting { display: flex; flex-direction: column; align-items: flex-start; margin-top: var(--space-s); }
+  .lede { margin-top: var(--space-l); font-size: var(--step-1); }
+  .lede strong { color: var(--accent-ink); font-weight: 600; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-l); }
+  .btn {
+    display: inline-flex; align-items: center;
+    padding: 0.7rem 1.3rem;
+    border-radius: var(--radius-pill);
+    font-weight: 540; font-size: 0.98rem;
+    border: 1px solid transparent;
+    transition: transform var(--t-fast), box-shadow var(--t-norm), background var(--t-fast), color var(--t-fast);
+  }
+  .btn-primary { background: var(--accent); color: #fff; box-shadow: var(--shadow-sm); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .btn-ghost { color: var(--ink); border-color: var(--line-strong); background: var(--paper-raised); }
+  .btn-ghost:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--accent-ink); }
+
+  .now-line {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0.5em;
+    margin-top: var(--space-l);
+    font-size: 0.92rem; color: var(--ink-soft);
+  }
+  .now-line a { color: var(--accent-ink); }
+  .pulse { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent); animation: pulse 2.4s infinite; }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+  @media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+
+  .block { padding-top: var(--space-xl); }
+  .block-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-s); margin-bottom: var(--space-m); }
+  .more { font-size: 0.92rem; color: var(--accent-ink); white-space: nowrap; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: var(--space-s); }
+  @media (min-width: 46rem) { .grid { grid-template-columns: repeat(3, 1fr); } }
+
+  .connect-lede { margin-top: var(--space-2xs); }
+  .connect { display: grid; grid-template-columns: 1fr; gap: var(--space-xs); list-style: none; padding: 0; margin-top: var(--space-m); }
+  @media (min-width: 34rem) { .connect { grid-template-columns: 1fr 1fr; } }
+  .connect-link {
+    display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-s);
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--line); border-radius: var(--radius-m);
+    background: var(--paper-raised); color: var(--ink);
+    transition: border-color var(--t-fast), transform var(--t-fast), box-shadow var(--t-norm);
+  }
+  .connect-link:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+  .connect-label { font-weight: 560; }
+  .connect-handle { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-faint); }
 </style>

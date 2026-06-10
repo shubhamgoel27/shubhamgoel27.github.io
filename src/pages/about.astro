@@ -1,0 +1,168 @@
+---
+import Base from "../layouts/Base.astro";
+import { Image } from "astro:assets";
+import profilePic from "../assets/profile.png";
+
+const timeline = [
+  {
+    role: "Senior Machine Learning Engineer",
+    org: "Meta · Instagram Ads Ranking",
+    dates: "2024–2026",
+    points: [
+      "Built multimodal LLM pipelines generating ad-side ranking features, and post-trained open models (SFT, teacher-student distillation) against custom per-field eval harnesses.",
+      "Shipped a domain-tuned video OCR pipeline reaching near-parity with a frontier VLM at a fraction of the cost.",
+      "First author on a RecSys '26 Industry Track submission on text-on-creative as a ranking modality.",
+    ],
+  },
+  {
+    role: "Senior Machine Learning Scientist",
+    org: "ZEFR",
+    dates: "2021–2024",
+    points: [
+      "Built a multimodal semantic search platform over 1B+ image and text embeddings, powering CV/NLP fine-tunes across brand-safety taxonomies.",
+      "Fine-tuned CLIP/ViT models and built a vector-search active-learning loop. Invited speaker at the Snap ML group (2023).",
+    ],
+  },
+  {
+    role: "M.S. in Statistics",
+    org: "University of Illinois Urbana-Champaign",
+    dates: "2019–2020",
+    points: [
+      "GPA 4.0. Research on hurricane property-damage estimation from satellite imagery and insurance data.",
+    ],
+  },
+  {
+    role: "Machine Learning Engineer, Computer Vision",
+    org: "Reliance Jio",
+    dates: "2018–2019",
+    points: [
+      "Building-footprint extraction at scale to automate population estimation for the JioFiber rollout.",
+    ],
+  },
+  {
+    role: "Software Engineer, ML",
+    org: "Pitney Bowes",
+    dates: "2016–2018",
+    points: ["Where the machine-learning thread of my career started."],
+  },
+];
+---
+<Base title="About" description="About Shubham Goel: machine learning engineer working on multimodal learning, post-training, and computer vision.">
+  <section class="wrap head">
+    <div class="head-grid">
+      <div class="head-text">
+        <p class="eyebrow">About</p>
+        <h1>Hi, I'm Shubham.</h1>
+        <div class="intro stack">
+          <p>
+            I'm a machine learning engineer with computer-vision roots. Most recently I was a Senior
+            MLE at Meta on Instagram Ads Ranking, where I worked on multimodal LLM ranking features,
+            model distillation, and the eval harnesses that keep all of it honest.
+          </p>
+          <p>
+            Before Meta, I spent a few years at ZEFR building multimodal search and content-understanding
+            systems, did my M.S. in Statistics at UIUC, and worked across computer-vision roles at
+            Reliance Jio and Pitney Bowes, spanning satellite imagery, building detection, and more.
+          </p>
+          <p>
+            I firmly believe that <em>specialization is for insects</em>, which is why I keep a few too
+            many interests running at once: technology, startups, education, philosophy, and an
+            unshakeable allegiance to Arsenal.
+          </p>
+        </div>
+      </div>
+      <figure class="portrait">
+        <Image src={profilePic} alt="Shubham Goel at the beach, smiling" width={400} height={400} loading="eager" />
+      </figure>
+    </div>
+  </section>
+
+  <section class="wrap narrow tl-section">
+    <h2>The path here</h2>
+    <ol class="timeline">
+      {timeline.map((item) => (
+        <li class="tl-item">
+          <div class="tl-marker" aria-hidden="true"></div>
+          <div class="tl-body">
+            <div class="tl-top">
+              <h3 class="tl-role">{item.role}</h3>
+              <span class="tl-dates">{item.dates}</span>
+            </div>
+            <p class="tl-org">{item.org}</p>
+            <ul class="tl-points">
+              {item.points.map((p) => <li>{p}</li>)}
+            </ul>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="wrap narrow tl-section">
+    <h2>Education</h2>
+    <div class="edu stack">
+      <p><strong>University of Illinois Urbana-Champaign</strong>, M.S. in Statistics (GPA 4.0)</p>
+      <p><strong>University of Delhi</strong>, B.Tech, I.T. and Mathematical Innovations</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head { padding-top: var(--space-2xl); }
+  .head-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-l);
+    align-items: start;
+    max-width: 58rem;
+  }
+  .portrait { order: -1; justify-self: start; }
+  .portrait img {
+    width: min(13rem, 50vw);
+    height: auto;
+    border-radius: var(--radius-l);
+    border: 4px solid var(--paper-raised);
+    box-shadow: var(--shadow-md);
+    transform: rotate(-2deg);
+    transition: transform var(--t-norm);
+  }
+  .portrait img:hover { transform: rotate(0deg) scale(1.02); }
+  @media (min-width: 48rem) {
+    .head-grid { grid-template-columns: minmax(0, var(--width-text)) auto; }
+    .portrait { order: 0; justify-self: end; position: sticky; top: 6rem; }
+    .portrait img { width: 15rem; }
+  }
+  .intro { margin-top: var(--space-m); font-size: var(--step-1); }
+  .intro em { color: var(--accent-ink); font-style: italic; }
+  .tl-section { padding-top: var(--space-xl); }
+  .tl-section h2 { margin-bottom: var(--space-m); }
+
+  .timeline { list-style: none; padding: 0; margin: 0; }
+  .tl-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-m);
+    padding-bottom: var(--space-l);
+  }
+  .tl-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 6px; top: 0.9rem; bottom: -0.2rem;
+    width: 2px; background: var(--line-strong);
+  }
+  .tl-marker {
+    position: relative; z-index: 1;
+    width: 14px; height: 14px; margin-top: 0.55rem;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 3px solid var(--accent);
+  }
+  .tl-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.4rem var(--space-s); }
+  .tl-role { font-size: var(--step-1); }
+  .tl-dates { font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-faint); }
+  .tl-org { color: var(--accent-ink); font-weight: 540; font-size: 0.95rem; margin-top: 0.1rem; }
+  .tl-points { margin-top: var(--space-xs); padding-left: 1.1rem; color: var(--ink-soft); }
+  .tl-points li { margin-bottom: 0.4rem; font-size: 0.95rem; }
+  .edu strong { color: var(--ink); }
+</style>

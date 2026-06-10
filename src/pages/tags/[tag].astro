@@ -1,61 +1,46 @@
 ---
 import { getCollection } from "astro:content";
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import Hero from "../../components/Hero.astro";
-import CardBlog from "../../components/CardBlog.astro";
-import { cardBlogBackgroundColors } from "../../data/colors";
+import Base from "../../layouts/Base.astro";
+import PostCard from "../../components/PostCard.astro";
+import { minutesRead } from "../../utils/reading";
 
 export async function getStaticPaths() {
-    const allPosts = await getCollection("blog");
-    const uniqueTags = [
-        ...new Set(allPosts.map((post) => post.data.tags).flat()),
-    ];
-
-    return uniqueTags.map((tag) => {
-        const filteredPosts = allPosts
-            .filter((post) => post.data.tags.includes(tag))
-            .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
-        return {
-            params: { tag },
-            props: { posts: filteredPosts },
-        };
-    });
+  const posts = (await getCollection("blog")).filter((p) => !p.data.draft);
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts
+        .filter((p) => p.data.tags.includes(tag))
+        .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+    },
+  }));
 }
-const { tag } = Astro.params;
-const { posts } = Astro.props;
----
 
-<BaseLayout
-    title={"Tag: " + tag}
-    description={"All posts containing the tag " + tag.charAt(0).toUpperCase() + tag.slice(1) + "."}
->
-    <Hero h1={tag.charAt(0).toUpperCase() + tag.slice(1)} subtitle={"Posts about " + tag + "."} />
-    <h2 class="text-align-center margin-top-xl margin-bottom-l">{"Posts tagged with " + tag.charAt(0).toUpperCase() + tag.slice(1) }</h2>
-    <ul role="list" class="blog-posts-container margin-bottom-xl">
-    {
-        posts.map((post, index) => (
-            <li>
-                <CardBlog post={post} backgroundColor={cardBlogBackgroundColors[index % cardBlogBackgroundColors.length]} transitionIcon/>
-            </li>
-        ))
-    }
-    </ul>
-</BaseLayout>
+const { tag, posts } = Astro.props;
+---
+<Base title={`#${tag}`} description={`Posts tagged ${tag}.`}>
+  <section class="wrap narrow head">
+    <p class="eyebrow">Tag</p>
+    <h1>#{tag}</h1>
+    <p class="muted">{posts.length} post{posts.length === 1 ? "" : "s"}. <a href="/blog" class="body-link">All writing →</a></p>
+  </section>
+  <section class="wrap narrow list">
+    {posts.map((post) => (
+      <PostCard
+        href={`/blog/${post.id}`}
+        title={post.data.title}
+        description={post.data.description}
+        pubDate={post.data.pubDate}
+        minutesRead={minutesRead(post.body)}
+        tags={post.data.tags}
+      />
+    ))}
+  </section>
+</Base>
 
 <style>
-    .blog-posts-container {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: var(--space-l);
-    }
-    @media (min-width: 32rem) {
-        .blog-posts-container {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
-    @media (min-width: 74rem) {
-        .blog-posts-container {
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-        }
-    }
+  .head { padding-top: var(--space-2xl); }
+  .list { padding-top: var(--space-m); }
 </style>

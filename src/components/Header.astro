@@ -1,196 +1,76 @@
 ---
-import { Icons } from "./Icons";
-import Icon from "./Icon.astro";
+import ThemeToggle from "./ThemeToggle.astro";
+
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+const nav = [
+  { label: "Building", href: "/building" },
+  { label: "Writing", href: "/blog" },
+  { label: "About", href: "/about" },
+  { label: "Now", href: "/now" },
+];
+const isActive = (href: string) =>
+  href === "/" ? path === "/" : path === href || path.startsWith(href + "/");
 ---
 
-<div class="backdrop-area">
-    <div class="header-container">
-        <header>
-            <ul role="list" class="left-content-container">
-                <li>
-                    <a href="/" class="logo-a" aria-label="Shubham Goel - Click to go back to the home page" title="Go back to home page"
-                        ><svg
-                            class="logo"
-                            width="28"
-                            height="28"
-                            viewBox="0 0 16 16"
-                            fill="currentColor"
-                            set:html={Icons["logogrey"]}
-                        /></a>
-                </li>
-                <li><a href="/blog">Blog</a></li>
-            </ul>
-
-            <button
-                aria-controls="primary-navigation"
-                aria-expanded="false"
-                class="menu-toggle-button"
-            >
-                <Icon
-                    name="bars"
-                    size="1.5rem"
-                    label="Bars"
-                    class="hamburger-icon"
-                    color="var(--color-neutral-300)"
-                />
-                <Icon
-                    name="close"
-                    size="1.5rem"
-                    label="Instagram"
-                    class="close-icon"
-                    color="var(--color-neutral-300)"
-                />
-            </button>
-            <nav class="primary-navigation">
-                <ul role="list">
-                    <li><a href="/projects">Projects</a></li>
-                    <li><a href="/about">About</a></li>
-                    <li><a href="/now">Now</a></li>
-                </ul>
-            </nav>
-        </header>
-    </div>
-</div>
+<header class="site-header">
+  <div class="wrap bar">
+    <a href="/" class="brand" aria-label="Home">
+      <span class="monogram">SG</span>
+      <span class="brand-name">Shubham Goel</span>
+    </a>
+    <nav aria-label="Primary">
+      <ul>
+        {nav.map((item) => (
+          <li>
+            <a href={item.href} class:list={["nav-link", "link-underline", { active: isActive(item.href) }]}
+               aria-current={isActive(item.href) ? "page" : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <ThemeToggle />
+  </div>
+</header>
 
 <style>
-    .backdrop-area {
-        width: 100%;
-        height: var(--navbar-height);
-    }
-    .header-container {
-        width: 100%;
-        position: fixed;
-        z-index: 10;
-        background-color: var(--color-neutral-900);
-        background-color: color-mix(
-            in srgb,
-            var(--color-neutral-900) 95%,
-            transparent
-        );
-    }
-    .header-container::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        backdrop-filter: blur(5px);
-        z-index: -1;
-    }
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--paper) 82%, transparent);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    min-height: 4rem;
+    padding-block: var(--space-2xs);
+  }
+  .brand { display: inline-flex; align-items: center; gap: 0.6rem; color: var(--ink); margin-right: auto; }
+  .monogram {
+    display: grid; place-items: center;
+    width: 2.1rem; height: 2.1rem;
+    font-family: var(--font-serif); font-weight: 600; font-size: 0.95rem;
+    color: var(--paper-raised); background: var(--accent);
+    border-radius: var(--radius-s);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--t-norm);
+  }
+  .brand:hover .monogram { transform: rotate(-6deg); }
+  .brand-name { font-family: var(--font-serif); font-weight: 560; font-size: 1.05rem; letter-spacing: -0.01em; }
+  nav ul { display: flex; align-items: center; gap: clamp(0.9rem, 2.5vw, 1.6rem); list-style: none; padding: 0; }
+  .nav-link { color: var(--ink-soft); font-size: 0.96rem; font-weight: 500; }
+  .nav-link:hover { color: var(--ink); }
+  .nav-link.active { color: var(--accent-ink); background-size: 100% 1.5px; }
 
-    header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-inline: auto;
-        padding-inline: var(--side-gap-padding);
-        height: var(--navbar-height);
-        overflow: hidden;
-    }
-
-
-    .primary-navigation ul, .left-content-container {
-        display: flex;
-        align-items: center;
-        gap: calc(var(--space-m) - 4px);
-        &>li>a {
-            color: var(--color-neutral-300);
-            text-decoration: none;
-            padding: 2px;
-            transition: var(--transition-normal) color;
-            &:hover,
-            &:focus-within {
-                color: var(--a-hover-color);
-            }
-        }
-    }
-    li>a {
-    }
-    .menu-toggle-button {
-        display: none;
-    }
-
-    @media only screen and (max-width: 35.999rem) {
-        .primary-navigation ul {
-            display: none;
-        }
-        .menu-toggle-button {
-            display: block;
-            position: absolute;
-            z-index: 30;
-            right: 1rem;
-            background-color: transparent;
-            padding: 0.5rem 0 0.5rem 0.5rem;
-            border: 0;
-            cursor: pointer;
-            .close-icon {
-                display: none;
-            }
-        }
-        [aria-expanded="true"] {
-            .close-icon {
-                display: block;
-            }
-            .hamburger-icon {
-                display: none;
-            }
-        }
-        [aria-expanded="true"] ~ nav {
-            display: block;
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 80%;
-            margin-left: auto;
-            box-shadow: 0 0 0 100vmax hsl(0 0 0 / 0.7);
-            background-color: var(--color-neutral-900);
-            z-index: 20;
-            ul {
-                margin-top: 20vh;
-                display: grid;
-                gap: 2rem;
-                margin-left: max(3rem, 20vw);
-            }
-        }
-    }
+  @media (max-width: 34rem) {
+    .brand-name { display: none; }
+    .bar { gap: var(--space-s); }
+    nav ul { gap: 0.9rem; }
+    .nav-link { font-size: 0.9rem; }
+  }
 </style>
-
-<script>
-    function setupNavigation() {
-        const navigationToggle = document.querySelector(
-            '[aria-controls="primary-navigation"]',
-        ) as HTMLButtonElement | null;
-        const navigation = document.querySelector(
-            ".primary-navigation",
-        ) as HTMLElement | null;
-
-        if (!navigationToggle || !navigation) return;
-
-        const closeMenu = (event: Event) => {
-            if (navigation.contains(event.target as Node)) return;
-            navigationToggle.setAttribute("aria-expanded", "false");
-        };
-
-        const toggleMenu = (event: Event) => {
-            event.stopPropagation();
-            const navigationOpened =
-                navigationToggle.getAttribute("aria-expanded");
-            navigationToggle.setAttribute(
-                "aria-expanded",
-                navigationOpened === "false" ? "true" : "false",
-            );
-        };
-
-        navigationToggle.removeEventListener("click", toggleMenu);
-        document.removeEventListener("click", closeMenu);
-
-        navigationToggle.addEventListener("click", toggleMenu);
-        document.addEventListener("click", closeMenu);
-    }
-
-    setupNavigation();
-
-    document.addEventListener("astro:after-swap", setupNavigation);
-</script>

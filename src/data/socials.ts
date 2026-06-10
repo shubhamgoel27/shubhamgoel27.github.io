@@ -1,30 +1,14 @@
-import { Icons } from "../components/Icons";
-interface SocialMediaDetail {
-    name: string;
-    href: string;
-    icon: keyof typeof Icons;
-    iconalt: string;
+export interface Social {
+  label: string;
+  href: string;
+  handle?: string;
 }
 
-interface Socials {
-    [key: string]: SocialMediaDetail;
-}
+export const socials = {
+  github: { label: "GitHub", href: "https://github.com/shubhamgoel27", handle: "shubhamgoel27" },
+  linkedin: { label: "LinkedIn", href: "https://linkedin.com/in/shubhamgoel27", handle: "in/shubhamgoel27" },
+  twitter: { label: "X", href: "https://twitter.com/shubhamg_", handle: "@shubhamg_" },
+  email: { label: "Email", href: "mailto:shubhamgoel27@gmail.com", handle: "shubhamgoel27@gmail.com" },
+} satisfies Record<string, Social>;
 
-const socials: Socials = {
-    github: {
-        name: "GitHub",
-        href: "https://github.com/shubhamgoel27",
-        icon: "github",
-        iconalt: "GitHub logo"
-    },
-    linkedin: {
-        name: "LinkedIn",
-        href: "https://www.linkedin.com/in/shubhamgoel27/",
-        icon: "linkedin",
-        iconalt: "LinkedIn logo"
-    },
-}
-
-export const { github, linkedin } = socials;
-
-export default socials;
+export const socialOrder = ["github", "linkedin", "twitter", "email"] as const;

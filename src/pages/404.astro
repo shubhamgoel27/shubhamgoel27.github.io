@@ -1,19 +1,23 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-
-
+import Base from "../layouts/Base.astro";
 ---
-<BaseLayout title="404 - Page not found" description="Site does not exist. Error 404.">
-    <div class="flow height-smart-fill-screen">
-        <h1 class="text-align-center">404 - Site not found</h1>
-        <p>Go back to the <a href="/">home page</a>.</p>
+<Base title="Not found" description="That page doesn't exist.">
+  <section class="wrap narrow nf">
+    <p class="eyebrow">404</p>
+    <h1>This page wandered off.</h1>
+    <p class="muted">Probably offside. Let's get you back onside.</p>
+    <div class="actions">
+      <a href="/" class="link-underline">← Home</a>
+      <a href="/building" class="link-underline">Things I'm building</a>
+      <a href="/blog" class="link-underline">Writing</a>
     </div>
-</BaseLayout>
+  </section>
+</Base>
+
 <style>
-    div {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-    }
+  .nf { padding-top: var(--space-3xl); padding-bottom: var(--space-2xl); text-align: center; }
+  .nf h1 { margin-top: var(--space-s); }
+  .nf .muted { margin-top: var(--space-xs); }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-m); margin-top: var(--space-l); }
+  .actions a { color: var(--accent-ink); }
 </style>

@@ -1,0 +1,44 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import PostCard from "../../components/PostCard.astro";
+import { minutesRead } from "../../utils/reading";
+
+const posts = (await getCollection("blog"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+<Base title="Writing" description="Essays and notes by Shubham Goel on multimodal models, computer vision, and building.">
+  <section class="wrap narrow head">
+    <p class="eyebrow">Writing</p>
+    <h1>Notes &amp; essays</h1>
+    <p class="lede muted">
+      Build logs, things I'm learning, and the occasional opinion. Mostly multimodal models,
+      computer vision, and whatever side project has my attention.
+    </p>
+  </section>
+
+  <section class="wrap narrow list">
+    {posts.length === 0 ? (
+      <p class="empty muted">First post is on its way. Check back soon.</p>
+    ) : (
+      posts.map((post) => (
+        <PostCard
+          href={`/blog/${post.id}`}
+          title={post.data.title}
+          description={post.data.description}
+          pubDate={post.data.pubDate}
+          minutesRead={minutesRead(post.body)}
+          tags={post.data.tags}
+        />
+      ))
+    )}
+  </section>
+</Base>
+
+<style>
+  .head { padding-top: var(--space-2xl); }
+  .head .lede { margin-top: var(--space-s); font-size: var(--step-1); }
+  .list { padding-top: var(--space-m); }
+  .empty { padding-block: var(--space-l); }
+</style>

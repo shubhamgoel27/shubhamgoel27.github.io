@@ -1,24 +1,16 @@
-import { defineCollection, z } from 'astro:content';
-
-import { glob, file } from 'astro/loaders';
+import { defineCollection, z } from "astro:content";
+import { glob } from "astro/loaders";
 
 const blog = defineCollection({
-    loader: glob({ pattern: "**/*.md", base: "./src/content/blog" }),
-    schema: ({ image }) => z.object({
-        title: z.string().max(65, "Maximum of 65 characters in title required.").min(10, "Minimum of 10 characters in title required."),
-        description: z.string().max(162, "Maximum of 162 characters in description required.").min(50, "Minimum of 50 characters in description required."),
-        coverImage: image().optional(),
-        emoji: z.string().optional(),
-        pubDate: z.date(),
-        lastUpdate: z.date().optional(),
-        blueskyRef: z.string().optional(),
-        mastodonRef: z.string().optional(),
-        threadsRef: z.string().optional(),
-        tags: z.array(z.string())
-    }).refine((data) => data.coverImage || data.emoji, {
-        message: "Either coverImage or emoji must be provided.",
-        path: ["coverImage", "emoji"]
-    })
+  loader: glob({ pattern: "**/*.md", base: "./src/content/blog" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    pubDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    tags: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+  }),
 });
 
 export const collections = { blog };

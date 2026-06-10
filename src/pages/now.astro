@@ -1,0 +1,52 @@
+---
+import Base from "../layouts/Base.astro";
+const updated = "June 2026";
+---
+<Base title="Now" description="What Shubham Goel is focused on right now.">
+  <section class="wrap narrow head">
+    <p class="eyebrow">Now</p>
+    <h1>What I'm focused on</h1>
+    <p class="updated">Last updated {updated}. <a href="https://nownownow.com/about" class="body-link" target="_blank" rel="noopener">What's a now page?</a></p>
+
+    <ul class="now-list stack">
+      <li>
+        <strong>Going deep on multimodal post-training and evals.</strong> Reading, reimplementing,
+        and building small things in the space I want to work in next: getting models to do one
+        narrow job extremely well, and the eval harnesses that prove it.
+      </li>
+      <li>
+        <strong>Building in public.</strong> Shipping side projects and writing them up here, from
+        a real-time soccer commentary pipeline to a from-scratch VLM challenge set.
+      </li>
+      <li>
+        <strong>Talking to teams.</strong> Exploring what's next, especially frontier-lab and
+        consumer-tech work on multimodal models and ranking. If that's you, <a href="mailto:shubhamgoel27@gmail.com" class="body-link">say hi</a>.
+      </li>
+      <li>
+        <strong>Off the keyboard.</strong> Watching too much Arsenal, settling into San Francisco,
+        and defending my spot on the poker-nights leaderboard.
+      </li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .head { padding-top: var(--space-2xl); }
+  .updated { margin-top: var(--space-xs); color: var(--ink-faint); font-size: 0.88rem; font-family: var(--font-mono); }
+  .now-list { list-style: none; padding: 0; margin-top: var(--space-l); font-size: var(--step-0); }
+  .now-list li {
+    padding-left: var(--space-m);
+    position: relative;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .now-list li::before {
+    content: "";
+    position: absolute; left: 0; top: 0.65em;
+    width: 8px; height: 8px; border-radius: 2px;
+    background: var(--accent);
+    transform: rotate(45deg);
+  }
+  .now-list strong { color: var(--ink); font-weight: 600; }
+  .now-list a { color: var(--accent-ink); }
+</style>

@@ -1,0 +1,59 @@
+---
+import Base from "../layouts/Base.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import { projects } from "../data/projects";
+
+const groups = [
+  { id: "shipped", title: "Shipped", blurb: "Out in the world, install or play with it today." },
+  { id: "research", title: "Research", blurb: "Papers and applied research, from satellite imagery to ads ranking." },
+  { id: "building", title: "In progress", blurb: "Active experiments. Some repos are still being cleaned up to share." },
+] as const;
+---
+<Base title="Building" description="Side projects, experiments, and research by Shubham Goel.">
+  <section class="wrap head narrow">
+    <p class="eyebrow">Things I'm building</p>
+    <h1>I learn by building.</h1>
+    <p class="lede muted">
+      A running list of side projects and research. Some are shipped and pip-installable, some
+      are weekend experiments, some are papers. The throughline: multimodal models, computer
+      vision, and football showing up more often than it probably should.
+    </p>
+  </section>
+
+  {groups.map((g) => {
+    const items = projects.filter((p) => p.status === g.id);
+    if (items.length === 0) return null;
+    return (
+      <section class="wrap group">
+        <div class="group-head">
+          <h2>{g.title}</h2>
+          <span class="count">{items.length}</span>
+          <p class="group-blurb muted">{g.blurb}</p>
+        </div>
+        <div class="grid">
+          {items.map((p) => <ProjectCard project={p} />)}
+        </div>
+      </section>
+    );
+  })}
+</Base>
+
+<style>
+  .head { padding-top: var(--space-2xl); }
+  .head .lede { margin-top: var(--space-s); font-size: var(--step-1); }
+  .group { padding-top: var(--space-xl); }
+  .group-head {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: baseline;
+    gap: 0 var(--space-s);
+    margin-bottom: var(--space-m);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--line);
+  }
+  .count { font-family: var(--font-mono); font-size: 0.85rem; color: var(--ink-faint); }
+  .group-blurb { grid-column: 1 / -1; margin-top: var(--space-2xs); font-size: 0.92rem; max-width: 40rem; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: var(--space-s); }
+  @media (min-width: 40rem) { .grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 64rem) { .grid { grid-template-columns: repeat(3, 1fr); } }
+</style>

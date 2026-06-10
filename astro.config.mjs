@@ -1,14 +1,15 @@
-// @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
+import sitemap from "@astrojs/sitemap";
 
-import sitemap from '@astrojs/sitemap';
-
-// https://astro.build/config
 export default defineConfig({
-  site: 'https://shubhamgoel27.github.io',
+  site: "https://shubham.gg",
+  base: "/",
+  trailingSlash: "ignore",
   integrations: [sitemap()],
-  server: {
-    host: true,
-    port: 4321,
+  markdown: {
+    shikiConfig: {
+      themes: { light: "github-light", dark: "github-dark" },
+      wrap: true,
+    },
   },
 });

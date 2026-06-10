@@ -1,0 +1,80 @@
+---
+import Base from "./Base.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  tags?: string[];
+  minutesRead?: number;
+}
+const { title, description, pubDate, updatedDate, tags = [], minutesRead } = Astro.props;
+const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+---
+<Base title={title} description={description} ogType="article">
+  <article class="wrap narrow post">
+    <header class="post-head">
+      <a href="/blog" class="back link-underline">← Writing</a>
+      <h1>{title}</h1>
+      <div class="post-meta">
+        <time datetime={pubDate.toISOString()}>{fmt(pubDate)}</time>
+        {minutesRead && <><span class="sep">·</span><span>{minutesRead} min read</span></>}
+        {updatedDate && <><span class="sep">·</span><span>updated {fmt(updatedDate)}</span></>}
+      </div>
+      {tags.length > 0 && (
+        <ul class="post-tags">{tags.map((t) => <li><a href={`/tags/${t}`} class="tag">#{t}</a></li>)}</ul>
+      )}
+    </header>
+    <div class="prose">
+      <slot />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .post { padding-top: var(--space-xl); }
+  .post-head { margin-bottom: var(--space-l); }
+  .back { display: inline-block; font-size: 0.88rem; color: var(--ink-soft); margin-bottom: var(--space-m); }
+  .post-head h1 { font-size: var(--step-4); }
+  .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5em; margin-top: var(--space-s); font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-faint); }
+  .post-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; padding: 0; margin-top: var(--space-s); }
+</style>
+
+<style is:global>
+  .prose { font-size: var(--step-0); line-height: 1.75; color: var(--ink); }
+  .prose > * + * { margin-top: var(--space-s); }
+  .prose h2 { font-size: var(--step-2); margin-top: var(--space-l); margin-bottom: var(--space-2xs); }
+  .prose h3 { font-size: var(--step-1); margin-top: var(--space-m); }
+  .prose p, .prose ul, .prose ol { color: var(--ink); }
+  .prose ul, .prose ol { padding-left: 1.4rem; }
+  .prose li { margin-bottom: 0.4rem; }
+  .prose li::marker { color: var(--accent); }
+  .prose strong { font-weight: 640; }
+  .prose em { font-style: italic; }
+  .prose a { color: var(--accent-ink); }
+  .prose blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 0.2rem 0 0.2rem var(--space-s);
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+  .prose code:not(pre code) {
+    background: var(--paper-sunk);
+    border: 1px solid var(--line);
+    padding: 0.1em 0.4em;
+    border-radius: var(--radius-s);
+    font-size: 0.85em;
+  }
+  .prose pre {
+    background: var(--paper-sunk) !important;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: var(--space-s);
+    overflow-x: auto;
+    font-size: 0.86rem;
+    line-height: 1.6;
+  }
+  .prose img { border-radius: var(--radius-m); border: 1px solid var(--line); margin-block: var(--space-m); }
+  .prose hr { border: none; border-top: 1px solid var(--line); margin-block: var(--space-l); }
+</style>

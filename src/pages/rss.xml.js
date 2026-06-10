@@ -1,18 +1,20 @@
-import rss from '@astrojs/rss';
-import { getCollection } from 'astro:content';
+import rss from "@astrojs/rss";
+import { getCollection } from "astro:content";
 
 export async function GET(context) {
-  const posts = await getCollection("blog");
+  const posts = (await getCollection("blog")).filter((p) => !p.data.draft);
   return rss({
-    title: "Shubham's Blog",
-    description: "ML, AI agents, multimodal LLMs, and side projects.",
+    title: "Shubham Goel",
+    description: "Notes and essays on multimodal models, computer vision, and building.",
     site: context.site,
-    trailingSlash: false,
-    items: posts.map((post) => ({
-      title: post.data.title,
-      pubDate: post.data.pubDate,
-      description: post.data.description,
-      link: `/blog/${post.id}`,
-    })),
-  })
+    items: posts
+      .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+      .map((post) => ({
+        title: post.data.title,
+        description: post.data.description,
+        pubDate: post.data.pubDate,
+        link: `/blog/${post.id}/`,
+        categories: post.data.tags,
+      })),
+  });
 }

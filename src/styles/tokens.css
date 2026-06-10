@@ -1,0 +1,90 @@
+/* ============================================================
+   Design tokens: warm + personable
+   Light is the default; [data-theme="dark"] overrides.
+   ============================================================ */
+
+:root {
+  /* Warm light palette (default) */
+  --paper:        #FBF7F0;
+  --paper-raised: #FFFDF8;
+  --paper-sunk:   #F3ECDF;
+  --ink:          #2B2521;
+  --ink-soft:     #6E6459;
+  --ink-faint:    #9C9286;
+  --accent:       #C1452A;  /* terracotta */
+  --accent-ink:   #C1452A;  /* accent used as text/link */
+  --accent-wash:  #F6E7DF;  /* tinted fill behind accent things */
+  --line:         #E9DFCF;
+  --line-strong:  #DDD0BB;
+
+  --shadow-color: 28 22 18;  /* warm brown, used as rgb(var(--shadow-color) / a) */
+  --shadow-sm: 0 1px 2px rgb(var(--shadow-color) / 0.06),
+               0 2px 6px rgb(var(--shadow-color) / 0.05);
+  --shadow-md: 0 2px 4px rgb(var(--shadow-color) / 0.06),
+               0 8px 20px rgb(var(--shadow-color) / 0.08);
+  --shadow-lg: 0 4px 8px rgb(var(--shadow-color) / 0.07),
+               0 16px 40px rgb(var(--shadow-color) / 0.12);
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --paper:        #1A1613;
+  --paper-raised: #221D18;
+  --paper-sunk:   #15110E;
+  --ink:          #ECE3D5;
+  --ink-soft:     #B2A797;
+  --ink-faint:    #82776A;
+  --accent:       #E8826A;  /* lightened terracotta for dark contrast */
+  --accent-ink:   #EE9079;
+  --accent-wash:  #2E211B;
+  --line:         #352C25;
+  --line-strong:  #463B31;
+
+  --shadow-color: 0 0 0;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.30);
+  --shadow-md: 0 2px 6px rgb(0 0 0 / 0.35), 0 10px 24px rgb(0 0 0 / 0.30);
+  --shadow-lg: 0 4px 10px rgb(0 0 0 / 0.40), 0 18px 44px rgb(0 0 0 / 0.45);
+
+  color-scheme: dark;
+}
+
+:root {
+  /* Type */
+  --font-serif: "Fraunces Variable", Georgia, "Times New Roman", serif;
+  --font-sans:  "Inter Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:  "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  --step--1: clamp(0.83rem, 0.81rem + 0.10vw, 0.89rem);
+  --step-0:  clamp(1.00rem, 0.96rem + 0.20vw, 1.13rem);
+  --step-1:  clamp(1.20rem, 1.13rem + 0.36vw, 1.45rem);
+  --step-2:  clamp(1.44rem, 1.31rem + 0.63vw, 1.86rem);
+  --step-3:  clamp(1.73rem, 1.52rem + 1.04vw, 2.38rem);
+  --step-4:  clamp(2.07rem, 1.74rem + 1.62vw, 3.05rem);
+  --step-5:  clamp(2.49rem, 1.99rem + 2.45vw, 3.91rem);
+
+  /* Spacing */
+  --space-2xs: 0.375rem;
+  --space-xs:  0.625rem;
+  --space-s:   1rem;
+  --space-m:   1.5rem;
+  --space-l:   2.5rem;
+  --space-xl:  4rem;
+  --space-2xl: 6rem;
+  --space-3xl: 9rem;
+
+  /* Radius */
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+  --radius-pill: 999px;
+
+  /* Widths */
+  --width-page:  72rem;
+  --width-text:  40rem;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-fast: 0.15s var(--ease);
+  --t-norm: 0.25s var(--ease);
+}
