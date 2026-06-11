@@ -65,10 +65,11 @@ const timeline = [
             Reliance Jio and Pitney Bowes, spanning satellite imagery, building detection, and more.
           </p>
           <p>
-            I firmly believe that <em>specialization is for insects</em>, which is why I keep a few too
-            many interests running at once: technology, startups, education, philosophy, and an
-            unshakeable allegiance to Arsenal.
+            I firmly believe that <button type="button" id="heinlein" class="insects" title="click me">specialization is for insects</button>,
+            which is why I keep a few too many interests running at once: technology, startups,
+            education, philosophy, and an unshakeable allegiance to Arsenal.
           </p>
+          <p class="heinlein-line" id="heinlein-line" aria-live="polite"></p>
         </div>
       </div>
       <figure class="portrait">
@@ -134,6 +135,25 @@ const timeline = [
   }
   .intro { margin-top: var(--space-m); font-size: var(--step-1); }
   .intro em { color: var(--accent-ink); font-style: italic; }
+  .insects {
+    font: inherit;
+    font-style: italic;
+    color: var(--accent-ink);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    border-bottom: 1px dotted var(--accent);
+  }
+  .insects:hover { border-bottom-style: solid; }
+  .heinlein-line {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    min-height: 1.5em;
+    margin-top: var(--space-2xs);
+  }
+  .heinlein-line .count { color: var(--ink-faint); margin-left: 0.5em; }
   .tl-section { padding-top: var(--space-xl); }
   .tl-section h2 { margin-bottom: var(--space-m); }
 
@@ -166,3 +186,33 @@ const timeline = [
   .tl-points li { margin-bottom: 0.4rem; font-size: 0.95rem; }
   .edu strong { color: var(--ink); }
 </style>
+
+<script>
+  // Heinlein roulette: cycle the real list, end on the amendment.
+  const items = [
+    "change a diaper",
+    "plan an invasion",
+    "butcher a hog",
+    "design a building",
+    "write a sonnet",
+    "set a bone",
+    "comfort the dying",
+    "solve equations",
+    "program a computer",
+    "post-train a model, and prove it with an eval. (amendment mine)",
+  ];
+  const btn = document.getElementById("heinlein");
+  const line = document.getElementById("heinlein-line");
+  let i = -1;
+  btn?.addEventListener("click", () => {
+    i++;
+    if (i >= items.length) {
+      i = -1;
+      line!.textContent = "";
+      return;
+    }
+    const isLast = i === items.length - 1;
+    line!.innerHTML = `"A human being should be able to ${items[i]}"` +
+      (isLast ? "" : ` <span class="count">· Heinlein, ${i + 1}/${items.length - 1} · keep clicking</span>`);
+  });
+</script>

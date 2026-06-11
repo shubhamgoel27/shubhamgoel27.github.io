@@ -25,7 +25,8 @@ const posts = (await getCollection("blog"))
       <p>
         I'm a machine learning engineer with eight years across computer vision, multimodal
         learning, and recommender systems, most recently at Meta on Instagram Ads Ranking.
-        Lately I'm most excited about <strong>multimodal LLMs, post-training, and evals</strong>.
+        Lately I'm most excited about <strong>multimodal LLMs, post-training, and
+        <a href="/evals" class="evals-link">evals</a></strong>.
       </p>
       <p class="muted">
         I love building side projects, like
@@ -122,6 +123,15 @@ const posts = (await getCollection("blog"))
   .greeting { display: flex; flex-direction: column; align-items: flex-start; margin-top: var(--space-s); }
   .lede { margin-top: var(--space-l); font-size: var(--step-1); }
   .lede strong { color: var(--accent-ink); font-weight: 600; }
+  .evals-link {
+    color: var(--accent-ink);
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 100% 1.5px;
+    transition: background-size var(--t-norm);
+  }
+  .evals-link:hover { background-size: 100% 3px; }
   .hero-actions { display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-l); }
   .btn {
     display: inline-flex; align-items: center;

@@ -1,0 +1,107 @@
+---
+import Base from "../layouts/Base.astro";
+
+// Real numbers from a Lighthouse run on the production build, headless Chrome,
+// measured 2026-06-10. Re-measure when the site changes meaningfully.
+const real = [
+  { metric: "Lighthouse · Performance", value: "90 / 100", verdict: "pass", note: "static site, optimized images, zero framework JS" },
+  { metric: "Lighthouse · Accessibility", value: "96 / 100", verdict: "pass", note: "two findings under appeal" },
+  { metric: "Lighthouse · Best practices", value: "100 / 100", verdict: "pass", note: "" },
+  { metric: "Lighthouse · SEO", value: "100 / 100", verdict: "pass", note: "" },
+  { metric: "First contentful paint", value: "0.9 s", verdict: "pass", note: "" },
+  { metric: "Largest contentful paint", value: "1.1 s", verdict: "pass", note: "" },
+  { metric: "Cumulative layout shift", value: "0.206", verdict: "flag", note: "the serif jumps in late. fix queued. honesty first." },
+  { metric: "Total transfer (home)", value: "~190 KB", verdict: "pass", note: "most of it is fonts and my face" },
+  { metric: "Client-side frameworks", value: "0", verdict: "pass", note: "hand-written vanilla scripts only" },
+  { metric: "Em dashes shipped", value: "0", verdict: "pass", note: "hard ban, enforced at the source" },
+  { metric: "Pages built", value: "11 in ~1 s", verdict: "pass", note: "Astro, static output" },
+];
+
+const judge = [
+  { metric: "Hero buzzword density", verdict: "pass", note: "no 'passionate', no 'leverage', no 'journey'. clean." },
+  { metric: "Footer jokes", verdict: "pass", note: "barely" },
+  { metric: "Arsenal references", verdict: "flag", note: "11 across 6 pages. flagged excessive. appeal denied." },
+  { metric: "Side-project count", verdict: "wontfix", note: "acknowledged. no remediation planned." },
+  { metric: "Easter-egg discoverability", verdict: "pass", note: "keep clicking things" },
+  { metric: "Humility", verdict: "fail", note: "this page exists" },
+];
+---
+<Base title="Evals" description="This site ships with its own eval harness. Real Lighthouse numbers, one biased judge.">
+  <section class="wrap narrow ev">
+    <p class="eyebrow">Evals</p>
+    <h1>This site, evaluated honestly.</h1>
+    <p class="lede muted">
+      I like models with one job, and evals that prove it. It would be hypocritical to ship a
+      website without one. Two tables: real measurements, then an LLM-as-judge pass with a
+      judge who is, in fairness, me.
+    </p>
+
+    <h2>The numbers <span class="sub">(real)</span></h2>
+    <table>
+      <thead><tr><th>Metric</th><th>Value</th><th>Verdict</th></tr></thead>
+      <tbody>
+        {real.map((r) => (
+          <tr>
+            <td>{r.metric}{r.note && <span class="note-inline">{r.note}</span>}</td>
+            <td class="val">{r.value}</td>
+            <td><span class:list={["chip", r.verdict]}>{r.verdict === "pass" ? "PASS" : r.verdict === "flag" ? "NEEDS WORK" : r.verdict.toUpperCase()}</span></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <h2>The judge <span class="sub">(less real)</span></h2>
+    <table>
+      <tbody>
+        {judge.map((r) => (
+          <tr>
+            <td>{r.metric}<span class="note-inline">{r.note}</span></td>
+            <td><span class:list={["chip", r.verdict]}>{r.verdict === "pass" ? "PASS" : r.verdict === "flag" ? "FLAGGED" : r.verdict.toUpperCase()}</span></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <p class="method muted">
+      Methodology: top table is a real Lighthouse run on the production build (headless Chrome,
+      measured June 2026), plus counts from the build output. Bottom table is LLM-as-judge
+      without human anchoring, which every eval person will tell you is malpractice. Appeals:
+      <a href="mailto:shubhamgoel27@gmail.com" class="body-link">shubhamgoel27@gmail.com</a>.
+    </p>
+  </section>
+</Base>
+
+<style>
+  .ev { padding-top: var(--space-2xl); }
+  .lede { margin-top: var(--space-s); }
+  h2 { margin-top: var(--space-xl); margin-bottom: var(--space-s); }
+  .sub { font-family: var(--font-mono); font-size: 0.6em; color: var(--ink-faint); font-weight: 400; letter-spacing: 0.04em; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+  thead th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink-faint);
+    font-weight: 500;
+    padding: 0.4rem 0.6rem;
+  }
+  td { padding: 0.55rem 0.6rem; border-top: 1px solid var(--line); vertical-align: top; }
+  .val { font-family: var(--font-mono); font-size: 0.85rem; white-space: nowrap; }
+  .note-inline { display: block; color: var(--ink-faint); font-size: 0.8rem; margin-top: 0.1rem; }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    padding: 0.15em 0.55em;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line-strong);
+    color: var(--ink-soft);
+    background: var(--paper-sunk);
+    white-space: nowrap;
+  }
+  .chip.flag, .chip.fail { color: var(--accent-ink); border-color: var(--accent); background: var(--accent-wash); }
+  .chip.wontfix { opacity: 0.75; }
+  .method { margin-top: var(--space-l); font-size: 0.88rem; }
+</style>

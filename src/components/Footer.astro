@@ -17,7 +17,16 @@ const year = 2026;
         </li>
       ))}
     </ul>
-    <p class="copy">© {year} Shubham Goel · <a href="/ai" class="ai-link">a note for AI agents</a></p>
+    <div class="hand" id="hand">
+      <span class="pcard" id="pcard-1"></span>
+      <span class="pcard" id="pcard-2"></span>
+      <span class="hand-note" id="hand-note"></span>
+      <span class="hand-tip" role="tooltip">
+        Your hole cards, dealt fresh every visit. Pocket aces is a true 1 in 221.
+        I host a poker night; the deck follows me around.
+      </span>
+    </div>
+    <p class="copy">© {year} Shubham Goel · <a href="/ai" class="ai-link">a note for AI agents</a><span id="chai-line"></span></p>
   </div>
 </footer>
 
@@ -31,6 +40,69 @@ const year = 2026;
   const pick = quips[Math.floor(Math.random() * quips.length)];
   const el = document.getElementById("footer-quip");
   if (pick && el) el.textContent = pick;
+
+  // ---- Poker hand: two hole cards per visit. AA is 1 in 221. ----
+  const RANKS = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
+  const SUITS = [
+    { s: "♠", red: false }, { s: "♥", red: true },
+    { s: "♦", red: true }, { s: "♣", red: false },
+  ];
+  const deck: { r: string; suit: string; red: boolean }[] = [];
+  for (const r of RANKS) for (const su of SUITS) deck.push({ r, suit: su.s, red: su.red });
+  const a = deck.splice(Math.floor(Math.random() * deck.length), 1)[0];
+  const b = deck.splice(Math.floor(Math.random() * deck.length), 1)[0];
+  const c1 = document.getElementById("pcard-1");
+  const c2 = document.getElementById("pcard-2");
+  const hand = document.getElementById("hand");
+  const note = document.getElementById("hand-note");
+  if (c1 && c2 && hand && note) {
+    c1.textContent = a.r + a.suit;
+    c2.textContent = b.r + b.suit;
+    c1.classList.add(a.red ? "red" : "black");
+    c2.classList.add(b.red ? "red" : "black");
+    if (a.r === b.r) {
+      hand.classList.add("paired");
+      if (a.r === "A") {
+        note.textContent = "POCKET ACES. you should've been at poker night.";
+        burst(hand);
+      } else {
+        note.textContent = `pocket ${a.r}s. poker night material.`;
+      }
+    }
+  }
+
+  function burst(anchor: HTMLElement) {
+    const r = anchor.getBoundingClientRect();
+    const colors = ["#C1452A", "#9C824A", "#FFFDF8", "#EF0107"];
+    for (let i = 0; i < 24; i++) {
+      const p = document.createElement("span");
+      p.style.cssText = `position:fixed;left:${r.x + r.width / 2}px;top:${r.y}px;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:999;background:${colors[i % colors.length]}`;
+      document.body.appendChild(p);
+      const ang = Math.random() * Math.PI * 2;
+      const v = 70 + Math.random() * 130;
+      p.animate(
+        [
+          { transform: "translate(0,0)", opacity: 1 },
+          { transform: `translate(${Math.cos(ang) * v}px, ${Math.sin(ang) * v - 90 + 200}px) rotate(${Math.random() * 540}deg)`, opacity: 0 },
+        ],
+        { duration: 1000 + Math.random() * 500, easing: "cubic-bezier(0.2,0.6,0.3,1)" }
+      ).onfinish = () => p.remove();
+    }
+  }
+
+  // ---- Chai o'clock: only speaks when it has something to say. ----
+  const chai = document.getElementById("chai-line");
+  if (chai) {
+    const istHour = Number(
+      new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Kolkata", hour: "numeric", hour12: false }).format(new Date())
+    );
+    const localHour = new Date().getHours();
+    if (istHour >= 16 && istHour < 18) {
+      chai.textContent = " · it's chai o'clock in Delhi right now ☕";
+    } else if (localHour >= 23 || localHour < 5) {
+      chai.textContent = " · it's late. the evals will hold.";
+    }
+  }
 </script>
 
 <style>
@@ -53,4 +125,58 @@ const year = 2026;
   .copy { color: var(--ink-faint); font-size: 0.85rem; font-family: var(--font-mono); width: 100%; }
   .ai-link { color: var(--ink-faint); }
   .ai-link:hover { color: var(--accent-ink); }
+
+  .hand { display: flex; align-items: center; gap: 0.3rem; position: relative; }
+  .hand-tip {
+    position: absolute;
+    bottom: calc(100% + 0.6rem);
+    right: 0;
+    width: 15rem;
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-md);
+    padding: 0.55rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    opacity: 0;
+    translate: 0 4px;
+    pointer-events: none;
+    transition: opacity var(--t-norm), translate var(--t-norm);
+    z-index: 10;
+  }
+  .hand-tip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    right: 1.1rem;
+    border: 6px solid transparent;
+    border-top-color: var(--line-strong);
+  }
+  .hand:hover .hand-tip, .hand:active .hand-tip { opacity: 1; translate: 0 0; }
+  .pcard {
+    display: inline-grid;
+    place-items: center;
+    width: 1.7rem;
+    height: 2.3rem;
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: 5px;
+    box-shadow: var(--shadow-sm);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    transform: rotate(-4deg);
+    transition: transform var(--t-norm);
+  }
+  .pcard + .pcard { transform: rotate(5deg); margin-left: -0.45rem; }
+  .hand:hover .pcard:first-child { transform: rotate(-9deg) translateY(-2px); }
+  .hand:hover .pcard + .pcard { transform: rotate(10deg) translateY(-2px); }
+  .pcard.red { color: #C1452A; }
+  .pcard.black { color: var(--ink); }
+  .hand.paired .pcard { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow-sm); }
+  .hand-note { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); margin-left: 0.5rem; max-width: 12rem; }
+  #chai-line { color: var(--ink-faint); }
 </style>
