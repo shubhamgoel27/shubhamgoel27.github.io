@@ -7,6 +7,7 @@ const nav = [
   { label: "Writing", href: "/blog" },
   { label: "About", href: "/about" },
   { label: "Now", href: "/now" },
+  { label: "Resume", href: "/resume.pdf" },
 ];
 const isActive = (href: string) =>
   href === "/" ? path === "/" : path === href || path.startsWith(href + "/");
@@ -23,7 +24,8 @@ const isActive = (href: string) =>
         {nav.map((item) => (
           <li>
             <a href={item.href} class:list={["nav-link", "link-underline", { active: isActive(item.href) }]}
-               aria-current={isActive(item.href) ? "page" : undefined}>
+               aria-current={isActive(item.href) ? "page" : undefined}
+               target={item.href.endsWith(".pdf") ? "_blank" : undefined}>
               {item.label}
             </a>
           </li>

@@ -51,8 +51,8 @@
 
 :root {
   /* Type */
-  --font-serif: "Fraunces Variable", Georgia, "Times New Roman", serif;
-  --font-sans:  "Inter Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: "Fraunces Variable", "Fraunces-fallback", Georgia, "Times New Roman", serif;
+  --font-sans:  "Inter Variable", "Inter-fallback", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono:  "JetBrains Mono", ui-monospace, Menlo, monospace;
 
   --step--1: clamp(0.83rem, 0.81rem + 0.10vw, 0.89rem);

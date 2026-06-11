@@ -17,7 +17,7 @@ const primary = project.links[0];
         ? <a href={primary.href} class="link-underline" target="_blank" rel="noopener">{project.name}</a>
         : project.name}
     </h3>
-    {project.links.length === 0 && <span class="soon">repo coming soon</span>}
+    {project.links.length === 0 && project.status !== "research" && <span class="soon">repo coming soon</span>}
   </div>
 
   <p class="tagline">{project.tagline}</p>

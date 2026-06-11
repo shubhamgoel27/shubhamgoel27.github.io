@@ -4,6 +4,24 @@
 @import "@fontsource/jetbrains-mono/500.css";
 @import "./tokens.css";
 
+/* Metric-matched fallbacks: hold the layout until the web fonts land. */
+@font-face {
+  font-family: "Fraunces-fallback";
+  src: local("Georgia");
+  size-adjust: 102%;
+  ascent-override: 96%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Inter-fallback";
+  src: local("Arial");
+  size-adjust: 107%;
+  ascent-override: 90%;
+  descent-override: 22.5%;
+  line-gap-override: 0%;
+}
+
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; }
