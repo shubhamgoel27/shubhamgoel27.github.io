@@ -7,6 +7,7 @@ import chandniImg from "../assets/projects/chandni-chowk-bros.png";
 import tavernImg from "../assets/projects/tavern-nights.png";
 import graphQuestImg from "../assets/projects/graph-quest.png";
 import mleInterviewImg from "../assets/projects/mle-interview.png";
+import curbcheckImg from "../assets/projects/curbcheck.png";
 
 export type ProjectStatus = "shipped" | "building" | "research";
 
@@ -29,6 +30,16 @@ export interface Project {
 
 export const projects: Project[] = [
   // ---------- Shipped ----------
+  {
+    name: "curbcheck",
+    tagline: "Can a small VLM tell you if you can park in San Francisco? A parking-sign benchmark, plus a QLoRA fine-tune that takes a 3B model from worse-than-guessing to reading real poles.",
+    result: "~$4 of training: read F1 0.35 → 0.96, reasoning 0.15 → 0.76",
+    tags: ["VLM", "QLoRA", "Qwen2.5-VL", "evals", "Modal"],
+    links: [{ label: "GitHub", href: "https://github.com/shubhamgoel27/curbcheck" }],
+    status: "shipped",
+    featured: true,
+    image: curbcheckImg,
+  },
   {
     name: "artifold",
     tagline: "A local-first library for the stuff you make with AI. Index, search, preview, and share your work, then use your past output as the style guide for the next thing you build.",
@@ -63,7 +74,6 @@ export const projects: Project[] = [
       { label: "GitHub", href: "https://github.com/shubhamgoel27/chandni-chowk-bros" },
     ],
     status: "shipped",
-    featured: true,
     image: chandniImg,
   },
   {
