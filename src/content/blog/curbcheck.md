@@ -89,13 +89,36 @@ Two things jump out. The good: the deterministic resolver keeps pipeline reasoni
 
 The humbling: I threw everything at the reading gap. I doubled the real training data, added human-verified labels, and augmented the renderer with fading, occlusion, and perspective. Real-photo reading moved from **0.33 to 0.34**. One point.
 
-That non-result is actually the most useful thing I learned. If more data barely moves the needle, the bottleneck is not data, it is **model capacity**. And the prime suspect is that frozen vision encoder I mentioned earlier. The model can reason about signs it reads; it just cannot reliably read faded, sun-bleached Mission Street poles with a vision tower that never got to adapt. So the next experiment is not more data. It is unfreezing the vision encoder. A full fine-tune would not help while the eyes stay frozen.
+That non-result is actually the most useful thing I learned. If more data barely moves the needle, the bottleneck is not data, it is **model capacity**. And the prime suspect is that frozen vision encoder I mentioned earlier. The model can reason about signs it reads; it just cannot reliably read faded, sun-bleached Mission Street poles with a vision tower that never got to adapt. So the next experiment is not more data. It is unfreezing the vision encoder.
+
+## I ran the experiment. The hypothesis was wrong.
+
+So I did it. I unfroze the vision encoder, roughly doubled the real training data by pulling parking-sign photos from other cities (Oakland, Chicago, and more), and replaced the single-pass labels with a 3-vote consensus.
+
+Then I tested it the same way I tested everything else: on the full held-out set, no cherry-picking. The result was not what I predicted, and that was the interesting part.
+
+| Metric (real photos) | base | first tune | vision unfrozen + more data |
+|---|:---:|:---:|:---:|
+| Read F1 | 0.04 | 0.34 | 0.33 |
+| Reasoning (pipeline) | 0.78 | 0.89 | 0.90 |
+| Reasoning (end to end) | 0.09 | 0.41 | 0.82 |
+
+Reading did not move. 0.34 to 0.33. Unfreezing the vision encoder, the thing I was sure was the bottleneck, did nothing for it. So that hypothesis was wrong too.
+
+But look at the bottom row. End-to-end reasoning on real photos doubled, 0.41 to 0.82. The diverse cross-city data and cleaner labels did not teach the model to *read* better; they taught it to *reason* better about what it does read, and to stop over-calling restrictions on simple poles.
+
+I had one idea left for reading: bolt on a small dedicated OCR model, plus a contrast-normalization transform to rescue faded signs. On a handful of hard images I picked by hand, it looked promising. So I ran a proper A/B across the entire test set before believing it.
+
+It made things worse. OCR text as a hint confused the model on the clean signs it already read fine, and the contrast trick recovered nothing on average. A clean reminder of why you test on the whole set, not the three examples that flatter your idea.
+
+So here is the honest state. Reading faded, cluttered SF sign poles is genuinely hard, and not because of one fixable bottleneck. The model reads simple 1-to-2-sign poles decently and falls apart on dense 4-sign ones. What carries the product is the architecture: because a deterministic resolver does the logic, the verdict stays right about 90% of the time even when a read is imperfect. The neural net is allowed to be the fallible part.
 
 ## Try it
 
 I wrapped the tuned model in a little demo. Upload a photo of an SF sign pole, pick a day and time, and it shows you both what each sign says and whether you can park.
 
-- Demo (runs on a free GPU): [the curbcheck Space](https://huggingface.co/spaces/build-small-hackathon/curbcheck)
+- Demo: [the curbcheck Space](https://huggingface.co/spaces/build-small-hackathon/curbcheck)
+- Model (the v5 adapter): [shubhamgoel27/curbcheck-qwen25vl3b-v5-lora](https://huggingface.co/shubhamgoel27/curbcheck-qwen25vl3b-v5-lora)
 - Code, benchmark, and the full, honest results: [github.com/shubhamgoel27/curbcheck](https://github.com/shubhamgoel27/curbcheck)
 
 It is not solved. Real-world reading is still the open problem, and I find that more interesting than if it had worked on the first try. But there is now a small model that gets the pole that beat me, and a clean experiment pointing at what to try next.
