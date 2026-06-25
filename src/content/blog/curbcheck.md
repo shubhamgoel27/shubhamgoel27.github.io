@@ -113,6 +113,23 @@ It made things worse. OCR text as a hint confused the model on the clean signs i
 
 So here is the honest state. Reading faded, cluttered SF sign poles is genuinely hard, and not because of one fixable bottleneck. The model reads simple 1-to-2-sign poles decently and falls apart on dense 4-sign ones. What carries the product is the architecture: because a deterministic resolver does the logic, the verdict stays right about 90% of the time even when a read is imperfect. The neural net is allowed to be the fallible part.
 
+## Update: the reading number was a measurement bug
+
+After all that hand-wringing about reading being stuck at 0.33, I found the real culprit, and it was my own scorer.
+
+Half the eval set (231 of 500 photos) is downed or missing poles with no readable sign. The correct answer there is to read nothing, an empty list. My read-F1 scorer was counting that correct "nothing" as a zero instead of a perfect score. So nearly half the benchmark was punishing the model for correctly abstaining.
+
+Once I fixed it, the real numbers are very different:
+
+| metric (real photos) | base | v5 |
+|---|:---:|:---:|
+| Read F1, sign-bearing photos | 0.08 | 0.62 |
+| Abstains correctly on no-sign photos | 0.57 | 0.83 |
+
+So the model reads real sign-bearing photos at about 0.62 F1 (around 0.52 against a stricter 3-vote consensus gold I built to de-noise the metric), and correctly says "no sign here" 83% of the time. Reading was never the 0.33 disaster I thought. It is decent on 1-to-2-sign poles and weakest on cluttered 4-sign ones.
+
+The lesson, again: check the ruler before you trust the number. I built the consensus gold to ask whether the model was worse than the metric claimed. The answer turned out to be the opposite. The metric was worse than the model.
+
 ## Try it
 
 I wrapped the tuned model in a little demo. Upload a photo of an SF sign pole, pick a day and time, and it shows you both what each sign says and whether you can park.
