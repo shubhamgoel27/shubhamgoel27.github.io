@@ -1,0 +1,93 @@
+---
+// Hand-drawn self-portrait doodle for the hero. Single-weight terracotta line art
+// in the same language as the squiggle: theme-aware (CSS vars), a feDisplacementMap
+// "roughen" filter for a hand-sketched wobble, and a gentle fade-in + idle float.
+---
+<div class="doodle-wrap" aria-hidden="true">
+  <svg class="doodle" viewBox="0 0 340 340" fill="none" role="img" aria-label="A hand-drawn doodle of Shubham with a football">
+    <defs>
+      <filter id="hd-rough" x="-18%" y="-18%" width="136%" height="136%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2" seed="6" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/>
+      </filter>
+    </defs>
+    <ellipse class="wash" cx="170" cy="156" rx="98" ry="102"/>
+    <g filter="url(#hd-rough)">
+      <path class="stroke" d="M92 302 C96 252 120 226 170 226 C220 226 244 252 248 302"/>
+      <path class="stroke" d="M108 148 C108 104 134 78 170 78 C206 78 232 106 232 146 C232 188 208 214 170 214 C132 214 108 190 108 148Z"/>
+      <path class="stroke thin" d="M108 150 C99 152 99 166 108 168"/>
+      <path class="stroke thin" d="M232 148 C241 150 241 164 232 166"/>
+      <path class="hair" d="M104 158 C98 130 96 102 110 78 C126 54 152 54 157 68 C163 60 169 60 175 70 C183 60 193 58 199 70 C215 56 236 60 242 88 C250 114 248 134 236 158 C230 134 224 122 214 116 C202 108 194 114 184 114 C175 120 165 116 155 112 C142 108 129 112 121 120 C114 126 108 138 104 158Z"/>
+      <path class="stroke thin flick" d="M140 60 C137 48 147 45 151 57"/>
+      <path class="stroke thin flick" d="M196 60 C201 47 211 50 208 62"/>
+      <path class="stroke thin flick" d="M170 54 C169 44 176 43 179 53"/>
+      <rect class="stroke" x="120" y="132" width="42" height="34" rx="15"/>
+      <rect class="stroke" x="178" y="132" width="42" height="34" rx="15"/>
+      <path class="stroke thin" d="M162 147 C168 143 172 143 178 147"/>
+      <path class="stroke thin" d="M120 144 L108 142"/>
+      <path class="stroke thin" d="M220 144 L232 142"/>
+      <path class="stroke" d="M150 188 C161 199 179 199 190 188"/>
+      <!-- laptop showing an eval chart ticking up (building) -->
+      <g class="laptop">
+        <rect class="stroke thin" x="28" y="236" width="56" height="36" rx="3"/>
+        <path class="stroke thin chart" d="M37 263 L46 254 L54 258 L63 247 L71 250 L78 242"/>
+        <path class="stroke thin" d="M28 272 L84 272 L93 285 L19 285 Z"/>
+        <path class="stroke thin" d="M48 279 H64"/>
+      </g>
+      <!-- football (futbol / Arsenal) -->
+      <g class="ball">
+        <circle class="stroke" cx="262" cy="264" r="31"/>
+        <path class="stroke thin" d="M262 247 L249 257 L254 273 L270 273 L275 257 Z"/>
+        <path class="stroke thin" d="M262 247 V237 M249 257 L237 253 M254 273 L248 285 M270 273 L276 285 M275 257 L287 253"/>
+      </g>
+      <!-- poker card (top-left, jaunty tilt) -->
+      <g class="card" transform="rotate(-11 60 98)">
+        <rect class="paper-fill" x="45" y="76" width="31" height="44" rx="5"/>
+        <path class="fill-accent" d="M60 92 C57 87 49 88 49 95 C49 102 60 108 60 108 C60 108 71 102 71 95 C71 88 63 87 60 92Z"/>
+        <path class="fill-accent thin2" d="M50 82 C49 80 46 80 46 83 C46 86 50 88 50 88 C50 88 54 86 54 83 C54 80 51 80 50 82Z"/>
+      </g>
+      <!-- coffee (building fuel) -->
+      <g class="mug">
+        <path class="stroke thin" d="M283 108 L285 131 C285 134 287 136 290 136 L300 136 C303 136 305 134 305 131 L307 108Z"/>
+        <path class="stroke thin" d="M307 113 C315 113 315 126 306 126"/>
+        <path class="stroke thin steam" d="M290 102 C287 98 293 94 290 90"/>
+        <path class="stroke thin steam" d="M300 102 C297 98 303 94 300 90"/>
+      </g>
+    </g>
+    <circle class="dot" cx="141" cy="150" r="3.3"/>
+    <circle class="dot" cx="199" cy="150" r="3.3"/>
+  </svg>
+</div>
+
+<style>
+  .doodle-wrap { display: flex; justify-content: center; }
+  .doodle {
+    width: min(23rem, 100%);
+    height: auto;
+    overflow: visible;
+    animation: doodle-in 0.9s var(--ease, cubic-bezier(0.2, 0.7, 0.2, 1)) 0.15s both,
+               doodle-float 7s ease-in-out 1s infinite;
+  }
+  .stroke { stroke: var(--accent); stroke-width: 3.3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+  .thin   { stroke-width: 2.3; }
+  .ink    { stroke: var(--ink); }
+  .wash   { fill: var(--accent-wash); stroke: none; }
+  .hair   { fill: var(--paper); stroke: var(--accent); stroke-width: 3.3; stroke-linejoin: round; }
+  .dot    { fill: var(--accent); stroke: none; }
+  .paper-fill  { fill: var(--paper); stroke: var(--accent); stroke-width: 2.3; stroke-linejoin: round; }
+  .fill-accent { fill: var(--accent); stroke: none; }
+  .steam       { animation: steam 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: bottom; }
+  @keyframes steam { 0%, 100% { opacity: 0.3; transform: translateY(2px); } 50% { opacity: 0.9; transform: translateY(-2px); } }
+
+  .ball    { transform-box: fill-box; transform-origin: center; animation: ball-bob 3.2s ease-in-out infinite; }
+  .sparkle { animation: twinkle 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+
+  @keyframes doodle-in { from { opacity: 0; transform: translateY(14px) rotate(-1.5deg); } to { opacity: 1; transform: none; } }
+  @keyframes doodle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @keyframes ball-bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-6px) rotate(8deg); } }
+  @keyframes twinkle { 0%, 100% { opacity: 0.35; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.1); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .doodle, .ball, .sparkle { animation: none; }
+  }
+</style>

@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Squiggle from "../components/Squiggle.astro";
+import HeroDoodle from "../components/HeroDoodle.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import PostCard from "../components/PostCard.astro";
 import { featuredProjects } from "../data/projects";
@@ -17,33 +18,42 @@ const posts = (await getCollection("blog"))
 ---
 <Base>
   <section class="hero wrap">
-    <button class="avatar" id="avatar-egg" aria-label="Shubham's photo. Click for a surprise." title="click me">
-      <Image src={profilePic} alt="Shubham Goel" width={352} height={352} loading="eager" />
-    </button>
-    <h1 class="greeting">Hey, I'm Shubham.<Squiggle /></h1>
-    <div class="lede narrow stack">
-      <p>
-        I'm a machine learning engineer with eight years across computer vision, multimodal
-        learning, and recommender systems, most recently at Meta on Instagram Ads Ranking.
-        Lately I'm most excited about <strong>multimodal LLMs, post-training, and
-        <a href="/evals" class="evals-link">evals</a></strong>.
-      </p>
-      <p class="muted">
-        I love building side projects, like
-        <a href="https://github.com/shubhamgoel27/artifold" class="body-link">artifold</a> and
-        <a href="https://github.com/shubhamgoel27/rl-arcade" class="body-link">rl-arcade</a>,
-        and I have a serious obsession with <a href="/futbol" class="body-link">futbol</a>.
-      </p>
+    <div class="hero-inner">
+      <div class="hero-text">
+        <button class="avatar" id="avatar-egg" aria-label="Shubham's photo. Click for a surprise." title="click me">
+          <Image src={profilePic} alt="Shubham Goel" width={352} height={352} loading="eager" />
+        </button>
+        <h1 class="greeting">Hey, I'm Shubham.<Squiggle /></h1>
+        <div class="lede stack">
+          <p>
+            I'm a machine learning engineer, about eight years in, mostly teaching machines
+            to see and read: computer vision, multimodal models, and recommender systems,
+            most recently at Meta on Instagram Ads ranking. Lately I'm most excited about
+            <strong>multimodal LLMs, post-training, and <a href="/evals" class="evals-link">evals</a></strong>.
+          </p>
+          <p class="muted">
+            The projects I love most fix a problem I actually ran into, like
+            <a href="/blog/curbcheck" class="body-link">curbcheck</a>, a model I trained to read SF
+            parking signs after collecting two tickets in one week. When I'm not on something like
+            that or <a href="https://github.com/shubhamgoel27/artifold" class="body-link">artifold</a>,
+            I'm following <a href="/futbol" class="body-link">Arsenal</a> a little too closely, and
+            splitting the rest between poker and a recent, slightly out-of-hand obsession with padel.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <a href="/building" class="btn btn-primary">Projects</a>
+          <a href="/about" class="btn btn-ghost">About</a>
+        </div>
+        <p class="now-line">
+          <span class="pulse" aria-hidden="true"></span>
+          Currently going deep on multimodal post-training and evals.
+          <a href="/now" class="link-underline">what I'm up to now →</a>
+        </p>
+      </div>
+      <div class="hero-art">
+        <HeroDoodle />
+      </div>
     </div>
-    <div class="hero-actions">
-      <a href="/building" class="btn btn-primary">Projects</a>
-      <a href="/about" class="btn btn-ghost">About</a>
-    </div>
-    <p class="now-line">
-      <span class="pulse" aria-hidden="true"></span>
-      Currently going deep on multimodal post-training and evals.
-      <a href="/now" class="link-underline">what I'm up to now →</a>
-    </p>
   </section>
 
   <section class="wrap block">
@@ -95,6 +105,13 @@ const posts = (await getCollection("blog"))
 
 <style>
   .hero { padding-top: var(--space-2xl); padding-bottom: var(--space-xl); }
+  .hero-inner { display: grid; grid-template-columns: 1fr; gap: var(--space-l); align-items: center; }
+  .hero-text { max-width: var(--width-text); }
+  .hero-art { display: none; }
+  @media (min-width: 54rem) {
+    .hero-inner { grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr); gap: var(--space-xl); }
+    .hero-art { display: block; }
+  }
   .avatar {
     display: block;
     width: 5.5rem;

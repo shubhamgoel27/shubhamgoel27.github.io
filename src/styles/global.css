@@ -49,6 +49,23 @@ body {
   min-height: 100vh;
 }
 
+/* Subtle paper grain so the warm background reads as physical, not a flat hex. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.09;
+  mix-blend-mode: multiply;
+}
+[data-theme="dark"] body::before { opacity: 0.10; mix-blend-mode: overlay; }
+@media (prefers-reduced-motion: no-preference) {
+  /* grain is static; nothing to animate here, kept for clarity */
+}
+
 h1, h2, h3, h4 {
   font-family: var(--font-serif);
   font-weight: 560;
