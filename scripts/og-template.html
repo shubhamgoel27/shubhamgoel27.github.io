@@ -59,4 +59,22 @@ html,body{margin:0;padding:0;}
     </svg>
   </div></div>
 </div>
+<script>
+  // Post variant: og-template.html?title=...&sub=...  -> lead with the post title.
+  const p = new URLSearchParams(location.search);
+  const title = p.get("title");
+  if (title) {
+    document.querySelector(".kick").textContent = p.get("kicker") || "shubham.gg / writing";
+    const h1 = document.querySelector("h1");
+    h1.textContent = title;
+    const len = title.length;
+    h1.style.fontSize = len > 52 ? "46px" : len > 34 ? "56px" : "72px";
+    h1.style.lineHeight = "1.08";
+    const tag = document.querySelector(".tag");
+    tag.textContent = p.get("sub") || "A post by Shubham Goel.";
+    tag.style.fontWeight = "500";
+    tag.style.color = "var(--ink-soft)";
+    document.querySelector(".sub").style.display = "none";
+  }
+</script>
 </body></html>

@@ -56,6 +56,13 @@
     </g>
     <circle class="dot" cx="141" cy="150" r="3.3"/>
     <circle class="dot" cx="199" cy="150" r="3.3"/>
+    <!-- hover easter egg: a little Arsenal shout -->
+    <g class="coyg" aria-hidden="true">
+      <circle class="coyg-b" cx="240" cy="60" r="3"/>
+      <circle class="coyg-b" cx="251" cy="50" r="5"/>
+      <ellipse class="coyg-b" cx="288" cy="30" rx="47" ry="18"/>
+      <text class="coyg-t" x="288" y="37" text-anchor="middle">COYG!</text>
+    </g>
   </svg>
 </div>
 
@@ -80,6 +87,14 @@
   @keyframes steam { 0%, 100% { opacity: 0.3; transform: translateY(2px); } 50% { opacity: 0.9; transform: translateY(-2px); } }
 
   .ball    { transform-box: fill-box; transform-origin: center; animation: ball-bob 3.2s ease-in-out infinite; }
+
+  /* hover easter egg */
+  .coyg { opacity: 0; transform: translateY(8px) scale(0.7); transform-box: fill-box; transform-origin: 70% bottom; transition: opacity 0.22s var(--ease, ease), transform 0.32s cubic-bezier(0.2, 1.4, 0.4, 1); }
+  .coyg-b { fill: var(--paper); stroke: var(--accent); stroke-width: 2.3; }
+  .coyg-t { fill: var(--accent); font-family: var(--font-sans, sans-serif); font-weight: 700; font-size: 20px; letter-spacing: 0.5px; }
+  .doodle-wrap:hover .coyg { opacity: 1; transform: none; }
+  .doodle-wrap:hover .ball { animation: ball-spin 1.05s linear infinite; }
+  @keyframes ball-spin { to { transform: rotate(360deg); } }
   .sparkle { animation: twinkle 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 
   @keyframes doodle-in { from { opacity: 0; transform: translateY(14px) rotate(-1.5deg); } to { opacity: 1; transform: none; } }

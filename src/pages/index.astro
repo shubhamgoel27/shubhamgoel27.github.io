@@ -46,7 +46,7 @@ const posts = (await getCollection("blog"))
         </div>
         <p class="now-line">
           <span class="pulse" aria-hidden="true"></span>
-          Currently going deep on multimodal post-training and evals.
+          <span id="hero-status">Currently going deep on multimodal post-training and evals.</span>
           <a href="/now" class="link-underline">what I'm up to now →</a>
         </p>
       </div>
@@ -228,6 +228,18 @@ const posts = (await getCollection("blog"))
 </style>
 
 <script>
+  // rotate the hero status line through a few current one-liners (footer energy, up top)
+  (() => {
+    const lines = [
+      "Currently going deep on multimodal post-training and evals.",
+      "Currently teaching small models to read faded parking signs.",
+      "Currently losing at padel and winning at poker. Usually.",
+      "Currently refreshing the Arsenal table more than my terminal.",
+    ];
+    const s = document.getElementById("hero-status");
+    if (s) s.textContent = lines[Math.floor(Math.random() * lines.length)];
+  })();
+
   const avatar = document.getElementById("avatar-egg");
   const ARSENAL = ["#EF0107", "#FFFDF8", "#9C824A", "#C1452A"];
   let clicks = 0;

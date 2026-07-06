@@ -8,11 +8,12 @@ interface Props {
   updatedDate?: Date;
   tags?: string[];
   minutesRead?: number;
+  ogImage?: string;
 }
-const { title, description, pubDate, updatedDate, tags = [], minutesRead } = Astro.props;
+const { title, description, pubDate, updatedDate, tags = [], minutesRead, ogImage } = Astro.props;
 const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 ---
-<Base title={title} description={description} ogType="article">
+<Base title={title} description={description} ogType="article" ogImage={ogImage}>
   <article class="wrap narrow post">
     <header class="post-head">
       <a href="/blog" class="back link-underline">← Writing</a>

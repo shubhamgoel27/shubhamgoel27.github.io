@@ -1,11 +1,12 @@
 ---
 import Base from "../layouts/Base.astro";
 import KeepyUppy from "../components/KeepyUppy.astro";
+import Squiggle from "../components/Squiggle.astro";
 ---
 <Base title="Not found" description="That page doesn't exist.">
   <section class="wrap narrow nf">
     <p class="eyebrow">404</p>
-    <h1>This page wandered off.</h1>
+    <h1>This page wandered off.<Squiggle width="min(11rem, 55%)" /></h1>
     <p class="muted">Probably offside. While the ref sorts it out: keepy-uppy?</p>
 
     <KeepyUppy />
@@ -20,7 +21,7 @@ import KeepyUppy from "../components/KeepyUppy.astro";
 
 <style>
   .nf { padding-top: var(--space-2xl); padding-bottom: var(--space-2xl); text-align: center; }
-  .nf h1 { margin-top: var(--space-s); }
+  .nf h1 { margin-top: var(--space-s); display: flex; flex-direction: column; align-items: center; }
   .nf .muted { margin-top: var(--space-xs); }
   .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-m); margin-top: var(--space-l); }
   .actions a { color: var(--accent-ink); }

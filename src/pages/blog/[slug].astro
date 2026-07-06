@@ -18,6 +18,7 @@ const { Content } = await render(post);
   updatedDate={post.data.updatedDate}
   tags={post.data.tags}
   minutesRead={minutesRead(post.body)}
+  ogImage={`/og-${post.id}.png`}
 >
   <Content />
 </BlogPost>
