@@ -1,11 +1,12 @@
 ---
 import Base from "../layouts/Base.astro";
+import Squiggle from "../components/Squiggle.astro";
 const updated = "July 2026";
 ---
 <Base title="Now" description="What Shubham Goel is focused on right now.">
   <section class="wrap narrow head">
     <p class="eyebrow">Now</p>
-    <h1>What I'm focused on</h1>
+    <h1>What I'm focused on<Squiggle width="min(13rem, 55%)" /></h1>
     <p class="updated">Last updated {updated}. <a href="https://nownownow.com/about" class="body-link" target="_blank" rel="noopener">What's a now page?</a></p>
 
     <ul class="now-list stack">

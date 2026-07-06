@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Squiggle from "../components/Squiggle.astro";
 import HeroDoodle from "../components/HeroDoodle.astro";
+import HandArrow from "../components/HandArrow.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import PostCard from "../components/PostCard.astro";
 import { featuredProjects } from "../data/projects";
@@ -59,7 +60,7 @@ const posts = (await getCollection("blog"))
   <section class="wrap block">
     <div class="block-head">
       <h2>Things I'm building</h2>
-      <a href="/building" class="more link-underline">All projects →</a>
+      <a href="/building" class="more link-underline">All projects <HandArrow /></a>
     </div>
     <div class="grid">
       {featuredProjects.map((p) => <ProjectCard project={p} />)}
@@ -70,7 +71,7 @@ const posts = (await getCollection("blog"))
     <section class="wrap block narrow">
       <div class="block-head">
         <h2>Writing</h2>
-        <a href="/blog" class="more link-underline">All posts →</a>
+        <a href="/blog" class="more link-underline">All posts <HandArrow /></a>
       </div>
       <div class="posts">
         {posts.map((post) => (

@@ -1,17 +1,57 @@
 ---
 import Base from "../layouts/Base.astro";
 import KeepyUppy from "../components/KeepyUppy.astro";
+import Squiggle from "../components/Squiggle.astro";
 ---
-<Base title="Futbol" description="The beautiful game gets its own page. Keepy-uppy included.">
+<Base title="Futbol" description="The beautiful game gets its own page. Arsenal, padel, and a keepy-uppy you can't beat.">
   <section class="wrap narrow fb">
     <p class="eyebrow">Futbol</p>
-    <h1>The beautiful game gets its own page.</h1>
-    <p class="muted">
-      Gunner since before it was character-building. When I'm not watching, I'm building with
-      it: a real-time <a href="/building" class="body-link">AI soccer commentator</a>, match
-      highlights restyled as anime, and whatever this is below. Current record holder: me,
-      on my own website. Take that from me.
+    <h1>The beautiful game gets its own page.<Squiggle width="min(16rem, 62%)" /></h1>
+
+    <div class="fb-hero" aria-hidden="true">
+      <svg class="footy" viewBox="0 0 220 240" fill="none" role="img" aria-label="A hand-drawn bouncing football">
+        <defs><filter id="fb-rough" x="-15%" y="-15%" width="130%" height="130%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="4" result="n"/>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/>
+        </filter></defs>
+        <ellipse class="shadow" cx="110" cy="214" rx="52" ry="10"/>
+        <g class="ball" filter="url(#fb-rough)">
+          <circle class="stroke" cx="110" cy="96" r="78"/>
+          <path class="patch" d="M110 54 L148 82 L133 128 L87 128 L72 82 Z"/>
+          <path class="line" d="M110 54 V18 M148 82 L182 68 M133 128 L150 166 M87 128 L70 166 M72 82 L38 68"/>
+          <path class="line" d="M110 18 C126 20 140 26 150 36 M182 68 C186 86 184 104 176 120 M150 166 C136 172 120 174 106 172 M70 166 C56 160 44 150 38 136 M38 68 C48 52 62 42 78 36"/>
+        </g>
+      </svg>
+    </div>
+
+    <p class="lede">
+      Some people have a personality. I have a football club. I've been a Gunner since before
+      it was character-building, which is the polite way of saying I've watched Arsenal invent
+      new ways to break my heart. Still worth it. <strong>Come on you Gunners.</strong>
     </p>
+
+    <ul class="fb-list stack">
+      <li>
+        <strong>Arsenal, for my sins.</strong> North London, red and white, and a permanent belief
+        that this is finally our year. I defend them against most of the evidence and all of my friends.
+      </li>
+      <li>
+        <strong>I build with it, too.</strong> Football is my favorite dataset. I'm wiring up
+        <a href="/building" class="body-link">AURA FC</a>, a real-time AI commentator that watches a
+        match and calls it live, and I've restyled highlights as anime just to see if I could.
+      </li>
+      <li>
+        <strong>New addiction: padel.</strong> Picked it up this year and now I plan my week around
+        court availability. Currently deep in the "dangerous confidence, questionable technique" phase.
+      </li>
+    </ul>
+
+    <div class="kickoff">
+      <h2>Now, the important part.</h2>
+      <p class="muted">
+        Current keepy-uppy record holder: me, on my own website. The bar is low. Go on, take it from me.
+      </p>
+    </div>
 
     <KeepyUppy />
   </section>
@@ -19,6 +59,34 @@ import KeepyUppy from "../components/KeepyUppy.astro";
 
 <style>
   .fb { padding-top: var(--space-2xl); padding-bottom: var(--space-xl); text-align: center; }
-  .fb h1 { margin-top: var(--space-s); }
-  .fb .muted { margin-top: var(--space-s); max-width: 34rem; margin-inline: auto; }
+  .fb h1 { margin-top: var(--space-s); display: flex; flex-direction: column; align-items: center; }
+
+  .fb-hero { display: flex; justify-content: center; margin: var(--space-m) 0 var(--space-s); }
+  .footy { width: min(15rem, 70%); height: auto; overflow: visible; }
+  .footy .stroke { stroke: var(--accent); stroke-width: 3.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .footy .patch { fill: var(--accent); stroke: none; }
+  .footy .line { stroke: var(--accent); stroke-width: 2.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .footy .shadow { fill: rgb(var(--shadow-color) / 0.10); }
+  .footy .ball { transform-box: fill-box; transform-origin: center bottom; animation: footy-bounce 1.8s cubic-bezier(0.3, 0, 0.4, 1) infinite; }
+  @keyframes footy-bounce {
+    0%, 100% { transform: translateY(0) rotate(-6deg); }
+    50% { transform: translateY(-26px) rotate(6deg); }
+  }
+  @media (prefers-reduced-motion: reduce) { .footy .ball { animation: none; } }
+
+  .lede { margin-top: var(--space-m); font-size: var(--step-1); max-width: 36rem; margin-inline: auto; }
+  .lede strong { color: var(--accent-ink); }
+
+  .fb-list { list-style: none; padding: 0; margin: var(--space-l) auto 0; max-width: 36rem; text-align: left; }
+  .fb-list li { position: relative; padding-left: var(--space-l); color: var(--ink-soft); line-height: 1.6; }
+  .fb-list li::before {
+    content: "⚽";
+    position: absolute; left: 0; top: 0.05em;
+    font-size: 1.05em;
+  }
+  .fb-list strong { color: var(--ink); }
+  .fb-list a { color: var(--accent-ink); }
+
+  .kickoff { margin-top: var(--space-2xl); }
+  .kickoff .muted { margin-top: var(--space-xs); max-width: 32rem; margin-inline: auto; }
 </style>

@@ -1,0 +1,21 @@
+---
+// A small hand-drawn arrow, inherits the current text color. Used in place of "→"
+// on "more" links so the hand-drawn language carries beyond the hero doodle.
+---
+<svg class="hand-arrow" viewBox="0 0 42 16" fill="none" aria-hidden="true">
+  <path d="M2 8.4 C13 6.8 27 8.6 37 7.8" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/>
+  <path d="M30 3 L38 7.8 L30 12.6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+<style>
+  .hand-arrow {
+    display: inline-block;
+    width: 1.5em;
+    height: 0.6em;
+    margin-left: 0.15em;
+    vertical-align: -0.02em;
+    overflow: visible;
+    transition: transform var(--t-norm, 0.25s);
+  }
+  a:hover .hand-arrow { transform: translateX(3px); }
+</style>
