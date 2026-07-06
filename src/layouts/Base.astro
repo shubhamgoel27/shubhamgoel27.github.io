@@ -9,15 +9,18 @@ interface Props {
   title?: string;
   description?: string;
   ogType?: string;
+  ogImage?: string;
 }
 const {
   title = "Shubham Goel",
   description = "Machine learning engineer building systems where vision, language, and ranking meet. Previously a Senior MLE at Meta.",
   ogType = "website",
+  ogImage = "/og.png",
 } = Astro.props;
 
 const fullTitle = title === "Shubham Goel" ? title : `${title} · Shubham Goel`;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImageUrl = new URL(ogImage, Astro.site).href;
 ---
 <!doctype html>
 <html lang="en">
@@ -37,7 +40,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Shubham Goel, machine learning engineer" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImageUrl} />
     <meta name="twitter:creator" content="@shubhamg_" />
 
     <script is:inline>
