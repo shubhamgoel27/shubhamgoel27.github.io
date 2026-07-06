@@ -130,6 +130,24 @@ So the model reads real sign-bearing photos at about 0.62 F1 (around 0.52 agains
 
 The lesson, again: check the ruler before you trust the number. I built the consensus gold to ask whether the model was worse than the metric claimed. The answer turned out to be the opposite. The metric was worse than the model.
 
+## Scaling up: a 7B student, and a bug hiding in plain sight
+
+The diagnostics kept pointing at one thing: reading real signs was capacity-bound, not data-bound. So I did the obvious next experiment and swapped the 3B student for a **7B** one, trained on the full cross-city corpus (now 17 cities, cleaned with 3-vote consensus labels). Same read-then-reason architecture, just a bigger brain doing the perception.
+
+On simple poles it clearly helped. The 7B reads a clean single-sign pole perfectly, and on real sign-bearing photos it edged the 3B up from about 0.62 to roughly 0.72 (on a smaller hand-checked sample). The pipeline verdict held around 0.92. The bigger model perceives more, exactly as the read-ceiling story predicted.
+
+But the more interesting result came from **splitting the score by how many signs are on the pole**, instead of trusting one average. The moment I bucketed it, the aggregate number fell apart:
+
+| signs on the pole | 7B read F1 |
+|---|:---:|
+| 1 sign | 1.00 (perfect) |
+| 2 signs | partial |
+| 3 to 4 signs | ~0.00 |
+
+That "0.00" on dense poles looked catastrophic. It wasn't. Digging into the raw outputs, the 7B was reading those poles and then *never stopping*. It emits the JSON and just keeps generating instead of producing an end-of-sequence token. So every dense-pole read ran to the length limit: truncated into invalid JSON when I capped tokens low, and painfully slow (tens of seconds each) when I capped them high. The 3B never did this. The 7B regressed on knowing when to shut up.
+
+So the honest state of v6: bigger reads simple poles better, but it has a **generation-termination bug on cluttered poles** that a smaller, dumber model didn't have. The fix is boring (constrain the stop token, or a short fine-tune that teaches clean endings). The lesson is not: a single averaged metric hid both a scoring mistake of mine *and* a real regression in the model. Bucket your eval before you believe it. The pole that beat me is still where the interesting failures live.
+
 ## Try it
 
 I wrapped the tuned model in a little demo. Upload a photo of an SF sign pole, pick a day and time, and it shows you both what each sign says and whether you can park.
