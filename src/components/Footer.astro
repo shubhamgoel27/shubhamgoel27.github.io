@@ -7,6 +7,7 @@ const year = 2026;
     <p class="note" id="footer-quip">
       If you can read this, my evals passed.
     </p>
+    <button class="sfx-toggle" id="sfx-toggle" type="button" aria-label="Toggle sound effects" title="Sound effects (for keepy-uppy)">🔇</button>
     <ul class="socials">
       {socialOrder.map((key) => (
         <li>
@@ -31,6 +32,7 @@ const year = 2026;
 </footer>
 
 <script>
+  function initFooter() {
   const quips = [
     null, // keep the server-rendered line as one of the rotation slots
     "Built in San Francisco, seasoned in Old Delhi.",
@@ -103,6 +105,49 @@ const year = 2026;
       chai.textContent = " · it's late. the evals will hold.";
     }
   }
+
+  // ---- Opt-in sound effects (default off, remembered) ----
+  const SFX: any = { on: (() => { try { return localStorage.getItem("sfx") === "1"; } catch { return false; } })(), ctx: null };
+  (window as any).__sfx = SFX;
+  SFX.pop = (freq = 600) => {
+    if (!SFX.on) return;
+    try {
+      SFX.ctx = SFX.ctx || new (window.AudioContext || (window as any).webkitAudioContext)();
+      const c = SFX.ctx, o = c.createOscillator(), g = c.createGain();
+      o.type = "triangle"; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.16, c.currentTime + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.13);
+      o.connect(g); g.connect(c.destination);
+      o.start(); o.stop(c.currentTime + 0.14);
+    } catch {}
+  };
+  const sfxBtn = document.getElementById("sfx-toggle");
+  const renderSfx = () => { if (sfxBtn) sfxBtn.textContent = SFX.on ? "🔊" : "🔇"; };
+  renderSfx();
+  sfxBtn?.addEventListener("click", () => {
+    SFX.on = !SFX.on;
+    try { localStorage.setItem("sfx", SFX.on ? "1" : "0"); } catch {}
+    renderSfx();
+    if (SFX.on) SFX.pop(660);
+  });
+
+  // ---- Ambient: is it actually foggy in San Francisco right now? (Open-Meteo, no key) ----
+  (async () => {
+    try {
+      const r = await fetch(
+        "https://api.open-meteo.com/v1/forecast?latitude=37.7749&longitude=-122.4194&current=weather_code"
+      );
+      const code = (await r.json())?.current?.weather_code;
+      if (code === 45 || code === 48) {
+        document.body.classList.add("is-foggy");
+        const line = document.getElementById("chai-line");
+        if (line && !line.textContent) line.textContent = " · foggy in San Francisco right now 🌫️";
+      }
+    } catch { /* offline or blocked; no fog, no problem */ }
+  })();
+  }
+  document.addEventListener("astro:page-load", initFooter);
 </script>
 
 <style>
@@ -119,6 +164,12 @@ const year = 2026;
     padding-block: var(--space-l);
   }
   .note { color: var(--ink-soft); font-size: 0.9rem; max-width: 28rem; margin-right: auto; }
+  .sfx-toggle {
+    background: none; border: 1px solid var(--line); border-radius: var(--radius-pill);
+    width: 2rem; height: 2rem; padding: 0; cursor: pointer; font-size: 0.85rem; line-height: 1;
+    color: var(--ink-soft); transition: border-color var(--t-fast), transform var(--t-fast);
+  }
+  .sfx-toggle:hover { border-color: var(--accent); transform: translateY(-1px); }
   .socials { display: flex; gap: var(--space-m); list-style: none; padding: 0; }
   .socials a { color: var(--ink-soft); font-size: 0.92rem; }
   .socials a:hover { color: var(--accent-ink); }

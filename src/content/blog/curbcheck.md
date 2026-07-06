@@ -150,7 +150,13 @@ So the honest state of v6: bigger reads simple poles better, but it has a **gene
 
 ## Try it
 
-I wrapped the tuned model in a little demo. Upload a photo of an SF sign pole, pick a day and time, and it shows you both what each sign says and whether you can park.
+I wrapped the tuned model in a little demo. Upload a photo of an SF sign pole, pick a day and time, and it shows you both what each sign says and whether you can park. Try it right here:
+
+<div style="position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--paper-sunk);margin:1.75rem 0;">
+  <iframe src="https://build-small-hackathon-curbcheck.hf.space" title="curbcheck live demo" loading="lazy" style="width:100%;height:640px;border:0;display:block;"></iframe>
+</div>
+
+*Give it a few seconds to wake up, it runs on free ZeroGPU and naps when idle. If it's asleep, the [full Space](https://huggingface.co/spaces/build-small-hackathon/curbcheck) is here.*
 
 - Demo: [the curbcheck Space](https://huggingface.co/spaces/build-small-hackathon/curbcheck)
 - Model (the v5 adapter): [shubhamgoel27/curbcheck-qwen25vl3b-v5-lora](https://huggingface.co/shubhamgoel27/curbcheck-qwen25vl3b-v5-lora)

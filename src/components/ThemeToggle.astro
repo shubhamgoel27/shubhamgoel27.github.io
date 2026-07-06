@@ -35,11 +35,17 @@
 </style>
 
 <script>
-  const btn = document.getElementById("theme-toggle");
-  btn?.addEventListener("click", () => {
-    const current = document.documentElement.getAttribute("data-theme");
-    const next = current === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    try { localStorage.setItem("theme", next); } catch (e) {}
-  });
+  function initThemeToggle() {
+    const btn = document.getElementById("theme-toggle");
+    if (!btn || (btn as any)._wired) return;
+    (btn as any)._wired = true;
+    btn.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme");
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try { localStorage.setItem("theme", next); } catch (e) {}
+    });
+  }
+  initThemeToggle();
+  document.addEventListener("astro:page-load", initThemeToggle);
 </script>

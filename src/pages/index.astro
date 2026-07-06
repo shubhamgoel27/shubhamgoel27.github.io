@@ -57,7 +57,7 @@ const posts = (await getCollection("blog"))
     </div>
   </section>
 
-  <section class="wrap block">
+  <section class="wrap block reveal">
     <div class="block-head">
       <h2>Things I'm building</h2>
       <a href="/building" class="more link-underline">All projects <HandArrow /></a>
@@ -68,7 +68,7 @@ const posts = (await getCollection("blog"))
   </section>
 
   {posts.length > 0 && (
-    <section class="wrap block narrow">
+    <section class="wrap block narrow reveal">
       <div class="block-head">
         <h2>Writing</h2>
         <a href="/blog" class="more link-underline">All posts <HandArrow /></a>
@@ -88,7 +88,7 @@ const posts = (await getCollection("blog"))
     </section>
   )}
 
-  <section class="wrap block narrow">
+  <section class="wrap block narrow reveal">
     <h2>Say hi</h2>
     <p class="muted connect-lede">Always happy to talk multimodal models, recsys, football, or whatever you're building.</p>
     <ul class="connect">
@@ -229,6 +229,7 @@ const posts = (await getCollection("blog"))
 </style>
 
 <script>
+  function initHome() {
   // rotate the hero status line through a few current one-liners (footer energy, up top)
   (() => {
     const lines = [
@@ -289,4 +290,6 @@ const posts = (await getCollection("blog"))
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 1700);
   }
+  }
+  document.addEventListener("astro:page-load", initHome);
 </script>

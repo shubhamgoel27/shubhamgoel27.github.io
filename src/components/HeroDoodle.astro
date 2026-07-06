@@ -54,8 +54,8 @@
         <path class="stroke thin steam" d="M300 102 C297 98 303 94 300 90"/>
       </g>
     </g>
-    <circle class="dot" cx="141" cy="150" r="3.3"/>
-    <circle class="dot" cx="199" cy="150" r="3.3"/>
+    <circle class="dot pupil" id="pupil-l" cx="141" cy="150" r="3.3"/>
+    <circle class="dot pupil" id="pupil-r" cx="199" cy="150" r="3.3"/>
     <!-- hover easter egg: a little Arsenal shout -->
     <g class="coyg" aria-hidden="true">
       <circle class="coyg-b" cx="240" cy="60" r="3"/>
@@ -81,6 +81,7 @@
   .wash   { fill: var(--accent-wash); stroke: none; }
   .hair   { fill: var(--paper); stroke: var(--accent); stroke-width: 3.3; stroke-linejoin: round; }
   .dot    { fill: var(--accent); stroke: none; }
+  .pupil  { transform-box: fill-box; transform-origin: center; transition: transform 0.12s ease-out; }
   .paper-fill  { fill: var(--paper); stroke: var(--accent); stroke-width: 2.3; stroke-linejoin: round; }
   .fill-accent { fill: var(--accent); stroke: none; }
   .steam       { animation: steam 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: bottom; }
@@ -106,3 +107,43 @@
     .doodle, .ball, .sparkle { animation: none; }
   }
 </style>
+
+<script>
+  // The doodle's pupils follow the cursor, and he blinks now and then.
+  function initDoodleEyes() {
+    const svg = document.querySelector(".doodle") as SVGElement | null;
+    const pl = document.getElementById("pupil-l");
+    const pr = document.getElementById("pupil-r");
+    if (!svg || !pl || !pr || svg.dataset.eyes) return;
+    svg.dataset.eyes = "1";
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let ox = 0, oy = 0, blink = 1;
+    const apply = () => {
+      const t = `translate(${ox}px, ${oy}px) scaleY(${blink})`;
+      pl.style.transform = t;
+      pr.style.transform = t;
+    };
+    window.addEventListener("mousemove", (e) => {
+      if (!pl.isConnected) return;
+      const r = svg.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height * 0.42;
+      const dx = e.clientX - cx, dy = e.clientY - cy;
+      const d = Math.hypot(dx, dy) || 1;
+      const max = 3.4;
+      ox = (dx / d) * max;
+      oy = (dy / d) * max;
+      apply();
+    }, { passive: true });
+    if (!reduce) {
+      const blinkOnce = () => {
+        blink = 0.12; apply();
+        setTimeout(() => { blink = 1; apply(); }, 130);
+        setTimeout(blinkOnce, 2800 + Math.random() * 3800);
+      };
+      setTimeout(blinkOnce, 2600);
+    }
+  }
+  initDoodleEyes();
+  document.addEventListener("astro:page-load", initDoodleEyes);
+</script>

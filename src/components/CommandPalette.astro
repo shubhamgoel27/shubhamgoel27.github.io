@@ -1,0 +1,177 @@
+---
+// Command palette. Press Cmd/Ctrl-K (or /) to jump anywhere or run a quick action.
+---
+<div class="cmdk" id="cmdk" hidden>
+  <div class="cmdk-backdrop" data-cmdk-close></div>
+  <div class="cmdk-panel" role="dialog" aria-modal="true" aria-label="Command menu">
+    <input
+      class="cmdk-input"
+      id="cmdk-input"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="Jump to a page, or try 'theme', 'sound', 'coyg'…"
+      aria-label="Search commands"
+    />
+    <ul class="cmdk-list" id="cmdk-list" role="listbox"></ul>
+    <div class="cmdk-foot"><kbd>↑</kbd><kbd>↓</kbd> navigate · <kbd>↵</kbd> open · <kbd>esc</kbd> close</div>
+  </div>
+</div>
+
+<style>
+  .cmdk { position: fixed; inset: 0; z-index: 300; display: grid; place-items: start center; padding-top: 14vh; }
+  .cmdk[hidden] { display: none; }
+  .cmdk-backdrop { position: absolute; inset: 0; background: rgb(var(--shadow-color) / 0.28); backdrop-filter: blur(3px); }
+  .cmdk-panel {
+    position: relative;
+    width: min(34rem, 92vw);
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    animation: cmdk-in 0.16s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  @keyframes cmdk-in { from { opacity: 0; transform: translateY(-8px) scale(0.98); } to { opacity: 1; transform: none; } }
+  .cmdk-input {
+    width: 100%; box-sizing: border-box; border: 0; outline: 0;
+    background: transparent; color: var(--ink);
+    font-family: var(--font-sans); font-size: 1.05rem;
+    padding: 1rem 1.1rem; border-bottom: 1px solid var(--line);
+  }
+  .cmdk-input::placeholder { color: var(--ink-faint); }
+  .cmdk-list { list-style: none; margin: 0; padding: 0.4rem; max-height: 52vh; overflow-y: auto; }
+  /* items are built via innerHTML, so they need global (unscoped) rules */
+  .cmdk-list :global(.cmdk-item) {
+    display: flex; align-items: baseline; gap: 0.6rem;
+    padding: 0.55rem 0.7rem; border-radius: var(--radius-s); cursor: pointer;
+    color: var(--ink);
+  }
+  .cmdk-list :global(.cmdk-item .lbl) { font-weight: 500; }
+  .cmdk-list :global(.cmdk-item .hint) { margin-left: auto; color: var(--ink-faint); font-size: 0.8rem; font-family: var(--font-mono); }
+  .cmdk-list :global(.cmdk-item[aria-selected="true"]) { background: var(--accent-wash); color: var(--accent-ink); }
+  .cmdk-list :global(.cmdk-item[aria-selected="true"] .hint) { color: var(--accent-ink); opacity: 0.75; }
+  .cmdk-list :global(.cmdk-empty) { padding: 1rem 0.7rem; color: var(--ink-faint); font-size: 0.9rem; }
+  .cmdk-foot {
+    padding: 0.5rem 0.9rem; border-top: 1px solid var(--line);
+    color: var(--ink-faint); font-size: 0.72rem; font-family: var(--font-mono);
+  }
+  .cmdk-foot kbd {
+    font-family: inherit; background: var(--paper-sunk); border: 1px solid var(--line);
+    border-radius: 4px; padding: 0 0.3em; margin-right: 0.15em;
+  }
+</style>
+
+<script>
+  type Item = { label: string; hint?: string; href?: string; ext?: boolean; act?: string };
+
+  function initPalette() {
+    const root = document.getElementById("cmdk");
+    const input = document.getElementById("cmdk-input") as HTMLInputElement | null;
+    const list = document.getElementById("cmdk-list");
+    if (!root || !input || !list || (root as any)._wired) return;
+    (root as any)._wired = true;
+
+    const ITEMS: Item[] = [
+      { label: "Home", hint: "/", href: "/" },
+      { label: "Things I'm building", hint: "projects", href: "/building" },
+      { label: "Writing", hint: "blog", href: "/blog" },
+      { label: "About", hint: "story", href: "/about" },
+      { label: "Now", hint: "current", href: "/now" },
+      { label: "Futbol", hint: "arsenal", href: "/futbol" },
+      { label: "Evals", hint: "/evals", href: "/evals" },
+      { label: "Résumé", hint: "pdf", href: "/resume.pdf" },
+      { label: "GitHub", hint: "@shubhamgoel27", href: "https://github.com/shubhamgoel27", ext: true },
+      { label: "LinkedIn", hint: "in/shubhamgoel27", href: "https://www.linkedin.com/in/shubhamgoel27", ext: true },
+      { label: "X / Twitter", hint: "@shubhamg_", href: "https://x.com/shubhamg_", ext: true },
+      { label: "Email me", hint: "say hi", href: "mailto:shubhamgoel27@gmail.com" },
+      { label: "Toggle theme", hint: "light / dark", act: "theme" },
+      { label: "Toggle sound", hint: "keepy-uppy sfx", act: "sound" },
+      { label: "Confetti", hint: "come on you gunners", act: "party" },
+    ];
+
+    let filtered = ITEMS.slice();
+    let sel = 0;
+
+    const render = () => {
+      const q = input.value.trim().toLowerCase();
+      filtered = q
+        ? ITEMS.filter((i) => (i.label + " " + (i.hint || "")).toLowerCase().includes(q))
+        : ITEMS.slice();
+      sel = 0;
+      if (!filtered.length) {
+        list.innerHTML = `<li class="cmdk-empty">Nothing here. Try 'building' or 'coyg'.</li>`;
+        return;
+      }
+      list.innerHTML = filtered
+        .map(
+          (i, n) =>
+            `<li class="cmdk-item" role="option" data-n="${n}" aria-selected="${n === sel}"><span class="lbl">${i.label}</span><span class="hint">${i.hint || (i.ext ? "↗" : "")}</span></li>`
+        )
+        .join("");
+    };
+
+    const paint = () => {
+      [...list.querySelectorAll(".cmdk-item")].forEach((el, n) =>
+        el.setAttribute("aria-selected", String(n === sel))
+      );
+      list.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest" });
+    };
+
+    const run = (i?: Item) => {
+      if (!i) return;
+      close();
+      if (i.href) {
+        if (i.ext) window.open(i.href, "_blank", "noopener");
+        else window.location.href = i.href;
+      } else if (i.act === "theme") {
+        const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        try { localStorage.setItem("theme", next); } catch {}
+      } else if (i.act === "sound") {
+        (document.getElementById("sfx-toggle") as HTMLButtonElement | null)?.click();
+      } else if (i.act === "party") {
+        (window as any).__party?.();
+      }
+    };
+
+    const open = () => {
+      root.hidden = false;
+      input.value = "";
+      render();
+      requestAnimationFrame(() => input.focus());
+    };
+    function close() { root.hidden = true; }
+    // expose the current page's toggle so the one global hotkey never holds a stale closure
+    (window as any).__cmdkToggle = () => (root.hidden ? open() : close());
+
+    input.addEventListener("input", render);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") { e.preventDefault(); sel = Math.min(sel + 1, filtered.length - 1); paint(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); sel = Math.max(sel - 1, 0); paint(); }
+      else if (e.key === "Enter") { e.preventDefault(); run(filtered[sel]); }
+      else if (e.key === "Escape") { close(); }
+    });
+    list.addEventListener("click", (e) => {
+      const li = (e.target as HTMLElement).closest(".cmdk-item") as HTMLElement | null;
+      if (li) run(filtered[Number(li.dataset.n)]);
+    });
+    root.querySelector("[data-cmdk-close]")?.addEventListener("click", close);
+
+    if (!(window as any)._cmdkKey) {
+      (window as any)._cmdkKey = true;
+      addEventListener("keydown", (e) => {
+        const inField = /^(INPUT|TEXTAREA)$/.test((document.activeElement as HTMLElement)?.tagName || "");
+        const openKey =
+          (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) ||
+          (e.key === "/" && !inField);
+        if (openKey) {
+          e.preventDefault();
+          (window as any).__cmdkToggle?.();
+        }
+      });
+    }
+  }
+  initPalette();
+  document.addEventListener("astro:page-load", initPalette);
+</script>

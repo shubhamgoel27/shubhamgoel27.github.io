@@ -62,9 +62,27 @@ body::before {
   mix-blend-mode: multiply;
 }
 [data-theme="dark"] body::before { opacity: 0.10; mix-blend-mode: overlay; }
-@media (prefers-reduced-motion: no-preference) {
-  /* grain is static; nothing to animate here, kept for clarity */
+
+/* Ambient: a faint fog drift across the top, but only when it's really foggy in SF. */
+body.is-foggy::after {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 42vh;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, color-mix(in srgb, #c9d2da 55%, transparent), transparent);
+  opacity: 0.55;
+  animation: fog-drift 24s ease-in-out infinite alternate;
 }
+[data-theme="dark"] body.is-foggy::after { background: linear-gradient(to bottom, rgb(150 162 176 / 0.14), transparent); }
+@keyframes fog-drift { from { transform: translateX(-3%); opacity: 0.4; } to { transform: translateX(3%); opacity: 0.62; } }
+@media (prefers-reduced-motion: reduce) { body.is-foggy::after { animation: none; } }
+
+/* Reveal-on-scroll: sections rise and fade in as they enter the viewport. */
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1 !important; transform: none !important; } }
 
 h1, h2, h3, h4 {
   font-family: var(--font-serif);

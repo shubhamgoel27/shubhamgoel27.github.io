@@ -73,6 +73,8 @@
   function kick() {
     streak++;
     score.textContent = `Streak: ${streak}${best ? ` · Best: ${best}` : ""}`;
+    (window as any).__sfx?.pop(440 + Math.min(streak, 24) * 28); // pitch climbs with the streak
+
     if (reduced) {
       if (streak > best) { best = streak; localStorage.setItem(KEY, String(best)); }
       return;
