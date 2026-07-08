@@ -36,6 +36,7 @@ export const projects: Project[] = [
     result: "7B student reads real SF sign poles at 0.83 F1 (base: 0.22); verdicts right ~0.9 via the resolver",
     tags: ["VLM", "QLoRA", "Qwen2.5-VL", "evals", "Modal"],
     links: [
+      { label: "Write-up", href: "/blog/curbcheck" },
       { label: "GitHub", href: "https://github.com/shubhamgoel27/curbcheck" },
       { label: "Demo", href: "https://huggingface.co/spaces/build-small-hackathon/curbcheck" },
     ],

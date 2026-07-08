@@ -4,6 +4,8 @@ import type { Project } from "../data/projects";
 interface Props { project: Project; }
 const { project } = Astro.props;
 const primary = project.links[0];
+const isExternal = (href: string) => /^https?:\/\//.test(href);
+const linkAttrs = (href: string) => (isExternal(href) ? { target: "_blank", rel: "noopener" } : {});
 ---
 <article class="card">
   {project.image && (
@@ -14,7 +16,7 @@ const primary = project.links[0];
   <div class="head">
     <h3 class="name">
       {primary
-        ? <a href={primary.href} class="link-underline" target="_blank" rel="noopener">{project.name}</a>
+        ? <a href={primary.href} class="link-underline" {...linkAttrs(primary.href)}>{project.name}</a>
         : project.name}
     </h3>
     {project.links.length === 0 && project.status !== "research" && <span class="soon">repo coming soon</span>}
@@ -36,7 +38,7 @@ const primary = project.links[0];
     {project.links.length > 0 && (
       <ul class="links">
         {project.links.map((l) => (
-          <li><a href={l.href} class="link-underline" target="_blank" rel="noopener">{l.label} ↗</a></li>
+          <li><a href={l.href} class="link-underline" {...linkAttrs(l.href)}>{l.label}{isExternal(l.href) ? " ↗" : ""}</a></li>
         ))}
       </ul>
     )}
