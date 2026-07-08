@@ -32,10 +32,13 @@ export const projects: Project[] = [
   // ---------- Shipped ----------
   {
     name: "curbcheck",
-    tagline: "Can a small VLM tell you if you can park in San Francisco? A parking-sign benchmark, plus a QLoRA fine-tune that takes a 3B model from worse-than-guessing to reading real poles.",
-    result: "~$4 of training: read F1 0.35 → 0.96, reasoning 0.15 → 0.76",
+    tagline: "Can a small VLM tell you if you can park in San Francisco? A parking-sign benchmark plus QLoRA-tuned 3B and 7B students that read the pole; a deterministic resolver does the logic.",
+    result: "7B student reads real SF sign poles at 0.83 F1 (base: 0.22); verdicts right ~0.9 via the resolver",
     tags: ["VLM", "QLoRA", "Qwen2.5-VL", "evals", "Modal"],
-    links: [{ label: "GitHub", href: "https://github.com/shubhamgoel27/curbcheck" }],
+    links: [
+      { label: "GitHub", href: "https://github.com/shubhamgoel27/curbcheck" },
+      { label: "Demo", href: "https://huggingface.co/spaces/build-small-hackathon/curbcheck" },
+    ],
     status: "shipped",
     featured: true,
     image: curbcheckImg,

@@ -2,6 +2,7 @@
 title: "I got two parking tickets, so I trained a VLM"
 description: "A week in San Francisco, two parking tickets, and a small vision-language model I taught to read stacked parking signs and tell you if you can legally park."
 pubDate: 2026-06-16
+updatedDate: 2026-07-08
 tags: ["machine learning", "multimodal", "vision-language models", "side projects"]
 coverImage: ./curbcheck-cover.png
 ---
@@ -147,6 +148,35 @@ But the more interesting result came from **splitting the score by how many sign
 That "0.00" on dense poles looked catastrophic. It wasn't. Digging into the raw outputs, the 7B was reading those poles and then *never stopping*. It emits the JSON and just keeps generating instead of producing an end-of-sequence token. So every dense-pole read ran to the length limit: truncated into invalid JSON when I capped tokens low, and painfully slow (tens of seconds each) when I capped them high. The 3B never did this. The 7B regressed on knowing when to shut up.
 
 So the honest state of v6: bigger reads simple poles better, but it has a **generation-termination bug on cluttered poles** that a smaller, dumber model didn't have. The fix is boring (constrain the stop token, or a short fine-tune that teaches clean endings). The lesson is not: a single averaged metric hid both a scoring mistake of mine *and* a real regression in the model. Bucket your eval before you believe it. The pole that beat me is still where the interesting failures live.
+
+## Update: the bug was boring, the audit was not
+
+The termination bug turned out to be exactly as boring as predicted. Instead of retraining the model to say "I'm done," I made the eval harness stop listening: a small stopping rule that ends generation the instant the JSON closes. Dense-pole reads went from fifty seconds to a few, and for the first time the full 500-photo real eval ran end to end with zero skipped samples. The "0.00 on dense poles" vanished the way artifacts do: the 7B actually reads synthetic 3-and-4-sign stacks essentially perfectly (0.99 overall).
+
+With the full run finally measurable, the 7B's real number came in at **0.735 F1 on sign-bearing poles**. Better than the 3B's 0.62. But the biggest remaining error pool was strange: 45 single-sign photos, the easy case, scored exactly zero. Simple poles the model supposedly could not read at all.
+
+So I audited every one of them by hand (well, by agent: three vision models re-read each photo and adjudicated). The blame table was not what the metric claimed:
+
+| who was actually wrong | count |
+|---|:---:|
+| the model | 14 |
+| the teacher's gold labels | 12 |
+| nobody (two valid names for the same sign) | 7 |
+| the sign itself (graffiti, crop, too far away) | 12 |
+
+Only a third of my "model failures" were the model. The Opus teacher had encoded "12 NOON TO 2PM" as midnight-to-2am, labeled a Monday sign as Wednesday, and left times blank on signs where the times are perfectly legible. Set-wide, one in eight gold labels was malformed. I had been grading the student with the teacher's mistakes.
+
+The audit also flushed out something worse: a genuine logic bug in the deterministic resolver, the half of the system I had been bragging "is never wrong." A pole whose only sign reads "TOW-AWAY, NO PARKING ANY TIME" fell through every branch of the verdict logic and came back as *you can park here*. At a tow-away zone. The eval had even baked that in as the correct answer, so no metric could ever catch it. It is fixed now, with regression tests, and it permanently upgraded my respect for the phrase "deterministic just means deterministically wrong."
+
+After fixing the labels, the naming coin-flips, and the resolver, the honest current scorecard:
+
+| metric (real photos) | v5 (3B) | v6 (7B) |
+|---|:---:|:---:|
+| Read F1, sign-bearing poles | 0.62 | **0.83** |
+| Read F1, single-sign poles | | **0.88** |
+| Pipeline reasoning | 0.90 | 0.89 |
+
+Roughly 40% of what I had been calling a model gap was measurement. The general lesson stacks neatly on the earlier one: first I learned to check the ruler, then I learned the ruler's *labels* need checking too. When a metric plateaus, do not buy more data or more GPU. Print the errors and read them with your own eyes. It is the cheapest experiment in machine learning and consistently the most embarrassing.
 
 ## Try it
 
