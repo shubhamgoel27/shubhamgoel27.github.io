@@ -1,0 +1,82 @@
+---
+import Base from "../layouts/Base.astro";
+import Squiggle from "../components/Squiggle.astro";
+
+const publications = [
+  {
+    title: "The Text on the Creative: An Under-Exploited Ranking Modality for Short-Form Video Ads",
+    venue: "RecSys 2026, Industry Track · first author",
+    context:
+      "Work from my time on Instagram Ads Ranking at Meta, on using on-screen text as a ranking signal for short-form video ads.",
+  },
+];
+
+const talks = [
+  {
+    title: "Labelling Sparse Data at Scale using Vector Search",
+    venue: "Invited talk · Snap ML group · August 2023",
+    context: "The active-learning and vector search system I built at ZEFR.",
+  },
+  {
+    title: "Predicting Cyclone Damage from Geospatial Imagery",
+    venue: "Invited talk · GeoPython 2020",
+    context: "Siamese change-detection research from my time at UIUC.",
+  },
+];
+---
+<Base title="Publications & Talks" description="Papers Shubham Goel has published and talks he has given, spanning ads ranking, vector search, and geospatial ML.">
+  <section class="wrap narrow head">
+    <p class="eyebrow">Publications</p>
+    <h1>Publications &amp; talks<Squiggle width="min(13rem, 55%)" /></h1>
+    <p class="lede">Things I've published or spoken about.</p>
+
+    <h2>Publications</h2>
+    <ul class="pub-list stack">
+      {publications.map((item) => (
+        <li>
+          <p class="pub-title">{item.title}</p>
+          <p class="pub-venue">{item.venue}</p>
+          <p class="pub-context">{item.context}</p>
+        </li>
+      ))}
+    </ul>
+
+    <h2>Talks</h2>
+    <ul class="pub-list stack">
+      {talks.map((item) => (
+        <li>
+          <p class="pub-title">{item.title}</p>
+          <p class="pub-venue">{item.venue}</p>
+          <p class="pub-context">{item.context}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .head { padding-top: var(--space-2xl); padding-bottom: var(--space-2xl); }
+  .lede { margin-top: var(--space-xs); color: var(--ink-soft); font-size: var(--step-0); }
+  h2 { margin-top: var(--space-xl); margin-bottom: var(--space-m); }
+  .pub-list { list-style: none; padding: 0; margin: 0; }
+  .pub-list li {
+    padding-left: var(--space-m);
+    position: relative;
+    line-height: 1.6;
+  }
+  .pub-list li::before {
+    content: "";
+    position: absolute; left: 0; top: 0.65em;
+    width: 8px; height: 8px; border-radius: 2px;
+    background: var(--accent);
+    transform: rotate(45deg);
+  }
+  .pub-title { color: var(--ink); font-weight: 600; }
+  .pub-venue {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+    margin-top: 0.15rem;
+  }
+  .pub-context { color: var(--ink-soft); font-size: 0.95rem; margin-top: 0.3rem; }
+</style>

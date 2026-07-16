@@ -130,7 +130,7 @@ export const projects: Project[] = [
   {
     name: "The Text on the Creative",
     tagline: "First-author paper on an under-exploited ranking modality for short-form video ads: the text rendered on the creative itself.",
-    result: "RecSys '26 Industry Track, under review",
+    result: "Accepted at RecSys '26, Industry Track",
     tags: ["multimodal", "ranking", "OCR"],
     links: [],
     status: "research",

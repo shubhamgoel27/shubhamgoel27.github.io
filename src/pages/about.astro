@@ -11,7 +11,7 @@ const timeline = [
     points: [
       "Built multimodal LLM pipelines generating ad-side ranking features, and post-trained open models (SFT, teacher-student distillation) against custom per-field eval harnesses.",
       "Shipped a domain-tuned video OCR pipeline reaching near-parity with a frontier VLM at a fraction of the cost.",
-      "First author on a RecSys '26 Industry Track submission on text-on-creative as a ranking modality.",
+      `First author on a RecSys '26 Industry Track paper on text-on-creative as a ranking modality (more on my <a href="/publications" class="body-link">publications page</a>).`,
     ],
   },
   {
@@ -91,7 +91,7 @@ const timeline = [
             </div>
             <p class="tl-org">{item.org}</p>
             <ul class="tl-points">
-              {item.points.map((p) => <li>{p}</li>)}
+              {item.points.map((p) => <li set:html={p} />)}
             </ul>
           </div>
         </li>
