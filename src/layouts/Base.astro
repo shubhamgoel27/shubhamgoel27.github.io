@@ -24,6 +24,32 @@ const {
 const fullTitle = title === "Shubham Goel" ? title : `${title} · Shubham Goel`;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImageUrl = new URL(ogImage, Astro.site).href;
+
+// One canonical Person entity, homepage only, so search engines link the profile.
+const isHome = Astro.url.pathname === "/" || Astro.url.pathname === "";
+const personLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Shubham Goel",
+  url: new URL("/", Astro.site).href,
+  image: ogImageUrl,
+  jobTitle: "Machine Learning Engineer",
+  description:
+    "Machine learning engineer building systems where vision, language, and ranking meet. Previously a Senior Machine Learning Engineer at Meta.",
+  knowsAbout: [
+    "Machine Learning",
+    "Computer Vision",
+    "Vision-Language Models",
+    "Multimodal Learning",
+    "Recommender Systems",
+    "Deep Learning",
+  ],
+  sameAs: [
+    "https://github.com/shubhamgoel27",
+    "https://www.linkedin.com/in/shubhamgoel27",
+    "https://x.com/shubhamg_",
+  ],
+};
 ---
 <!doctype html>
 <html lang="en">
@@ -33,6 +59,7 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {isHome && <script type="application/ld+json" set:html={JSON.stringify(personLd)} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="application/rss+xml" title="Shubham Goel" href="/rss.xml" />
     <link rel="preload" as="font" type="font/woff2" href={frauncesWoff2} crossorigin />
