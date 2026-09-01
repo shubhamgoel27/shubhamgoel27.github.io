@@ -18,6 +18,10 @@
   </div>
 </div>
 
+<button class="cmdk-hint" id="cmdk-hint" type="button" hidden aria-label="Press the slash key to open quick navigation">
+  psst, press <kbd>/</kbd> to jump around
+</button>
+
 <style>
   .cmdk { position: fixed; inset: 0; z-index: 300; display: grid; place-items: start center; padding-top: 14vh; }
   .cmdk[hidden] { display: none; }
@@ -59,6 +63,46 @@
   .cmdk-foot kbd {
     font-family: inherit; background: var(--paper-sunk); border: 1px solid var(--line);
     border-radius: 4px; padding: 0 0.3em; margin-right: 0.15em;
+  }
+
+  /* first-visit whisper: shown once, desktop only, fades on its own */
+  .cmdk-hint {
+    position: fixed;
+    right: 1.4rem;
+    bottom: 1.4rem;
+    z-index: 195;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.9rem;
+    background: var(--ink);
+    color: var(--paper);
+    border: 0;
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-lg);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(0.6rem);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 1, 0.4, 1);
+    pointer-events: none;
+  }
+  .cmdk-hint.show { opacity: 1; transform: none; pointer-events: auto; }
+  .cmdk-hint[hidden] { display: none; }
+  .cmdk-hint kbd {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    line-height: 1;
+    padding: 0.1rem 0.36rem;
+    color: var(--paper);
+    background: color-mix(in srgb, var(--paper) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--paper) 38%, transparent);
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cmdk-hint { transition: opacity 0.3s ease; transform: none; }
   }
 </style>
 
@@ -172,6 +216,32 @@
       });
     }
   }
-  initPalette();
-  document.addEventListener("astro:page-load", initPalette);
+
+  // First-visit whisper: surface the / palette once, gently, to keyboard users.
+  function maybeShowHint() {
+    if ((window as any)._cmdkHintShown) return;
+    try { if (localStorage.getItem("cmdk_hint_v1")) return; } catch { return; }
+    // only where a / shortcut is actually usable (desktop with a keyboard)
+    if (!matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    const hint = document.getElementById("cmdk-hint");
+    if (!hint) return;
+    (window as any)._cmdkHintShown = true;
+
+    const dismiss = () => { hint.classList.remove("show"); setTimeout(() => { hint.hidden = true; }, 450); };
+    setTimeout(() => {
+      hint.hidden = false;
+      requestAnimationFrame(() => hint.classList.add("show"));
+      try { localStorage.setItem("cmdk_hint_v1", "1"); } catch {} // once, ever
+    }, 1600);
+    const auto = setTimeout(dismiss, 1600 + 6500);
+    hint.addEventListener("click", () => {
+      clearTimeout(auto);
+      dismiss();
+      (window as any).__cmdkToggle?.();
+    }, { once: true });
+  }
+
+  function bootPalette() { initPalette(); maybeShowHint(); }
+  bootPalette();
+  document.addEventListener("astro:page-load", bootPalette);
 </script>
