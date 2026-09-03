@@ -63,6 +63,12 @@
       <ellipse class="coyg-b" cx="288" cy="30" rx="47" ry="18"/>
       <text class="coyg-t" x="288" y="37" text-anchor="middle">COYG!</text>
     </g>
+    <!-- shown when he nods off after a while -->
+    <g class="zzz" aria-hidden="true">
+      <text class="zzz-t z1" x="246" y="98">z</text>
+      <text class="zzz-t z2" x="262" y="82">z</text>
+      <text class="zzz-t z3" x="282" y="64">z</text>
+    </g>
   </svg>
 </div>
 
@@ -98,6 +104,15 @@
   @keyframes ball-spin { to { transform: rotate(360deg); } }
   .sparkle { animation: twinkle 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 
+  /* idle sleep: eyes close (via JS) and little z's drift up. z's hidden until sleeping */
+  .zzz-t { fill: var(--accent); font-family: var(--font-serif, serif); font-style: italic; font-weight: 700; opacity: 0; }
+  .z1 { font-size: 15px; } .z2 { font-size: 20px; } .z3 { font-size: 26px; }
+  .doodle.sleeping { animation-play-state: paused; }
+  .doodle.sleeping .zzz-t { transform-box: fill-box; animation: zfloat 2.6s ease-in-out infinite; }
+  .doodle.sleeping .z2 { animation-delay: 0.5s; }
+  .doodle.sleeping .z3 { animation-delay: 1s; }
+  @keyframes zfloat { 0% { opacity: 0; transform: translateY(5px) rotate(-4deg); } 35% { opacity: 1; } 100% { opacity: 0; transform: translateY(-12px) rotate(6deg); } }
+
   @keyframes doodle-in { from { opacity: 0; transform: translateY(14px) rotate(-1.5deg); } to { opacity: 1; transform: none; } }
   @keyframes doodle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
   @keyframes ball-bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-6px) rotate(8deg); } }
@@ -105,6 +120,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .doodle, .ball, .sparkle { animation: none; }
+    .doodle.sleeping .zzz-t { animation: none; opacity: 0.85; }
   }
 </style>
 
@@ -117,12 +133,24 @@
     if (!svg || !pl || !pr || svg.dataset.eyes) return;
     svg.dataset.eyes = "1";
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let ox = 0, oy = 0, blink = 1;
+    let ox = 0, oy = 0, blink = 1, sleeping = false, idleTimer: ReturnType<typeof setTimeout>;
     const apply = () => {
-      const t = `translate(${ox}px, ${oy}px) scaleY(${blink})`;
+      const t = `translate(${ox}px, ${oy}px) scaleY(${sleeping ? 0.06 : blink})`;
       pl.style.transform = t;
       pr.style.transform = t;
     };
+
+    // nod off after a spell of no activity; wake on any interaction
+    const sleep = () => { sleeping = true; svg.classList.add("sleeping"); apply(); };
+    const wake = () => { if (!sleeping) return; sleeping = false; svg.classList.remove("sleeping"); apply(); };
+    const resetIdle = () => { wake(); clearTimeout(idleTimer); idleTimer = setTimeout(sleep, 30000); };
+    (window as any).__doodleReset = resetIdle;
+    if (!(window as any).__doodleActivity) {
+      (window as any).__doodleActivity = true;
+      ["scroll", "keydown", "touchstart", "pointerdown"].forEach((ev) =>
+        window.addEventListener(ev, () => (window as any).__doodleReset?.(), { passive: true }));
+    }
+
     window.addEventListener("mousemove", (e) => {
       if (!pl.isConnected) return;
       const r = svg.getBoundingClientRect();
@@ -133,12 +161,14 @@
       const max = 3.4;
       ox = (dx / d) * max;
       oy = (dy / d) * max;
+      resetIdle();
       apply();
     }, { passive: true });
+    resetIdle();
+
     if (!reduce) {
       const blinkOnce = () => {
-        blink = 0.12; apply();
-        setTimeout(() => { blink = 1; apply(); }, 130);
+        if (!sleeping) { blink = 0.12; apply(); setTimeout(() => { blink = 1; apply(); }, 130); }
         setTimeout(blinkOnce, 2800 + Math.random() * 3800);
       };
       setTimeout(blinkOnce, 2600);

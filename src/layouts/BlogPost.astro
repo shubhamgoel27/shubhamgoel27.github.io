@@ -1,6 +1,7 @@
 ---
 import Base from "./Base.astro";
 
+interface PostRef { slug: string; title: string; }
 interface Props {
   title: string;
   description: string;
@@ -9,11 +10,14 @@ interface Props {
   tags?: string[];
   minutesRead?: number;
   ogImage?: string;
+  prev?: PostRef;
+  next?: PostRef;
 }
-const { title, description, pubDate, updatedDate, tags = [], minutesRead, ogImage } = Astro.props;
+const { title, description, pubDate, updatedDate, tags = [], minutesRead, ogImage, prev, next } = Astro.props;
 const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 ---
 <Base title={title} description={description} ogType="article" ogImage={ogImage}>
+  <div class="read-progress" aria-hidden="true"><span id="read-bar"></span></div>
   <article class="wrap narrow post">
     <header class="post-head">
       <a href="/blog" class="back link-underline">← Writing</a>
@@ -30,6 +34,28 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
     <div class="prose">
       <slot />
     </div>
+
+    <div class="post-end" id="post-end">
+      <p class="signoff-thanks">thanks for reading</p>
+      <p class="signoff-name">— Shubham</p>
+    </div>
+
+    {(prev || next) && (
+      <nav class="post-nav" aria-label="More posts">
+        {prev ? (
+          <a class="post-nav-link prev" href={`/blog/${prev.slug}`}>
+            <span class="dir">← Previous</span>
+            <span class="ttl">{prev.title}</span>
+          </a>
+        ) : <span />}
+        {next ? (
+          <a class="post-nav-link next" href={`/blog/${next.slug}`}>
+            <span class="dir">Next →</span>
+            <span class="ttl">{next.title}</span>
+          </a>
+        ) : <span />}
+      </nav>
+    )}
   </article>
 </Base>
 
@@ -40,6 +66,34 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
   .post-head h1 { font-size: var(--step-4); }
   .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5em; margin-top: var(--space-s); font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-faint); }
   .post-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; padding: 0; margin-top: var(--space-s); }
+
+  /* reading progress: a thin terracotta line pinned to the very top */
+  .read-progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 25; pointer-events: none; }
+  .read-progress span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.08s linear; }
+
+  /* finished-reading sign-off */
+  .post-end { margin-top: var(--space-xl); text-align: center; }
+  .signoff-thanks { font-family: var(--font-mono); font-size: 0.76rem; letter-spacing: 0.03em; color: var(--ink-faint); }
+  .signoff-name {
+    font-family: var(--font-serif); font-style: italic; font-weight: 500;
+    font-size: 1rem; color: var(--ink-soft);
+    margin-top: 0.1rem;
+  }
+
+  .post-nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-s); margin-top: var(--space-2xl); }
+  .post-nav-link {
+    display: flex; flex-direction: column; gap: 0.25rem;
+    padding: var(--space-s) var(--space-m);
+    border: 1px solid var(--line); border-radius: var(--radius-m);
+    background: var(--paper-raised); color: var(--ink);
+    transition: border-color var(--t-fast), transform var(--t-fast), box-shadow var(--t-norm);
+  }
+  .post-nav-link:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+  .post-nav-link.next { text-align: right; }
+  .post-nav-link .dir { font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent-ink); }
+  .post-nav-link .ttl { font-weight: 560; font-size: 0.95rem; }
+  @media (max-width: 34rem) { .post-nav { grid-template-columns: 1fr; } .post-nav-link.next { text-align: left; } }
+  @media (prefers-reduced-motion: reduce) { .read-progress span { transition: none; } }
 </style>
 
 <style is:global>
@@ -78,4 +132,112 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
   }
   .prose img { border-radius: var(--radius-m); border: 1px solid var(--line); margin-block: var(--space-m); }
   .prose hr { border: none; border-top: 1px solid var(--line); margin-block: var(--space-l); }
+
+  /* a short terracotta underline that draws itself when the heading scrolls in */
+  .prose h2 { position: relative; }
+  .prose h2::after {
+    content: ""; position: absolute; left: 0; bottom: -0.35rem; height: 2px; width: 2.4rem;
+    background: var(--accent); transform: scaleX(0); transform-origin: left;
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .prose h2.drawn::after { transform: scaleX(1); }
+
+  /* hover-to-reveal deep-link anchors on headings */
+  .prose h3 { position: relative; }
+  .prose .heading-anchor {
+    position: absolute; left: -1.1rem; top: 0.06em;
+    opacity: 0; text-decoration: none; color: var(--ink-faint); font-weight: 400;
+    transition: opacity 0.15s ease;
+  }
+  .prose h2:hover .heading-anchor, .prose h3:hover .heading-anchor { opacity: 1; }
+  .prose .heading-anchor:hover { color: var(--accent-ink); }
+  @media (max-width: 40rem) { .prose .heading-anchor { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .prose h2::after { transition: none; } }
 </style>
+
+<script>
+  function updateProgress() {
+    const bar = document.getElementById("read-bar");
+    if (!bar) return;
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0).toFixed(1) + "%";
+  }
+
+  function confettiOnce() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const colors = ["#C1452A", "#E07A5F", "#9C824A", "#D9C4A9", "#2B2521"];
+    const end = document.getElementById("post-end");
+    const r = end?.getBoundingClientRect();
+    const cx = r ? r.left + r.width / 2 : innerWidth / 2;
+    const cy = r ? r.top + r.height / 2 : innerHeight / 2;
+    for (let i = 0; i < 42; i++) {
+      const p = document.createElement("span");
+      p.style.cssText = `position:fixed;left:${cx}px;top:${cy}px;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:60;background:${colors[i % colors.length]}`;
+      document.body.appendChild(p);
+      const ang = Math.random() * Math.PI * 2;
+      const v = 80 + Math.random() * 180;
+      p.animate(
+        [
+          { transform: "translate(0,0) rotate(0)", opacity: 1 },
+          { transform: `translate(${Math.cos(ang) * v}px, ${Math.sin(ang) * v - 100 + 230}px) rotate(${Math.random() * 720}deg)`, opacity: 0 },
+        ],
+        { duration: 1000 + Math.random() * 700, easing: "cubic-bezier(0.2,0.6,0.3,1)" }
+      ).onfinish = () => p.remove();
+    }
+  }
+
+  function initPost() {
+    const article = document.querySelector(".post");
+    if (!article || (article as any)._postWired) return;
+    (article as any)._postWired = true;
+
+    // reading progress (one scroll listener, ever; reads the current bar)
+    if (!(window as any)._readProgWired) {
+      (window as any)._readProgWired = true;
+      window.addEventListener("scroll", updateProgress, { passive: true });
+      window.addEventListener("resize", updateProgress, { passive: true });
+    }
+    updateProgress();
+
+    // heading anchors: slugify, assign ids, add a hover-reveal # deep link
+    const slugify = (s: string) =>
+      s.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-");
+    const used = new Set<string>();
+    (Array.from(document.querySelectorAll(".prose h2, .prose h3")) as HTMLElement[]).forEach((h) => {
+      const base = h.id || slugify(h.textContent || "");
+      if (!base) return;
+      let id = base, n = 2;
+      while (used.has(id)) id = `${base}-${n++}`;
+      used.add(id);
+      h.id = id;
+      const a = document.createElement("a");
+      a.className = "heading-anchor";
+      a.href = `#${id}`;
+      a.setAttribute("aria-label", "Link to this section");
+      a.textContent = "#";
+      h.prepend(a);
+    });
+
+    // draw the underline as each h2 scrolls into view
+    const h2s = Array.from(document.querySelectorAll(".prose h2"));
+    if ("IntersectionObserver" in window && h2s.length) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("drawn"); io.unobserve(e.target); } });
+      }, { threshold: 0.6 });
+      h2s.forEach((h) => io.observe(h));
+    }
+
+    // reward for reaching the end: one soft confetti burst
+    const end = document.getElementById("post-end");
+    if (end && "IntersectionObserver" in window) {
+      const io2 = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) { io2.disconnect(); confettiOnce(); }
+      }, { threshold: 0.9 });
+      io2.observe(end);
+    }
+  }
+
+  initPost();
+  document.addEventListener("astro:page-load", initPost);
+</script>

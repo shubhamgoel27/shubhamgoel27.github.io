@@ -19,11 +19,13 @@ const posts = (await getCollection("blog"))
 ---
 <Base>
   <section class="hero wrap">
+    <div class="hero-sky" aria-hidden="true"></div>
     <div class="hero-inner">
       <div class="hero-text">
         <button class="avatar" id="avatar-egg" aria-label="Shubham's photo. Click for a surprise." title="click me">
           <Image src={profilePic} alt="Shubham Goel" width={352} height={352} loading="eager" />
         </button>
+        <p class="hero-kicker" id="tod-greeting"></p>
         <h1 class="greeting">Hey, I'm Shubham.<Squiggle /></h1>
         <div class="lede stack">
           <p>
@@ -105,7 +107,38 @@ const posts = (await getCollection("blog"))
 </Base>
 
 <style>
-  .hero { padding-top: var(--space-2xl); padding-bottom: var(--space-xl); }
+  .hero { position: relative; isolation: isolate; padding-top: var(--space-2xl); padding-bottom: var(--space-xl); }
+  /* time-of-day sky: a soft full-bleed glow behind the hero, tinted by the SF clock */
+  .hero-sky {
+    position: absolute;
+    top: calc(-1 * var(--space-2xl));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    height: 130%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(115% 78% at 72% 0%, var(--sky-glow, transparent), transparent 68%);
+    opacity: 0.9;
+    transition: opacity 0.6s ease;
+  }
+  .hero[data-sky="dawn"] .hero-sky  { --sky-glow: color-mix(in srgb, #F4A46A 42%, transparent); }
+  .hero[data-sky="day"]  .hero-sky  { --sky-glow: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .hero[data-sky="dusk"] .hero-sky  { --sky-glow: color-mix(in srgb, var(--accent) 32%, transparent); }
+  .hero[data-sky="night"] .hero-sky { --sky-glow: color-mix(in srgb, #3E4C8F 40%, transparent); }
+  :root[data-theme="dark"] .hero[data-sky="dawn"] .hero-sky  { --sky-glow: color-mix(in srgb, #F4A46A 26%, transparent); }
+  :root[data-theme="dark"] .hero[data-sky="dusk"] .hero-sky  { --sky-glow: color-mix(in srgb, var(--accent) 30%, transparent); }
+  :root[data-theme="dark"] .hero[data-sky="night"] .hero-sky { --sky-glow: color-mix(in srgb, #6A78C4 26%, transparent); }
+
+  .hero-kicker {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    color: var(--accent-ink);
+    margin-bottom: 0.35rem;
+  }
+  .hero-kicker:empty { display: none; }
+
   .hero-inner { display: grid; grid-template-columns: 1fr; gap: var(--space-l); align-items: center; }
   .hero-text { max-width: var(--width-text); }
   .hero-art { display: none; }
@@ -230,6 +263,29 @@ const posts = (await getCollection("blog"))
 
 <script>
   function initHome() {
+  // time-of-day sky, driven by the real San Francisco clock
+  (() => {
+    const hero = document.querySelector(".hero") as HTMLElement | null;
+    if (!hero) return;
+    let h = 12;
+    try {
+      h = Number(new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: false, timeZone: "America/Los_Angeles" }).format(new Date()));
+    } catch {}
+    hero.dataset.sky = h >= 5 && h < 8 ? "dawn" : h >= 8 && h < 17 ? "day" : h >= 17 && h < 20 ? "dusk" : "night";
+  })();
+
+  // greeting by the visitor's own local time
+  (() => {
+    const el = document.getElementById("tod-greeting");
+    if (!el) return;
+    const h = new Date().getHours();
+    el.textContent =
+      h >= 5 && h < 12 ? "good morning 👋" :
+      h >= 12 && h < 17 ? "good afternoon 👋" :
+      h >= 17 && h < 22 ? "good evening 👋" :
+      "burning the midnight oil? 👋";
+  })();
+
   // rotate the hero status line through a few current one-liners (footer energy, up top)
   (() => {
     const lines = [
