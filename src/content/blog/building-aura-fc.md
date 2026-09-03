@@ -1,48 +1,44 @@
 ---
 title: "Building AURA FC: turning soccer footage into live AI commentary"
-description: "What I learned wiring up a real-time pipeline that watches a soccer match, figures out what just happened, and commentates it back to you live."
+description: "A build log for a pipeline that watches a soccer clip, works out what just happened, and commentates it back live, plus the three times my first guess was wrong."
 pubDate: 2026-06-09
 tags: ["computer-vision", "build-log", "football"]
 ---
 
-I wanted to see if I could point a model at a soccer clip and have it commentate the match back to me, live, with the energy of someone who has had three espressos and a strong opinion about the back four. The project is called AURA FC, and this is the build log for the first working version.
+I wanted a model to watch a soccer clip and commentate it back to me, live, with the energy of someone three espressos deep who has strong opinions about the back four. AURA FC is the first version that actually works, and this is the build log.
 
-The fun part was not any single model. It was discovering, repeatedly, that the obvious approach was wrong, and that the footage itself was the real adversary.
+None of the hard parts turned out to be the models. They were the footage, and my own first guesses about how to handle it.
 
-## Three layers, one illusion
+## How it fits together
 
-The whole thing is three layers stacked on top of each other, and the trick is that each layer only has to be good at one thing.
+Three stages, and each one only has to be good at a single job.
 
-1. **Perception.** A YOLOv8 detector plus a tracker turns raw frames into a list of objects: players, the ball, who is where, moving how fast.
-2. **Events.** A thin state machine turns that stream of positions into things that have *names*: a pass, a turnover, a sprint into space, a shot. This is where raw pixels become something worth talking about.
-3. **Commentary.** Only the high-signal events get handed to a language model, which turns them into a line of play-by-play, then to TTS so it actually speaks.
+1. **Perception.** A YOLOv8 detector and a tracker turn each frame into a list of objects: players, the ball, positions, rough speeds.
+2. **Events.** A small state machine turns that stream of positions into things with names: a pass, a turnover, a run into space, a shot.
+3. **Commentary.** Only the events worth mentioning reach a language model, which writes a line of play-by-play, and then TTS speaks it.
 
-Keeping these separate mattered more than I expected. When commentary felt off, the bug was almost always one layer down, in the events, and the fix had nothing to do with the language model at all.
+Splitting it up this way paid off in a way I did not plan for. Nearly every time the commentary came out wrong, the actual bug was a stage lower, in the events, and the language model had nothing to do with it.
 
-## Lesson 1: the ball is tiny, and detectors hate that
+## The detector kept losing the ball
 
-Out of the box, the detector found the ball in roughly one frame out of ten. A soccer ball is a handful of pixels on a wide broadcast shot, and standard detection resizes the whole frame down before it ever looks at it, so the ball basically evaporates.
+Out of the box, the detector found the ball in maybe one frame in ten. On a wide broadcast shot the ball is a few pixels across, and the detector shrinks the whole frame down before it looks at anything, so the ball just vanishes.
 
-The fix was **SAHI** (slicing-aided hyper inference): run the detector on overlapping crops of the frame at full resolution, then stitch the detections back together. Slower, but it roughly doubled ball recall. Suddenly the events layer had something to track, and "who has the ball" stopped being a coin flip.
+SAHI sorted it out: run detection on overlapping crops at full resolution, then stitch the results back together. It is slower, but ball recall roughly doubled. Once the events layer had a ball to follow, "who has it" stopped being a coin flip. The thing I took away from this one was to actually look at what the input looks like by the time it reaches the weights, not what it looks like on my screen.
 
-> Takeaway: when a model fails on small objects, the problem is usually resolution, not the model. Look at what the input actually looks like by the time it reaches the weights.
+## Everyone looked like they were sprinting
 
-## Lesson 2: the camera moves, so everyone is always sprinting
+The first events layer thought every player was Usain Bolt. When the broadcast camera pans, every player's pixel velocity spikes at once, because the whole frame is sliding across itself, and the layer was reading camera motion as player motion.
 
-The first version of the events layer thought every player was Usain Bolt. The reason is embarrassing in hindsight: when the broadcast camera pans, *every* player's pixel velocity spikes, because the whole world is sliding across the frame. The model was reading camera motion as player motion.
+The fix was to estimate the global motion each frame (the median displacement across all tracked players) and subtract it before judging anyone's speed. That cut the false sprint calls by about half, and the commentary stopped yelling about runs nobody was making.
 
-The fix was to estimate global motion (the median displacement of all tracked players between frames) and subtract it before judging anyone's speed. That one change cut false "sprint" events roughly in half and made the commentary stop screaming about runs that were not happening.
+## Knowing when to shut up
 
-## Lesson 3: restraint is a feature
+My first version commented on everything. Every pass, every touch, its own little callout, more than one a second. It read as pure spam.
 
-My first instinct was to comment on everything. Every pass, every touch, every turnover got a callout. The result was a wall of popups, more than one per second, and it read as pure spam.
-
-Real commentary is mostly silence punctuated by the right moment. So I made callouts expensive on purpose: low-value events update the internal state silently (they still move the score and the momentum), and only high-signal moments earn words. For something meant to be watchable, around one callout every four to five seconds reads clean. Past one per second, your brain checks out.
-
-The deeper lesson is one I keep relearning: an attention budget is a design constraint, not an afterthought. What you choose *not* to say is most of the craft.
+Real commentary is mostly quiet, with words spent on the moments that earn them. So I made callouts expensive on purpose. Low-value events still update the score and the momentum in the background, they just do it silently, and only the high-signal ones get spoken. Somewhere around one line every four or five seconds feels watchable. Much past one a second and you stop hearing any of it.
 
 ## What's next
 
-The current version runs on landscape broadcast footage. Vertical clips are still rough: the ball spends most of its life cropped out of frame, and track IDs churn every time the camera cuts. That is the next hill.
+Right now it only handles landscape broadcast footage. Vertical clips are still rough: the ball spends half its life cropped out of frame, and track IDs churn every time the camera cuts. That is the next thing to sort out.
 
-I will put the repo up once it is less held together with duct tape. If you want a look before then, or you just want to argue about whether that was a foul, [come say hi](mailto:shubhamgoel27@gmail.com).
+I will put the repo up once it is less held together with tape. If you want a look before then, or you just want to argue about whether that was a foul, [come say hi](mailto:shubhamgoel27@gmail.com).
