@@ -26,7 +26,7 @@
       <path class="stroke thin" d="M162 147 C168 143 172 143 178 147"/>
       <path class="stroke thin" d="M120 144 L108 142"/>
       <path class="stroke thin" d="M220 144 L232 142"/>
-      <path class="stroke" d="M150 188 C161 199 179 199 190 188"/>
+      <path class="mouth" d="M150 188 C161 199 179 199 190 188 C179 199 161 199 150 188 Z"/>
       <!-- laptop showing an eval chart ticking up (building) -->
       <g class="laptop">
         <rect class="stroke thin" x="28" y="236" width="56" height="36" rx="3"/>
@@ -56,6 +56,9 @@
     </g>
     <circle class="dot pupil" id="pupil-l" cx="141" cy="150" r="3.3"/>
     <circle class="dot pupil" id="pupil-r" cx="199" cy="150" r="3.3"/>
+    <!-- squeezed-shut eyes, shown only during the yawn -->
+    <path class="clench-eye" d="M132 152 C136 145 146 145 150 152" aria-hidden="true"/>
+    <path class="clench-eye" d="M190 152 C194 145 204 145 208 152" aria-hidden="true"/>
     <!-- hover easter egg: a little Arsenal shout -->
     <g class="coyg" aria-hidden="true">
       <circle class="coyg-b" cx="240" cy="60" r="3"/>
@@ -68,6 +71,11 @@
       <text class="zzz-t z1" x="246" y="98">z</text>
       <text class="zzz-t z2" x="262" y="82">z</text>
       <text class="zzz-t z3" x="282" y="64">z</text>
+    </g>
+    <!-- brief reaction when the theme is toggled: yawn for dark, sparkle for light -->
+    <text class="yawn-z" x="214" y="150" aria-hidden="true">z</text>
+    <g class="wake-spark" aria-hidden="true">
+      <path class="stroke thin" d="M250 92 L250 108 M242 100 L258 100"/>
     </g>
   </svg>
 </div>
@@ -112,6 +120,29 @@
   .doodle.sleeping .z2 { animation-delay: 0.5s; }
   .doodle.sleeping .z3 { animation-delay: 1s; }
   @keyframes zfloat { 0% { opacity: 0; transform: translateY(5px) rotate(-4deg); } 35% { opacity: 1; } 100% { opacity: 0; transform: translateY(-12px) rotate(6deg); } }
+
+  /* theme-toggle reactions: the smile opens into a yawn for dark, a sparkle for light */
+  .mouth { fill: var(--ink); fill-opacity: 0; stroke: var(--accent); stroke-width: 3.3; stroke-linecap: round; stroke-linejoin: round; }
+  .doodle.reacting-dark .mouth { animation: doodle-yawn 1.4s ease; }
+  @keyframes doodle-yawn {
+    0%, 100% { d: path("M150 188 C161 199 179 199 190 188 C179 199 161 199 150 188 Z"); fill-opacity: 0; }
+    24%, 76% { d: path("M157 191 C157 179 183 179 183 191 C183 209 157 209 157 191 Z"); fill-opacity: 0.9; }
+  }
+
+  /* eyes squeeze shut during the yawn: pupils fade out, clenched arcs fade in */
+  .clench-eye { stroke: var(--accent); stroke-width: 2.8; stroke-linecap: round; fill: none; opacity: 0; }
+  .doodle.reacting-dark .clench-eye { animation: doodle-clench 1.4s ease; }
+  @keyframes doodle-clench { 0%, 100% { opacity: 0; } 24%, 76% { opacity: 1; } }
+  .doodle.reacting-dark .pupil { animation: doodle-pupilhide 1.4s ease; }
+  @keyframes doodle-pupilhide { 0%, 100% { opacity: 1; } 24%, 76% { opacity: 0; } }
+
+  .yawn-z { fill: var(--accent); font-family: var(--font-serif, serif); font-style: italic; font-weight: 700; font-size: 18px; opacity: 0; transform-box: fill-box; }
+  .doodle.reacting-dark .yawn-z { animation: doodle-yawnz 1.4s ease; }
+  @keyframes doodle-yawnz { 0% { opacity: 0; transform: translate(0, 4px); } 35% { opacity: 1; } 100% { opacity: 0; transform: translate(7px, -16px); } }
+
+  .wake-spark { opacity: 0; transform-box: fill-box; transform-origin: 250px 100px; }
+  .doodle.reacting-light .wake-spark { animation: doodle-wake 0.95s ease; }
+  @keyframes doodle-wake { 0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); } 45% { opacity: 1; transform: scale(1.1) rotate(30deg); } }
 
   @keyframes doodle-in { from { opacity: 0; transform: translateY(14px) rotate(-1.5deg); } to { opacity: 1; transform: none; } }
   @keyframes doodle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
@@ -174,6 +205,28 @@
       setTimeout(blinkOnce, 2600);
     }
   }
+  // brief reaction when the theme flips: yawn into dark, wake into light
+  function initDoodleThemeReact() {
+    if ((window as any).__doodleThemeReact) return;
+    (window as any).__doodleThemeReact = true;
+    const root = document.documentElement;
+    let last = root.getAttribute("data-theme");
+    new MutationObserver(() => {
+      const now = root.getAttribute("data-theme");
+      if (now === last) return;
+      last = now;
+      const svg = document.querySelector(".doodle") as SVGElement | null;
+      if (!svg || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const cls = now === "dark" ? "reacting-dark" : "reacting-light";
+      svg.classList.remove("reacting-dark", "reacting-light");
+      void (svg as any).offsetWidth;
+      svg.classList.add(cls);
+      clearTimeout((svg as any).__reactT);
+      (svg as any).__reactT = setTimeout(() => svg.classList.remove(cls), 1500);
+    }).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+  }
+
   initDoodleEyes();
+  initDoodleThemeReact();
   document.addEventListener("astro:page-load", initDoodleEyes);
 </script>
