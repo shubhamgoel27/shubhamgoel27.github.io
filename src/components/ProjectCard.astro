@@ -120,3 +120,28 @@ const linkAttrs = (href: string) => (isExternal(href) ? { target: "_blank", rel:
   .links { display: flex; gap: var(--space-s); list-style: none; padding: 0; }
   .links a { font-size: 0.85rem; font-weight: 500; color: var(--accent-ink); }
 </style>
+
+<script>
+  // subtle 3D tilt toward the cursor (desktop, motion-ok only)
+  function initCardTilt() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    document.querySelectorAll<HTMLElement>(".card").forEach((card) => {
+      if ((card as any)._tilt) return;
+      (card as any)._tilt = true;
+      card.addEventListener("pointermove", (e) => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transition = "transform 0s";
+        card.style.transform = `perspective(820px) rotateY(${px * 5}deg) rotateX(${-py * 5}deg) translateY(-3px)`;
+      });
+      card.addEventListener("pointerleave", () => {
+        card.style.transition = "";
+        card.style.transform = "";
+      });
+    });
+  }
+  initCardTilt();
+  document.addEventListener("astro:page-load", initCardTilt);
+</script>

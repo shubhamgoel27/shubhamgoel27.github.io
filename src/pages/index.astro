@@ -138,6 +138,16 @@ const posts = (await getCollection("blog"))
     margin-bottom: 0.35rem;
   }
   .hero-kicker:empty { display: none; }
+  .hero-kicker .wave { display: inline-block; transform-origin: 70% 80%; cursor: default; }
+  .hero-kicker .wave.wave-go { animation: wave 1s ease; }
+  @keyframes wave {
+    0%, 60%, 100% { transform: rotate(0); }
+    12% { transform: rotate(16deg); }
+    24% { transform: rotate(-8deg); }
+    36% { transform: rotate(16deg); }
+    48% { transform: rotate(-4deg); }
+  }
+  @media (prefers-reduced-motion: reduce) { .hero-kicker .wave.wave-go { animation: none; } }
 
   .hero-inner { display: grid; grid-template-columns: 1fr; gap: var(--space-l); align-items: center; }
   .hero-text { max-width: var(--width-text); }
@@ -274,16 +284,23 @@ const posts = (await getCollection("blog"))
     hero.dataset.sky = h >= 5 && h < 8 ? "dawn" : h >= 8 && h < 17 ? "day" : h >= 17 && h < 20 ? "dusk" : "night";
   })();
 
-  // greeting by the visitor's own local time
+  // greeting by the visitor's own local time, with a hand that waves
   (() => {
     const el = document.getElementById("tod-greeting");
     if (!el) return;
     const h = new Date().getHours();
-    el.textContent =
-      h >= 5 && h < 12 ? "good morning 👋" :
-      h >= 12 && h < 17 ? "good afternoon 👋" :
-      h >= 17 && h < 22 ? "good evening 👋" :
-      "burning the midnight oil? 👋";
+    const g =
+      h >= 5 && h < 12 ? "good morning" :
+      h >= 12 && h < 17 ? "good afternoon" :
+      h >= 17 && h < 22 ? "good evening" :
+      "burning the midnight oil?";
+    el.innerHTML = `${g} <span class="wave" role="img" aria-label="waving hand">👋</span>`;
+    const wv = el.querySelector(".wave");
+    if (wv) {
+      wv.addEventListener("animationend", () => wv.classList.remove("wave-go"));
+      wv.addEventListener("mouseenter", () => wv.classList.add("wave-go"));
+      wv.classList.add("wave-go"); // wave once on load
+    }
   })();
 
   // rotate the hero status line through a few current one-liners (footer energy, up top)

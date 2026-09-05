@@ -86,6 +86,9 @@ import Squiggle from "../components/Squiggle.astro";
   }
   .fb-list strong { color: var(--ink); }
   .fb-list a { color: var(--accent-ink); }
+  .fb-list li:hover::before { animation: fb-kick 0.7s ease; }
+  @keyframes fb-kick { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .fb-list li:hover::before { animation: none; } }
 
   .kickoff { margin-top: var(--space-2xl); }
   .kickoff .muted { margin-top: var(--space-xs); max-width: 32rem; margin-inline: auto; }
