@@ -8,6 +8,7 @@ import tavernImg from "../assets/projects/tavern-nights.png";
 import graphQuestImg from "../assets/projects/graph-quest.png";
 import mleInterviewImg from "../assets/projects/mle-interview.png";
 import curbcheckImg from "../assets/projects/curbcheck.png";
+import sayYesToSoupImg from "../assets/projects/say-yes-to-soup.png";
 
 export type ProjectStatus = "shipped" | "building" | "research";
 
@@ -88,6 +89,15 @@ export const projects: Project[] = [
     links: [{ label: "GitHub", href: "https://github.com/shubhamgoel27/tavern-nights" }],
     status: "shipped",
     image: tavernImg,
+  },
+  {
+    name: "Say Yes to Soup",
+    tagline: "A cozy, Pokémon-style browser RPG about walking the world's villages and letting culture arrive sideways: through soup, slang, and the small corrections people give you. No combat, no timers, nothing to lose.",
+    result: "Ten illustrated chapters across five continents, with generative art and nine regional music styles",
+    tags: ["TypeScript", "Vite", "generative art", "browser game"],
+    links: [{ label: "GitHub", href: "https://github.com/shubhamgoel27/say-yes-to-soup" }],
+    status: "shipped",
+    image: sayYesToSoupImg,
   },
   // ---------- Building ----------
   {
