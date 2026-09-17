@@ -5,7 +5,11 @@ interface Props { project: Project; }
 const { project } = Astro.props;
 const primary = project.links[0];
 const isExternal = (href: string) => /^https?:\/\//.test(href);
-const linkAttrs = (href: string) => (isExternal(href) ? { target: "_blank", rel: "noopener" } : {});
+// raw = a static page outside Astro's routing (e.g. a hosted game); open it in a
+// new tab so the view-transition router doesn't try to swap it into the layout.
+const linkAttrs = (l: { href: string; raw?: boolean }) =>
+  l.raw || isExternal(l.href) ? { target: "_blank", rel: "noopener" } : {};
+const newTab = (l: { href: string; raw?: boolean }) => l.raw || isExternal(l.href);
 ---
 <article class="card">
   {project.image && (
@@ -16,7 +20,7 @@ const linkAttrs = (href: string) => (isExternal(href) ? { target: "_blank", rel:
   <div class="head">
     <h3 class="name">
       {primary
-        ? <a href={primary.href} class="link-underline" {...linkAttrs(primary.href)}>{project.name}</a>
+        ? <a href={primary.href} class="link-underline" {...linkAttrs(primary)}>{project.name}</a>
         : project.name}
     </h3>
     {project.links.length === 0 && project.status !== "research" && <span class="soon">repo coming soon</span>}
@@ -38,7 +42,7 @@ const linkAttrs = (href: string) => (isExternal(href) ? { target: "_blank", rel:
     {project.links.length > 0 && (
       <ul class="links">
         {project.links.map((l) => (
-          <li><a href={l.href} class="link-underline" {...linkAttrs(l.href)}>{l.label}{isExternal(l.href) ? " ↗" : ""}</a></li>
+          <li><a href={l.href} class="link-underline" {...linkAttrs(l)}>{l.label}{newTab(l) ? " ↗" : ""}</a></li>
         ))}
       </ul>
     )}

@@ -15,6 +15,7 @@ export type ProjectStatus = "shipped" | "building" | "research";
 export interface ProjectLink {
   label: string;
   href: string;
+  raw?: boolean; // a static page outside Astro routing (e.g. a hosted game); opens in a new tab
 }
 
 export interface Project {
@@ -71,11 +72,11 @@ export const projects: Project[] = [
   {
     name: "Chandni Chowk Bros",
     tagline: "An endless runner set in Old Delhi: dodge rickshaws, outsmart monkeys, grab samosas, and make it to the Red Fort. Playable on desktop and mobile.",
-    result: "Live at chandni-chowk-bros.com",
-    resultHref: "https://chandni-chowk-bros.com/",
-    tags: ["JavaScript", "game", "canvas"],
+    result: "Playable at shubham.gg/chandni-bros",
+    resultHref: "/chandni-bros/",
+    tags: ["Phaser", "game", "canvas"],
     links: [
-      { label: "Play", href: "https://chandni-chowk-bros.com/" },
+      { label: "Play", href: "/chandni-bros/", raw: true },
       { label: "GitHub", href: "https://github.com/shubhamgoel27/chandni-chowk-bros" },
     ],
     status: "shipped",
