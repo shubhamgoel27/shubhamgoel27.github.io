@@ -78,7 +78,7 @@ On held-out real SF photos, reading was hard:
 | Read F1 | 0.04 | **0.34** |
 | Pipeline reasoning | 0.78 | **0.89** |
 
-The resolver earns its keep here. Pipeline reasoning holds at 0.89 even with reading stuck at 0.34, because partial reads still resolve correctly more often than not. But the reading itself was bad, and I could not move it. I doubled the real data, added human-verified labels, and taught the renderer to fade, occlude, and skew its signs. Real-photo reading went from 0.33 to 0.34.
+The resolver earns its keep here. Pipeline reasoning holds at 0.89 even with reading stuck at 0.34, because partial reads still resolve correctly more often than not. But the reading itself was bad, and I could not move it. I doubled the real data, added human-verified labels, and taught the renderer to fade, occlude, and skew its signs like the real ones. After about a week of that, real-photo reading went from 0.33 to 0.34.
 
 If a pile of new data barely moves a number, the bottleneck usually isn't data. I figured it was capacity, and specifically that frozen vision encoder, which never got to adapt to sun-bleached Mission Street poles. So I unfroze it, pulled in parking signs from other cities (Oakland, Chicago, a dozen more), and swapped the single-pass labels for a 3-vote consensus.
 
@@ -105,7 +105,7 @@ Start with the scorer. Half the real set, 231 of 500 photos, is downed or missin
 
 So the 3B was reading real sign-bearing poles at about 0.62, not the 0.33 I had been agonizing over. Decent on one and two-sign poles, weak on cluttered four-sign ones.
 
-That made the capacity idea worth another look, so I swapped the 3B for a **7B** student trained on the full cross-city corpus (17 cities by now, consensus-labeled). It read clean single-sign poles perfectly and nudged the real sign-bearing reads up. But when I split the score by how many signs were on the pole, dense poles came back at roughly zero. That looked like a catastrophe until I read the raw outputs. The 7B was reading those poles fine and then never stopping: it emitted the JSON and kept generating instead of producing an end-of-sequence token. Capped low, the reads truncated into invalid JSON. Capped high, they took fifty seconds each. The 3B never did this.
+That made the capacity idea worth another look, so I swapped the 3B for a **7B** student trained on the full cross-city corpus (17 cities by now, consensus-labeled). It read clean single-sign poles perfectly and nudged the real sign-bearing reads up. But when I split the score by how many signs were on the pole, dense poles came back at roughly zero. For an afternoon I believed it and quietly mourned the bigger model. Then I read the raw outputs: the 7B was reading those poles fine and then simply not stopping. It emitted the JSON and kept generating instead of a stop token. Capped low, the reads truncated into invalid JSON. Capped high, they took fifty seconds each. The 3B never did this.
 
 The fix wasn't a retrain, it was a stopping rule in the eval harness that ends generation the moment the JSON closes. Dense-pole reads dropped to a few seconds, and the full 500-photo eval finally ran end to end with nothing skipped.
 
@@ -130,7 +130,7 @@ After cleaning up the labels, the naming ties, and the resolver, here is where i
 | Read F1, single-sign poles | | **0.88** |
 | Pipeline reasoning | 0.90 | 0.89 |
 
-Something like 40% of what I had been calling a model gap was measurement. I went in expecting the interesting problem to be the model. Most of it was the ruler.
+Something like 40% of what I had been calling a model gap was measurement. I had assumed the hard part would be the model. A good chunk of it was me, grading against a broken scorer and a teacher that couldn't reliably tell noon from midnight.
 
 ## Try it
 
