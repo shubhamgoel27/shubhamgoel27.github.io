@@ -51,7 +51,7 @@ On the synthetic benchmark it did well, almost suspiciously so.
 ![Bar chart comparing the base model and the tuned model on read accuracy and reasoning](/blog/curbcheck/results.png)
 *Read F1 and reasoning accuracy, base Qwen2.5-VL-3B versus the QLoRA-tuned version.*
 
-A stock Qwen2.5-VL-3B scores **0.16** on "can I park here right now," which is below the 0.25 you would get guessing among the four verdicts. One QLoRA run takes it to **0.82 reasoning** and **0.98 read accuracy**.
+A stock Qwen2.5-VL-3B scores **0.16** on "can I park here right now," which is <mark>below the 0.25 you would get guessing</mark> among the four verdicts. One QLoRA run takes it to **0.82 reasoning** and **0.98 read accuracy**.
 
 And it falls off with the number of signs, exactly the way the ticket story predicted:
 
@@ -118,7 +118,7 @@ That left one strange pile: 45 single-sign photos, the easy case, scoring exactl
 | nobody (two valid names for one sign) | 7 |
 | the sign itself (graffiti, cropped, too far away) | 12 |
 
-Only about a third were the model. The Opus teacher had written "12 NOON TO 2PM" as midnight to 2am, labeled a Monday sign as Wednesday, and left the times blank on signs where they are perfectly legible. Roughly one gold label in eight was malformed, which means I had been grading the student against the teacher's mistakes.
+<mark>Only about a third were the model.</mark> The Opus teacher had written "12 NOON TO 2PM" as midnight to 2am, labeled a Monday sign as Wednesday, and left the times blank on signs where they are perfectly legible. Roughly one gold label in eight was malformed, which means I had been grading the student against the teacher's mistakes.
 
 The audit also turned up something worse, in the resolver I had been calling the reliable half. A pole whose only sign reads "TOW-AWAY, NO PARKING ANY TIME" fell through every branch of the verdict logic and came back as you can park here, at a tow-away zone. The eval had even baked that in as the correct answer, so no metric would ever have caught it. It is fixed now, with regression tests.
 
@@ -130,7 +130,7 @@ After cleaning up the labels, the naming ties, and the resolver, here is where i
 | Read F1, single-sign poles | | **0.88** |
 | Pipeline reasoning | 0.90 | 0.89 |
 
-Something like 40% of what I had been calling a model gap was measurement. I had assumed the hard part would be the model. A good chunk of it was me, grading against a broken scorer and a teacher that couldn't reliably tell noon from midnight.
+<mark>Something like 40% of what I had been calling a model gap was measurement.</mark> I had assumed the hard part would be the model. A good chunk of it was me, grading against a broken scorer and a teacher that couldn't reliably tell noon from midnight.
 
 ## Try it
 

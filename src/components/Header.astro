@@ -27,6 +27,7 @@ const isActive = (href: string) =>
                aria-current={isActive(item.href) ? "page" : undefined}
                target={item.href.endsWith(".pdf") ? "_blank" : undefined}>
               {item.label}
+              {isActive(item.href) && <span class="nav-ind" transition:name="nav-indicator" aria-hidden="true"></span>}
             </a>
           </li>
         ))}
@@ -67,7 +68,13 @@ const isActive = (href: string) =>
   nav ul { display: flex; align-items: center; gap: clamp(0.9rem, 2.5vw, 1.6rem); list-style: none; padding: 0; }
   .nav-link { color: var(--ink-soft); font-size: 0.96rem; font-weight: 500; }
   .nav-link:hover { color: var(--ink); }
-  .nav-link.active { color: var(--accent-ink); background-size: 100% 1.5px; }
+  .nav-link { position: relative; }
+  .nav-link.active, .nav-link.active:hover { color: var(--accent-ink); background-size: 0 1.5px; }
+  /* one shared element across pages, so it glides to the new tab on navigation */
+  .nav-ind {
+    position: absolute; left: 0; right: 0; bottom: -0.3rem;
+    height: 2px; border-radius: 2px; background: var(--accent);
+  }
 
   @media (max-width: 34rem) {
     .brand-name { display: none; }

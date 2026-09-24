@@ -1,33 +1,25 @@
-# Fun batch: visual + features + eggs + personality
+# Motion batch 2 + SEO / agent visibility
 
-Approved items: 1, 2, 3, 4, 5, 7, 8, 10, 11
+## Motion (approved: 1, 2, 3, 6)
+- [x] 1 Theme toggle: circular wipe from the button (View Transitions API), scoped so it doesn't fight Astro's page transitions or the title morph
+- [x] 2 Image zoom: post images grow into a fullscreen view and shrink back (shared view-transition name)
+- [x] 3 Nav indicator: active underline glides between nav items across page changes
+- [x] 6 Highlighter swipe: `<mark>` phrases in posts get a marker stroke that sweeps in on scroll (full highlight with JS off)
 
-## Plan
-- [ ] #3a Terracotta text-selection color (global.css)
-- [ ] #1 Time-of-day hero sky, driven by real SF clock (index.astro)
-- [ ] #10 Time-aware greeting by visitor local time (index.astro hero)
-- [ ] #5 Idle-aware doodle: nods off after ~30s, Zzz, wakes on activity (HeroDoodle.astro)
-- [ ] #2 Reading progress line on blog posts (BlogPost.astro)
-- [ ] #3b Heading underlines that draw themselves on scroll (BlogPost.astro)
-- [ ] #4 Blog polish: hover `#` anchor links on headings + prev/next posts (BlogPost.astro, [slug].astro)
-- [ ] #7 + #11 "You finished" soft confetti + handwritten "— Shubham" sign-off at post end
-- [ ] #8 New eggs: type `chai` (steam) and `gg` (ball rolls across), ambient, not tracked (Secrets.astro)
+## SEO / agents
+- [x] BlogPosting JSON-LD + article:published_time on every post (via a head slot in Base)
+- [x] WebSite JSON-LD alongside Person on the homepage; rel="me" identity links
+- [x] Markdown twin of every post at /blog/<slug>.md, advertised with rel="alternate" type="text/markdown"
+- [x] llms.txt generated from the content collections (never goes stale) + llms-full.txt with full post text
+- [x] robots.txt: explicit allow for AI crawlers, pointer to llms.txt
+- [x] Verify: build, JSON-LD parses, .md and llms files serve, headless render of motion
 
-## Notes
-- Reading time (#4) already shipped via utils/reading -> minutesRead.
-- Homepage-only: #1, #10, #5 (doodle shows >=54rem).
-- Blog-only: #2, #3b, #4, #7, #11. Global: #3a, #8.
-- All motion reduced-motion-safe. Preview before pushing to prod.
+## Needs user
+- Employment line: Pinterest offer accepted; site/llms still say "interviewing / open to roles". Announce or stay neutral?
+- Off-site: Google Search Console + Bing Webmaster sitemap submit, Cloudflare AI-bot blocking setting
 
 ## Review
-All 9 built + verified (build clean). Verification notes:
-- Automation tab runs HIDDEN, so IntersectionObserver + CSS transitions/animations
-  are paused there. Confirmed the CSS/JS is correct by bypassing (e.g. .drawn -> scaleX(1)
-  with transition off), but the *motion* of #3b underline, #5 Zzz, #7 confetti can only be
-  eyeballed in a real (focused) browser.
-- Verified visually: #1 sky glow, #10 "good afternoon" greeting, #2 progress bar (50/100%).
-- Verified functionally: #4 anchors (11 ids+links, correct slugs) + prev/next link,
-  #8 chai (steam+toast) / gg (rolling ball) + input-focus guard, #11 sign-off text/position.
-- Screenshot tool drops viewport-pinned fixed overlays and crops the right column, so the
-  doodle + some fixed bits can't be captured here; confirmed via DOM instead.
-- Pending: user preview at localhost:4321, then push.
+All built and verified on a local preview. Motion: theme wipe flips and cleans up its class; zoom opens/closes and clears the
+shared name; nav indicator carries `nav-indicator`; marks render as a soft wash (headless screenshot). SEO: Person+WebSite and
+BlogPosting JSON-LD parse; article:* meta + rel=alternate markdown present; llms.txt / llms-full.txt / blog/*.md generated from
+collections; sitemap excludes the text twins and now lists /chandni-bros/. Actual motion must be eyeballed in a visible tab.

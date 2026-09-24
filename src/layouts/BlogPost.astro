@@ -15,9 +15,34 @@ interface Props {
   next?: PostRef;
 }
 const { title, description, pubDate, updatedDate, tags = [], minutesRead, ogImage, prev, next, slug } = Astro.props;
+const site = Astro.site ?? new URL("https://shubham.gg");
+const postUrl = new URL(Astro.url.pathname, site).href;
+const articleLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: title,
+  description,
+  url: postUrl,
+  mainEntityOfPage: postUrl,
+  datePublished: pubDate.toISOString(),
+  dateModified: (updatedDate ?? pubDate).toISOString(),
+  image: new URL(ogImage ?? "/og.png", site).href,
+  keywords: tags.join(", "),
+  inLanguage: "en",
+  author: { "@type": "Person", "@id": "https://shubham.gg/#person", name: "Shubham Goel", url: "https://shubham.gg/" },
+  publisher: { "@type": "Person", "@id": "https://shubham.gg/#person", name: "Shubham Goel" },
+};
 const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 ---
 <Base title={title} description={description} ogType="article" ogImage={ogImage}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleLd)} />
+    <meta property="article:published_time" content={pubDate.toISOString()} />
+    {updatedDate && <meta property="article:modified_time" content={updatedDate.toISOString()} />}
+    <meta property="article:author" content="Shubham Goel" />
+    {tags.map((t) => <meta property="article:tag" content={t} />)}
+    {slug && <link rel="alternate" type="text/markdown" title="Markdown version" href={`/blog/${slug}.md`} />}
+  </Fragment>
   <div class="read-progress" aria-hidden="true"><span id="read-bar"></span></div>
   <article class="wrap narrow post">
     <header class="post-head">
@@ -164,7 +189,40 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
     transition: --v 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   @media (prefers-reduced-motion: reduce) { .prose td.num { transition: none; } }
+  /* image zoom: the post image grows into a fullscreen view via a shared view-transition name */
+  .prose img.zoomable { cursor: zoom-in; }
+  .zoom-overlay {
+    position: fixed; inset: 0; z-index: 400;
+    display: grid; place-items: center; padding: 4vh 4vw;
+    background: color-mix(in srgb, var(--paper) 90%, transparent);
+    backdrop-filter: blur(6px);
+    cursor: zoom-out;
+  }
+  .zoom-overlay img {
+    max-width: 92vw; max-height: 88vh; width: auto; height: auto;
+    object-fit: contain; margin: 0;
+    border-radius: var(--radius-m); box-shadow: var(--shadow-lg);
+  }
+  ::view-transition-group(zoom-img) { animation-duration: 0.42s; animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+  /* highlighter: <mark> phrases get a marker stroke that sweeps in when scrolled to (full with JS off) */
+  .prose mark {
+    color: inherit;
+    padding: 0 0.14em; margin: 0 -0.06em;
+    border-radius: 0.25em 0.15em 0.3em 0.2em;
+    background: linear-gradient(100deg,
+        transparent 0.15em,
+        color-mix(in srgb, var(--accent) 28%, transparent) 0.3em,
+        color-mix(in srgb, var(--accent) 20%, transparent) calc(100% - 0.3em),
+        transparent calc(100% - 0.15em))
+      no-repeat 0 65% / 100% 72%;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+    transition: background-size 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  html.marks-armed .prose mark:not(.on) { background-size: 0% 72%; }
+  @media (prefers-reduced-motion: reduce) { .prose mark { transition: none; } }
 </style>
+
 
 
 <script>
@@ -305,7 +363,57 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
     });
   }
 
-  initPost();
-  initTables();
-  document.addEventListener("astro:page-load", () => { initPost(); initTables(); });
+
+  // click a post image: it grows into a fullscreen view, click or Esc to shrink it back
+  function initZoom() {
+    document.querySelectorAll<HTMLImageElement>(".prose img").forEach((img) => {
+      if ((img as any)._zoom) return;
+      (img as any)._zoom = true;
+      img.classList.add("zoomable");
+      img.addEventListener("click", () => openZoom(img));
+    });
+  }
+  function openZoom(img: HTMLImageElement) {
+    if (document.querySelector(".zoom-overlay")) return;
+    const doc = document as any;
+    const vt = !!doc.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const overlay = document.createElement("div");
+    overlay.className = "zoom-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-label", img.alt || "Image");
+    const big = img.cloneNode() as HTMLImageElement;
+    big.removeAttribute("class");
+    big.removeAttribute("loading");
+    overlay.append(big);
+
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    const close = () => {
+      removeEventListener("keydown", onKey);
+      const swap = () => { big.style.viewTransitionName = ""; overlay.remove(); img.style.viewTransitionName = "zoom-img"; };
+      if (!vt) { overlay.remove(); return; }
+      doc.startViewTransition(swap).finished.finally(() => (img.style.viewTransitionName = ""));
+    };
+    overlay.addEventListener("click", close);
+    addEventListener("keydown", onKey);
+
+    const open = () => { img.style.viewTransitionName = ""; big.style.viewTransitionName = "zoom-img"; document.body.append(overlay); };
+    if (vt) { img.style.viewTransitionName = "zoom-img"; doc.startViewTransition(open); } else open();
+  }
+  document.addEventListener("astro:before-swap", () => document.querySelector(".zoom-overlay")?.remove());
+
+  // highlighter strokes sweep across <mark> phrases as they come into view
+  function initMarks() {
+    const marks = Array.from(document.querySelectorAll(".prose mark"));
+    if (!marks.length) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+    document.documentElement.classList.add("marks-armed");
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("on"); io.unobserve(e.target); } });
+    }, { threshold: 1, rootMargin: "0px 0px -12% 0px" });
+    marks.forEach((m) => { if (!m.classList.contains("on")) io.observe(m); });
+  }
+
+  const initAll = () => { initPost(); initTables(); initZoom(); initMarks(); };
+  initAll();
+  document.addEventListener("astro:page-load", initAll);
 </script>

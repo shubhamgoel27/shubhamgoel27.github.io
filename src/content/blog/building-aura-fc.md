@@ -17,19 +17,19 @@ Three stages, and each one only has to be good at a single job.
 2. **Events.** A small state machine turns that stream of positions into things with names: a pass, a turnover, a run into space, a shot.
 3. **Commentary.** Only the events worth mentioning reach a language model, which writes a line of play-by-play, and then TTS speaks it.
 
-Splitting it up this way paid off in a way I did not plan for. Nearly every time the commentary came out wrong, the actual bug was a stage lower, in the events, and the language model had nothing to do with it.
+Splitting it up this way paid off in a way I did not plan for. Nearly every time the commentary came out wrong, <mark>the actual bug was a stage lower, in the events,</mark> and the language model had nothing to do with it.
 
 ## The detector kept losing the ball
 
 Out of the box, the detector found the ball in maybe one frame in ten. I spent a day or two blaming the tracker before I did the obvious thing and looked at a frame the way the model actually gets it. On a wide broadcast shot the ball is a few pixels across, and the detector shrinks the whole frame down before it looks at anything, so the ball is basically gone before detection even starts.
 
-SAHI sorted it out: run detection on overlapping crops at full resolution, then stitch the results back together. Slower, but ball recall roughly doubled, and once the events layer had a ball to follow, "who has it" stopped being a coin flip.
+SAHI sorted it out: run detection on overlapping crops at full resolution, then stitch the results back together. Slower, but <mark>ball recall roughly doubled</mark>, and once the events layer had a ball to follow, "who has it" stopped being a coin flip.
 
 ## Everyone looked like they were sprinting
 
 The first events layer thought every player was Usain Bolt. When the broadcast camera pans, every player's pixel velocity spikes at once, because the whole frame is sliding across itself, and the layer was reading camera motion as player motion.
 
-The fix was to estimate the global motion each frame (the median displacement across all tracked players) and subtract it before judging anyone's speed. That cut the false sprint calls by about half, and the commentary stopped yelling about runs nobody was making.
+The fix was to estimate the global motion each frame (the median displacement across all tracked players) and subtract it before judging anyone's speed. That <mark>cut the false sprint calls by about half</mark>, and the commentary stopped yelling about runs nobody was making.
 
 ## Knowing when to shut up
 

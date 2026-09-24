@@ -1,4 +1,27 @@
+# Everyone, humans' tools and AI agents alike, is welcome to read this site.
 User-agent: *
 Allow: /
 
+# Named explicitly so a blanket bot rule upstream can't quietly exclude them.
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+# Agent-friendly summary: https://shubham.gg/llms.txt
+# Full text of every post:  https://shubham.gg/llms-full.txt
 Sitemap: https://shubham.gg/sitemap-index.xml

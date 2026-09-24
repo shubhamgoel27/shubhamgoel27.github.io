@@ -5,7 +5,7 @@ export default defineConfig({
   site: "https://shubham.gg",
   base: "/",
   trailingSlash: "ignore",
-  integrations: [sitemap()],
+  integrations: [sitemap({ customPages: ["https://shubham.gg/chandni-bros/"] })],
   markdown: {
     shikiConfig: {
       themes: { light: "github-light", dark: "github-dark" },

@@ -50,6 +50,20 @@ const personLd = {
     "https://x.com/shubhamg_",
   ],
 };
+const homeLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { ...personLd, "@context": undefined, "@id": "https://shubham.gg/#person" },
+    {
+      "@type": "WebSite",
+      "@id": "https://shubham.gg/#website",
+      url: "https://shubham.gg/",
+      name: "Shubham Goel",
+      author: { "@id": "https://shubham.gg/#person" },
+      inLanguage: "en",
+    },
+  ],
+};
 ---
 <!doctype html>
 <html lang="en">
@@ -59,7 +73,13 @@ const personLd = {
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {isHome && <script type="application/ld+json" set:html={JSON.stringify(personLd)} />}
+    {isHome && <script type="application/ld+json" set:html={JSON.stringify(homeLd)} />}
+    <meta name="author" content="Shubham Goel" />
+    <link rel="me" href="https://github.com/shubhamgoel27" />
+    <link rel="me" href="https://www.linkedin.com/in/shubhamgoel27" />
+    <link rel="me" href="https://x.com/shubhamg_" />
+    <link rel="alternate" type="text/plain" title="llms.txt" href="/llms.txt" />
+    <slot name="head" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="application/rss+xml" title="Shubham Goel" href="/rss.xml" />
     <link rel="preload" as="font" type="font/woff2" href={frauncesWoff2} crossorigin />
