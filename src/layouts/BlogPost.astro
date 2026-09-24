@@ -11,9 +11,10 @@ interface Props {
   minutesRead?: number;
   ogImage?: string;
   prev?: PostRef;
+  slug?: string;
   next?: PostRef;
 }
-const { title, description, pubDate, updatedDate, tags = [], minutesRead, ogImage, prev, next } = Astro.props;
+const { title, description, pubDate, updatedDate, tags = [], minutesRead, ogImage, prev, next, slug } = Astro.props;
 const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 ---
 <Base title={title} description={description} ogType="article" ogImage={ogImage}>
@@ -21,7 +22,7 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
   <article class="wrap narrow post">
     <header class="post-head">
       <a href="/blog" class="back link-underline">← Writing</a>
-      <h1>{title}</h1>
+      <h1 transition:name={slug ? `post-title-${slug}` : undefined}>{title}</h1>
       <div class="post-meta">
         <time datetime={pubDate.toISOString()}>{fmt(pubDate)}</time>
         {minutesRead && <><span class="sep">·</span><span>{minutesRead} min read</span></>}
@@ -153,7 +154,18 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
   .prose .heading-anchor:hover { color: var(--accent-ink); }
   @media (max-width: 40rem) { .prose .heading-anchor { display: none; } }
   @media (prefers-reduced-motion: reduce) { .prose h2::after { transition: none; } }
+  /* living tables: numeric cells count up and grow a thin bar when scrolled into view */
+  @property --v { syntax: "<number>"; inherits: false; initial-value: 0; }
+  .prose td.num {
+    font-variant-numeric: tabular-nums;
+    min-width: 6.5em;
+    padding: 0.35em 0.5em 0.6em;
+    background: linear-gradient(var(--accent), var(--accent)) no-repeat left 0.35em bottom 0.3em / calc(5.5em * var(--v)) 2px;
+    transition: --v 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @media (prefers-reduced-motion: reduce) { .prose td.num { transition: none; } }
 </style>
+
 
 <script>
   function updateProgress() {
@@ -238,6 +250,62 @@ const fmt = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month:
     }
   }
 
+
+  // metric tables: count numbers up from zero and grow a bar under each one
+  function initTables() {
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const NUM = /^\d+(\.\d+)?$/;
+    document.querySelectorAll<HTMLTableElement>(".prose table").forEach((table) => {
+      if ((table as any)._live) return;
+      (table as any)._live = true;
+      const rows = Array.from(table.tBodies[0]?.rows ?? []);
+      const cols = new Map<number, { cell: HTMLTableCellElement; node: Text; value: number; dec: number }[]>();
+      rows.forEach((row) =>
+        Array.from(row.cells).forEach((cell, ci) => {
+          if (ci === 0) return; // label column
+          const text = cell.textContent?.trim() ?? "";
+          if (!NUM.test(text)) return;
+          const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT);
+          let node: Text | null = null;
+          while (walker.nextNode()) if ((walker.currentNode.textContent ?? "").trim()) node = walker.currentNode as Text;
+          if (!node) return;
+          if (!cols.has(ci)) cols.set(ci, []);
+          cols.get(ci)!.push({ cell, node, value: parseFloat(text), dec: (text.split(".")[1] ?? "").length });
+        })
+      );
+      const cells = Array.from(cols.values()).flatMap((list) => {
+        const max = Math.max(...list.map((c) => c.value));
+        const scale = max <= 1 ? 1 : max; // scores are 0..1, counts scale to the column max
+        return list.map((c) => ({ ...c, frac: scale ? c.value / scale : 0 }));
+      });
+      if (!cells.length) return;
+      cells.forEach((c) => c.cell.classList.add("num"));
+
+      const fill = () => cells.forEach((c) => c.cell.style.setProperty("--v", c.frac.toFixed(3)));
+      if (reduce || !("IntersectionObserver" in window)) { fill(); return; }
+
+      const fmt = (c: (typeof cells)[number], v: number) => v.toFixed(c.dec);
+      cells.forEach((c) => (c.node.textContent = fmt(c, 0)));
+      const io = new IntersectionObserver((entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        fill();
+        const t0 = performance.now(), dur = 900;
+        const tick = (now: number) => {
+          const p = Math.min(1, (now - t0) / dur);
+          const ease = 1 - Math.pow(1 - p, 3);
+          cells.forEach((c) => (c.node.textContent = fmt(c, c.value * ease)));
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }, { threshold: 0.35 });
+      io.observe(table);
+      // never leave zeros behind for printing
+      addEventListener("beforeprint", () => { io.disconnect(); cells.forEach((c) => (c.node.textContent = fmt(c, c.value))); fill(); }, { once: true });
+    });
+  }
+
   initPost();
-  document.addEventListener("astro:page-load", initPost);
+  initTables();
+  document.addEventListener("astro:page-load", () => { initPost(); initTables(); });
 </script>
