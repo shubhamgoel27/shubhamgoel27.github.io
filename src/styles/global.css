@@ -1,4 +1,5 @@
-@import "@fontsource-variable/fraunces";
+@import "@fontsource-variable/fraunces/opsz.css";
+@import "@fontsource-variable/fraunces/opsz-italic.css";
 @import "@fontsource-variable/inter";
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
@@ -169,3 +170,16 @@ a.tag:hover { color: var(--accent-ink); border-color: var(--accent); }
 html.theme-vt::view-transition-old(root),
 html.theme-vt::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 html.theme-vt [data-astro-transition-scope] { view-transition-name: none !important; }
+
+/* editorial typesetting, site-wide */
+h1, h2, h3, h4 { text-wrap: balance; font-optical-sizing: auto; }
+p, li, figcaption { text-wrap: pretty; }
+html { hanging-punctuation: first allow-end last; }
+
+/* shiki ships both themes; switch code colors to the dark set when the site is dark */
+:root[data-theme="dark"] .astro-code,
+:root[data-theme="dark"] .astro-code span {
+  color: var(--shiki-dark) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+}

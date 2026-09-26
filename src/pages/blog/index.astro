@@ -1,12 +1,16 @@
 ---
 import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
-import PostCard from "../../components/PostCard.astro";
 import { minutesRead } from "../../utils/reading";
 
 const posts = (await getCollection("blog"))
   .filter((p) => !p.data.draft)
   .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+// group by year, newest first
+const years = [...new Set(posts.map((p) => p.data.pubDate.getUTCFullYear()))];
+const byYear = years.map((y) => ({ year: y, posts: posts.filter((p) => p.data.pubDate.getUTCFullYear() === y) }));
+const md = (d: Date) => d.toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric" });
 ---
 <Base title="Writing" description="Essays and notes by Shubham Goel on multimodal models, computer vision, and building.">
   <section class="wrap narrow head">
@@ -18,27 +22,135 @@ const posts = (await getCollection("blog"))
     </p>
   </section>
 
-  <section class="wrap narrow list">
+  <section class="wrap narrow contents">
     {posts.length === 0 ? (
       <p class="empty muted">First post is on its way. Check back soon.</p>
     ) : (
-      posts.map((post) => (
-        <PostCard
-          href={`/blog/${post.id}`}
-          title={post.data.title}
-          description={post.data.description}
-          pubDate={post.data.pubDate}
-          minutesRead={minutesRead(post.body)}
-          tags={post.data.tags}
-        />
+      byYear.map(({ year, posts }) => (
+        <div class="year-group">
+          <h2 class="year"><span>{year}</span></h2>
+          <ol class="entries">
+            {posts.map((post) => (
+              <li class="entry" data-preview={`/og-${post.id}.png`}>
+                <a href={`/blog/${post.id}`} class="entry-link">
+                  <time class="entry-date" datetime={post.data.pubDate.toISOString()}>{md(post.data.pubDate)}</time>
+                  <span class="entry-body">
+                    <span class="entry-title" transition:name={`post-title-${post.id}`}>{post.data.title}</span>
+                    <span class="entry-desc">{post.data.description}</span>
+                    <span class="entry-meta">{minutesRead(post.body)} min read{post.data.tags.length ? ` · ${post.data.tags.slice(0, 3).join(" · ")}` : ""}</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
       ))
     )}
   </section>
+
+  <img class="peek" alt="" aria-hidden="true" decoding="async" />
 </Base>
 
 <style>
   .head { padding-top: var(--space-2xl); }
   .head .lede { margin-top: var(--space-s); font-size: var(--step-1); }
-  .list { padding-top: var(--space-m); }
+  .contents { padding-top: var(--space-l); padding-bottom: var(--space-xl); }
   .empty { padding-block: var(--space-l); }
+
+  .year-group + .year-group { margin-top: var(--space-xl); }
+  .year {
+    display: flex; align-items: center; gap: var(--space-s);
+    font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500;
+    letter-spacing: 0.1em; color: var(--ink-faint);
+    margin-bottom: var(--space-2xs);
+  }
+  .year::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  .entries { list-style: none; padding: 0; margin: 0; }
+  .entry { border-bottom: 1px solid var(--line); }
+  .entry-link {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: var(--space-s);
+    padding: var(--space-m) 0;
+    color: var(--ink);
+  }
+  .entry-date {
+    font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-faint); padding-top: 0.45rem;
+  }
+  .entry-body { display: flex; flex-direction: column; gap: 0.35rem; }
+  .entry-title {
+    font-family: var(--font-serif); font-size: var(--step-2); font-weight: 560; line-height: 1.2;
+    letter-spacing: -0.01em; text-wrap: balance;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat; background-position: 0 100%; background-size: 0 1.5px;
+    transition: color var(--t-fast), background-size var(--t-norm);
+    width: fit-content;
+  }
+  .entry-desc { color: var(--ink-soft); font-size: 0.97rem; line-height: 1.55; }
+  .entry-meta { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.04em; color: var(--ink-faint); margin-top: 0.2rem; }
+  .entry-link:hover .entry-title { color: var(--accent-ink); background-size: 100% 1.5px; }
+
+  @media (max-width: 34rem) {
+    .entry-link { grid-template-columns: 1fr; gap: 0.4rem; }
+    .entry-date { padding-top: 0; }
+  }
+
+  /* the cover of whatever you're hovering, floating by the cursor */
+  .peek {
+    position: fixed; left: 0; top: 0; z-index: 30;
+    width: 17rem; aspect-ratio: 1200 / 630; object-fit: cover;
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-lg);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    will-change: transform, opacity;
+  }
+  .peek.show { opacity: 1; }
 </style>
+
+<script>
+  function initPeek() {
+    const peek = document.querySelector<HTMLImageElement>(".peek");
+    if (!peek || (peek as any)._wired) return;
+    (peek as any)._wired = true;
+    if (!matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let tx = 0, ty = 0, x = 0, y = 0, raf = 0, rot = 0, trot = 0;
+    const loop = () => {
+      x += (tx - x) * 0.16;
+      y += (ty - y) * 0.16;
+      trot *= 0.9; // lean eases back to level once you stop moving
+      rot += (trot - rot) * 0.12;
+      peek.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
+      const moving = Math.abs(tx - x) + Math.abs(ty - y) > 0.3 || Math.abs(rot) > 0.05;
+      raf = moving ? requestAnimationFrame(loop) : 0;
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
+
+    document.querySelectorAll<HTMLElement>(".entry").forEach((entry) => {
+      const src = entry.dataset.preview;
+      entry.addEventListener("pointerenter", (e) => {
+        if (!src) return;
+        peek.onerror = () => peek.classList.remove("show");
+        if (peek.getAttribute("src") !== src) peek.src = src;
+        x = tx = e.clientX + 24;
+        y = ty = e.clientY - 70;
+        peek.classList.add("show");
+      });
+      entry.addEventListener("pointermove", (e) => {
+        const dx = e.clientX + 24 - tx;
+        tx = e.clientX + 24;
+        ty = e.clientY - 70;
+        trot = Math.max(-5, Math.min(5, dx * 0.6)); // leans into the direction you're moving
+        kick();
+      });
+      entry.addEventListener("pointerleave", () => { peek.classList.remove("show"); trot = 0; });
+    });
+  }
+  initPeek();
+  document.addEventListener("astro:page-load", initPeek);
+</script>

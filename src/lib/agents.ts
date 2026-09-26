@@ -22,7 +22,11 @@ export function postMarkdown(post: CollectionEntry<"blog">) {
     tags.length ? `Tags: ${tags.join(", ")}` : "",
     `Canonical: ${SITE}/blog/${post.id}`,
   ].filter(Boolean);
-  return `# ${title}\n\n> ${description}\n\n${meta.join("\n")}\n\n${(post.body ?? "").trim()}\n`;
+  const body = (post.body ?? "")
+    .replace(/<span class="sn">([\s\S]*?)<\/span>/g, " ($1)") // sidenotes back to inline asides
+    .replace(/<\/?mark>/g, "")
+    .trim();
+  return `# ${title}\n\n> ${description}\n\n${meta.join("\n")}\n\n${body}\n`;
 }
 
 const link = (href: string) => (href.startsWith("/") ? SITE + href : href);

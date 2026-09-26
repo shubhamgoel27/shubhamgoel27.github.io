@@ -10,7 +10,7 @@ interface Props {
 }
 const { href, title, description, pubDate, minutesRead, tags = [], compact = false } = Astro.props;
 const slug = href.replace(/\/$/, "").split("/").pop();
-const dateStr = pubDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+const dateStr = pubDate.toLocaleDateString("en-US", { timeZone: "UTC", year: "numeric", month: "short", day: "numeric" });
 ---
 <article class:list={["post", { compact }]}>
   <a href={href} class="cover" aria-label={title}></a>
