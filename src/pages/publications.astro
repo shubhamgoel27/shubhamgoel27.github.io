@@ -8,6 +8,7 @@ const publications = [
     venue: "RecSys 2026, Industry Track · first author",
     context:
       "Work from my time on Instagram Ads Ranking at Meta, on using on-screen text as a ranking signal for short-form video ads.",
+    link: { href: "/recsys26", label: "Poster and summary" },
   },
 ];
 
@@ -37,6 +38,7 @@ const talks = [
           <p class="pub-title">{item.title}</p>
           <p class="pub-venue">{item.venue}</p>
           <p class="pub-context">{item.context}</p>
+          {item.link && <p class="pub-link"><a href={item.link.href}>{item.link.label} →</a></p>}
         </li>
       ))}
     </ul>
@@ -79,4 +81,5 @@ const talks = [
     margin-top: 0.15rem;
   }
   .pub-context { color: var(--ink-soft); font-size: 0.95rem; margin-top: 0.3rem; }
+  .pub-link { font-size: 0.95rem; margin-top: 0.3rem; }
 </style>

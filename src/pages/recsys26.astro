@@ -1,0 +1,95 @@
+---
+import Base from "../layouts/Base.astro";
+import Squiggle from "../components/Squiggle.astro";
+
+const authors = [
+  "Shubham Goel", "Andrew Treadway", "Yundi Jiang", "Yiding Wen", "Jianing Fu", "Alan Li",
+  "Angli Liu", "Antoine Simoulin", "Himanshu Thakur", "Haibo Zhang", "Selahattin Akkas",
+  "Calvin Ma", "Zhen Zeng", "Yunyu He", "Qin Huang", "Benjamin Au", "Guy Lebanon", "Sagar Chordia",
+];
+const presenting = new Set(["Shubham Goel", "Alan Li", "Angli Liu", "Himanshu Thakur"]);
+const doi = "https://doi.org/10.1145/3773078.3831887";
+---
+<Base
+  title="The Text on the Creative · RecSys 2026 poster"
+  description="Poster and short summary for The Text on the Creative (RecSys 2026 Industry Track): reading the on-screen text in short-form video ads as a ranking signal."
+  ogImage="/recsys26/poster-preview.jpg"
+>
+  <section class="wrap narrow head">
+    <p class="eyebrow">RecSys 2026 · Industry Track · Minneapolis</p>
+    <h1>The Text on the Creative<Squiggle width="min(15rem, 60%)" /></h1>
+    <p class="subtitle">An Under-Exploited Ranking Modality for Short-Form Video Ads</p>
+
+    <p class="authors">
+      {authors.map((a, i) => (
+        <>
+          <span class={presenting.has(a) ? "pres" : undefined}>{a}</span>{i < authors.length - 1 ? ", " : ""}
+        </>
+      ))}
+    </p>
+    <p class="note">Meta, Instagram Ads Ranking. Underlined names are presenting the poster.</p>
+
+    <div class="actions">
+      <a class="btn primary" href="/recsys26/poster-A1.pdf" data-astro-reload>Poster (PDF)</a>
+      <a class="btn" href={doi} rel="noopener">Paper (ACM)</a>
+    </div>
+
+    <a class="poster" href="/recsys26/poster-A1.pdf" data-astro-reload aria-label="Open the full poster as a PDF">
+      <img src="/recsys26/poster-preview.jpg" width="1400" height="1982" loading="eager"
+        alt="The RecSys 2026 poster: an ad frame with its on-screen words detected, the three-stage pipeline, and result charts." />
+    </a>
+    <p class="caption">Tap the poster for the full-resolution PDF.</p>
+
+    <h2>The short version</h2>
+    <p>
+      Short-form video ads put their pitch right on screen: prices, offers, calls to action.
+      The Instagram ads ranker wasn’t using any of that text. We got it in cheaply with three pieces.
+    </p>
+    <ol class="pieces">
+      <li>
+        <strong>Frame selection.</strong> We reuse the CTR-trained scorer that already picks ad thumbnails
+        to rank frames, and drop near-duplicates. At 6 frames it recovers more text than uniform sampling at 12.
+      </li>
+      <li>
+        <strong>Ads-OCR.</strong> An in-house OCR model trained on ad creatives in 41 languages.
+        It gets 93% of a VLM’s word F1 at about 80× the throughput.
+      </li>
+      <li>
+        <strong>Compact features.</strong> An RQ-VAE turns the text embedding into three 1-byte codes,
+        and TF-IDF keeps the exact words. Both go into the ranker as sparse ID features, about 500× smaller
+        than the dense embedding.
+      </li>
+    </ol>
+    <p>
+      Offline, the bundle gives a 0.055–0.06% NE gain across surfaces and ≈0.12% on Reels-class video.
+      Online, a multi-week A/B on 80% of traffic gave 0.06–0.08% (p &lt; 0.01), and the features are
+      now in production.
+    </p>
+
+    <p class="contact">Questions or want to compare notes? <a href="mailto:shubhamgoel27@gmail.com">shubhamgoel27@gmail.com</a></p>
+  </section>
+</Base>
+
+<style>
+  .head { padding-top: var(--space-2xl); padding-bottom: var(--space-2xl); }
+  .subtitle { margin-top: var(--space-xs); color: var(--ink-soft); font-size: var(--step-0); }
+  .authors { margin-top: var(--space-m); line-height: 1.6; color: var(--ink-soft); font-size: 0.95rem; }
+  .authors .pres { color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+  .note { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-faint); margin-top: 0.3rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: var(--space-l); }
+  .btn {
+    display: inline-block; padding: 0.55rem 1rem; border-radius: 8px;
+    border: 1px solid var(--line-strong); color: var(--ink); text-decoration: none; font-weight: 600;
+    min-height: 44px; line-height: 1.6;
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .poster { display: block; margin-top: var(--space-l); border-radius: 10px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow-md); }
+  .poster img { display: block; width: 100%; height: auto; }
+  .caption { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-faint); margin-top: 0.5rem; }
+  h2 { margin-top: var(--space-xl); margin-bottom: var(--space-s); }
+  p { line-height: 1.65; }
+  .pieces { padding-left: 1.2rem; margin: var(--space-s) 0; line-height: 1.65; }
+  .pieces li + li { margin-top: 0.6rem; }
+  .contact { margin-top: var(--space-l); color: var(--ink-soft); }
+</style>
