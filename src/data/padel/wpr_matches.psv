@@ -1,0 +1,76 @@
+date_utc|event_id|team_a|team_b|sets|winner|format
+2026-06-14T21:40|0|Perrin Tong:1.00>0.81+Anastasiia Biloshytska:0.34>0.27|Shubham Goel:0.80>1.04+Michelle Sarwo:0.65>0.75|4-6|B|ONESET
+2026-06-14T22:00|0|Leo Garcia:2.28>2.09+Michelle Sarwo:0.75>0.65|Austin Sprawls:1.42>1.82+Shubham Goel:1.04>1.45|2-6|B|ONESET
+2026-06-14T22:20|0|Austin Sprawls:1.82>1.57+Perrin Tong:1.44>1.21|Ines Cerdan:1.44>1.76+Shubham Goel:1.45>1.75|2-6|B|ONESET
+2026-06-14T22:40|0|Leo Garcia:2.40>2.55+Shubham Goel:1.75>2.00|Ines Cerdan:1.76>1.55+Anastasiia Biloshytska:0.41>0.31|6-0|A|ONESET
+2026-06-14T23:00|0|Leo Garcia:2.55>2.33+Perrin Tong:1.36>1.14|Morgan Budidjaja:0.93>1.14+Shubham Goel:2.00>2.34|1-6|B|ONESET
+2026-06-20T04:20|1|Jakub Karczewski:2.96>2.72+Shubham Goel:2.34>2.15|Dinesh Khurana:2.75>2.85+Aaron Soerjohadi:2.51>2.61|1-6|B|ONESET
+2026-06-20T04:40|1|Jakub Karczewski:2.72>2.67+gadea lombana:1.26>1.26|Shubham Goel:2.15>2.21+Marc Rapoport:2.17>2.22|5-7|B|ONESET
+2026-06-20T05:00|1|Aaron Soerjohadi:2.68>2.66+Marc Rapoport:2.22>2.19|Shubham Goel:2.21>2.27+Federico De Geronimo:2.93>2.96|6-7|B|ONESET
+2026-06-20T05:20|1|Jakub Karczewski:2.80>2.86+Federico De Geronimo:2.96>3.05|Shubham Goel:2.27>2.22+Taha Bouteraa:1.65>1.63|6-2|A|ONESET
+2026-06-21T21:25|1|Mona Rosemann:2.35>2.04+Luis Gamarra Jimenez:2.09>1.86|Leo Garcia:2.33>2.46+Shubham Goel:2.22>2.33|2-6|B|ONESET
+2026-06-21T21:45|1|Jeff Kh:3.18>3.23+Shubham Goel:2.33>2.44|Jakub Karczewski:2.75>2.66+Leo Garcia:2.46>2.35|6-2|A|ONESET
+2026-06-21T22:05|1|Christian Eilers Gonzalez:3.64>3.65+Shubham Goel:2.44>2.51|Jeff Kh:3.23>3.19+Luis Gamarra Jimenez:2.24>2.18|6-3|A|ONESET
+2026-06-21T22:25|1|Christian Eilers Gonzalez:3.65>3.58+Leo Garcia:2.55>2.47|Aaron Soerjohadi:2.69>2.76+Shubham Goel:2.51>2.62|3-6|B|ONESET
+2026-06-24T05:10|1|Shubham Goel:2.62>2.65+Elie habib:1.50>1.86|Luis Garcia:2.15>2.10+Taha Bouteraa:1.63>1.60|6-3|A|ONESET
+2026-06-24T05:30|1|Jeet Jagdhane:3.44>3.65+Elie habib:1.86>2.40|Jeff Kh:3.15>3.06+Shubham Goel:2.65>2.54|6-1|A|ONESET
+2026-06-24T05:50|1|Jeff Kh:3.06>3.12+Taha Bouteraa:1.56>1.62|arshan borhan:2.59>2.47+Shubham Goel:2.54>2.47|6-4|A|ONESET
+2026-06-24T06:10|1|arshan borhan:2.47>2.41+Aaron Soerjohadi:2.71>2.68|Antonio Adame:2.45>2.52+Shubham Goel:2.47>2.52|6-7|B|ONESET
+2026-06-27T04:30|1|Max Tepler:3.48>3.61+Shubham Goel:2.52>2.57|Aaron Soerjohadi:2.68>2.65+Antonio Adame:2.52>2.47|6-3|A|ONESET
+2026-06-27T04:50|1|Max Tepler:3.61>3.96+Taha Bouteraa:1.65>1.71|Shubham Goel:2.57>2.50+Ai Deng:2.36>2.07|6-2|A|ONESET
+2026-06-27T05:10|1|Aaron Soerjohadi:2.59>2.61+Ai Deng:2.07>2.20|Shubham Goel:2.50>2.47+Mona Rosemann:1.28>1.26|6-3|A|ONESET
+2026-06-27T05:30|1|Antonio Adame:2.48>2.58+Mona Rosemann:1.26>1.42|Shubham Goel:2.47>2.41+Taha Bouteraa:1.66>1.63|6-3|A|ONESET
+2026-07-01T05:30|2|Antonio Adame:2.58>2.52+Mohamed Sayadi:2.23>2.16|Aaron Soerjohadi:2.56>2.61+Shubham Goel:2.41>2.47|3-6|B|ONESET
+2026-07-01T05:50|2|Christian Eilers Gonzalez:3.50>3.63+Shubham Goel:2.47>2.57|Franchesca Budiman:3.46>3.32+Aaron Soerjohadi:2.61>2.55|6-1|A|ONESET
+2026-07-01T06:10|2|ANDREW LAVROV:4.36>3.98+Shubham Goel:2.57>2.50|Christian Eilers Gonzalez:3.63>3.76+Jackson McBride:3.46>3.61|0-6|B|ONESET
+2026-07-01T06:30|2|ANDREW LAVROV:3.98>3.78+Alex Zhang:2.04>1.97|Franchesca Budiman:3.32>3.39+Shubham Goel:2.50>2.57|2-6|B|ONESET
+2026-07-05T21:40|0|ANDREW LAVROV:3.78>3.65+Md Armughanuddin:1.68>1.65|Shubham Goel:2.57>2.63+Leo Garcia:2.47>2.57|3-6|B|ONESET
+2026-07-05T22:00|0|Shubham Goel:2.63>2.70+Michelle Sarwo:0.69>0.84|Leo Garcia:2.57>2.48+Morgan Budidjaja:1.39>1.33|7-5|A|ONESET
+2026-07-05T22:20|0|Shubham Goel:2.70>2.73+Austin Sprawls:1.03>1.14|Md Armughanuddin:1.73>1.62+Michelle Sarwo:0.84>0.75|6-1|A|ONESET
+2026-07-05T22:40|0|ANDREW LAVROV:3.63>3.59+Austin Sprawls:1.14>1.19|Shubham Goel:2.73>2.70+Morgan Budidjaja:1.42>1.40|6-4|A|ONESET
+2026-07-08T04:50|1|Dinesh Khurana:2.76>2.82+Aaron Soerjohadi:2.56>2.62|Keith Vetter:2.76>2.60+Shubham Goel:2.70>2.65|6-3|A|ONESET
+2026-07-08T05:10|1|Keith Vetter:2.60>2.51+Morgan Budidjaja:1.39>1.37|Shubham Goel:2.65>2.69+Mohamed Sayadi:2.40>2.53|2-6|B|ONESET
+2026-07-08T05:30|1|Arturo Bracero:3.44>3.51+Mohamed Sayadi:2.53>2.68|Dinesh Khurana:2.72>2.67+Shubham Goel:2.69>2.64|6-2|A|ONESET
+2026-07-08T05:50|1|Dinesh Khurana:2.67>2.72+Keith Vetter:2.39>2.51|Shubham Goel:2.64>2.59+Marcella Budiman:1.84>1.79|6-2|A|ONESET
+2026-07-11T22:00|3|DOMINGO ARELLANO:3.26>3.31+JM GL:3.26>3.31|Shubham Goel:2.59>2.58+Antonio Adame:2.42>2.41|6-4|A|ONESET
+2026-07-11T22:20|3|Shubham Goel:2.58>2.61+Antonio Adame:2.41>2.46|Marcella Budiman:1.92>1.89+Nikhil Thilak:2.25>2.02|6-3|A|ONESET
+2026-07-13T19:30|4|Antonio Adame:2.46>2.40+Shubham Goel:2.61>2.56|Meqdad Hashemi:3.38>3.43+Franchesca Budiman:3.19>3.24|3-6 6-7|B|STANDARD
+2026-07-26T01:25|1|Iryna Findziukevich:3.03>3.02+Md Armughanuddin:1.18>1.21|Nickolai Vysokov:2.83>2.83+Shubham Goel:2.56>2.57|4-6|B|ONESET
+2026-07-26T01:45|1|Iryna Findziukevich:3.02>3.07+Shubham Goel:2.57>2.64|Nickolai Vysokov:2.83>2.76+Md Armughanuddin:1.21>1.18|6-1|A|ONESET
+2026-07-26T02:05|1|Iryna Findziukevich:3.07>3.08+Nickolai Vysokov:2.76>2.80|Shubham Goel:2.64>2.62+Md Armughanuddin:1.18>1.18|6-2|A|ONESET
+2026-07-26T02:25|1|Iryna Findziukevich:3.08>3.17+Md Armughanuddin:1.18>1.27|Nickolai Vysokov:2.80>2.70+Shubham Goel:2.62>2.53|6-4|A|ONESET
+2026-07-29T04:55|1|Aaron Soerjohadi:3.32>3.37+Shubham Goel:2.53>2.62|Franchesca Budiman:3.14>3.07+Karan Ramakrishnegowd:2.56>2.52|6-2|A|ONESET
+2026-07-29T05:15|1|Aaron Soerjohadi:3.37>3.33+Arthur Qin:1.98>1.91|Shubham Goel:2.62>2.67+Antonio Adame:2.56>2.60|4-6|B|ONESET
+2026-07-29T05:35|1|Franchesca Budiman:3.09>3.02+Antonio Adame:2.60>2.55|Shubham Goel:2.67>2.74+Marcella Budiman:2.10>2.16|4-6|B|ONESET
+2026-07-29T05:55|1|Aaron Soerjohadi:3.35>3.36+Marcella Budiman:2.16>2.19|Shubham Goel:2.74>2.71+Karla Tiscareño:2.12>2.07|6-4|A|ONESET
+2026-08-05T04:55|1|Franchesca Budiman:3.09>2.99+arshan borhan:2.41>2.22|Shubham Goel:2.71>2.83+Vivian Gunawan:2.69>2.90|1-6|B|ONESET
+2026-08-05T05:15|1|Shubham Goel:2.83>2.90+Arthur Qin:2.16>2.32|Vivian Gunawan:2.90>2.78+Antonio Adame:2.47>2.42|6-3|A|ONESET
+2026-08-05T05:35|1|Franchesca Budiman:3.00>2.93+Arthur Qin:2.32>2.23|Shubham Goel:2.90>2.97+Marcella Budiman:2.16>2.22|3-6|B|ONESET
+2026-08-12T04:41|1|Tom Johnson:3.67>3.36+Karan Ramakrishnegowd:2.49>2.47|Aaron Soerjohadi:3.36>3.41+Shubham Goel:2.97>3.03|3-6|B|ONESET
+2026-08-12T05:01|1|Aaron Soerjohadi:3.41>3.42+Marcella Budiman:2.31>2.36|Shubham Goel:3.03>2.98+Antonio Adame:2.55>2.52|6-4|A|ONESET
+2026-08-12T05:21|1|Shubham Goel:2.98>3.03+Chirag Gupta:2.20>2.46|Antonio Adame:2.52>2.46+Arthur Qin:2.22>2.14|6-2|A|ONESET
+2026-08-12T05:41|1|Shubham Goel:3.03>2.96+Marcella Budiman:2.44>2.38|Karan Ramakrishnegowd:2.65>2.73+Chirag Gupta:2.46>2.73|2-6|B|ONESET
+2026-08-19T04:41|1|Luis Gamarra Jimenez:3.27>3.23+Antonio Adame:2.42>2.39|Shubham Goel:2.96>3.02+Amit Zelnik:2.45>2.59|4-6|B|ONESET
+2026-08-19T05:01|1|Shubham Goel:3.02>2.96+Daibo Chen:1.66>1.57|Amit Zelnik:2.59>2.73+arshan borhan:2.35>2.47|2-6|B|ONESET
+2026-08-19T05:21|1|Luis Gamarra Jimenez:3.19>3.21+Daibo Chen:1.57>1.72|Shubham Goel:2.96>2.91+JEFF HOU:1.21>1.14|6-2|A|ONESET
+2026-08-19T05:41|1|Shubham Goel:2.91>2.98+arshan borhan:2.39>2.53|Antonio Adame:2.38>2.31+JEFF HOU:1.14>1.02|6-0|A|ONESET
+2026-08-26T05:11|5|Chirag Gupta:3.65>3.65+Franchesca Budiman:2.93>2.97|Anish Rajan:2.98>2.94+Shubham Goel:2.98>2.96|7-6|A|ONESET
+2026-08-26T05:31|5|Anish Rajan:2.94>2.88+Morgan Budidjaja:1.54>1.53|Shubham Goel:2.96>2.99+Antonio Adame:2.37>2.40|3-6|B|ONESET
+2026-08-26T05:51|5|Shubham Goel:2.99>2.93+Dipesh Dar:3.03>2.91|Franchesca Budiman:3.04>3.12+Antonio Adame:2.40>2.45|4-6|B|ONESET
+2026-08-26T06:11|5|Shubham Goel:2.93>2.88+Morgan Budidjaja:1.59>1.56|Dipesh Dar:2.91>2.99+Alkin Sen:2.41>2.46|2-6|B|ONESET
+2026-09-02T05:05|6|Shubham Goel:2.88>2.93+Shachak Zicher:2.48>2.61|Antonio Adame:2.59>2.55+Alkin Sen:2.48>2.44|6-3|A|ONESET
+2026-09-02T05:25|6|Chirag Gupta:3.79>3.73+Shachak Zicher:2.61>2.54|Dipesh Dar:3.12>3.23+Shubham Goel:2.93>3.00|3-6|B|ONESET
+2026-09-02T05:45|6|Franchesca Budiman:2.98>3.04+Shubham Goel:3.00>3.06|Dipesh Dar:3.23>3.16+Adolfo Cendejas:2.48>2.42|6-3|A|ONESET
+2026-09-02T06:05|6|Franchesca Budiman:3.04>2.95+Shachak Zicher:2.75>2.63|Shubham Goel:3.06>3.14+Alkin Sen:2.57>2.63|2-6|B|ONESET
+2026-09-16T05:31|1|Meqdad Hashemi:3.42>3.35+Henry Cordeal:2.99>2.92|Shubham Goel:3.14>3.20+Dipesh Dar:3.10>3.16|5-7|B|ONESET
+2026-09-16T05:51|1|Shubham Goel:3.20>3.16+Antonio Adame:2.43>2.42|Dipesh Dar:3.16>3.20+Mostafa Abouelela:2.82>2.86|5-7|B|ONESET
+2026-09-16T06:11|1|Shubham Goel:3.16>3.12+Md Armughanuddin:1.86>1.85|Antonio Adame:2.42>2.46+Marcella Budiman:2.33>2.38|5-7|B|ONESET
+2026-09-20T10:30|7|Emmanuel De Vera:3.81>3.86+John Terada:3.34>3.48|Dipesh Dar:3.17>3.13+Shubham Goel:3.12>3.08|6-3|A|ONESET
+2026-09-20T11:00|7|Jake Gutierrez:3.07>2.92+Elias Perisic:2.23>2.21|Dipesh Dar:3.13>3.17+Shubham Goel:3.08>3.12|3-6|B|ONESET
+2026-09-20T11:30|7|Dora Celinne Tiscareno Martinez:3.75>3.69+Karan Ramakrishnegowd:3.48>3.43|Dipesh Dar:3.17>3.24+Shubham Goel:3.12>3.19|6-7|B|ONESET
+2026-09-20T12:00|7|Dipesh Dar:3.24>3.28+Shubham Goel:3.19>3.23|Stephen Lewis:2.46>2.42+Kapil Kolhatkar:2.62>2.58|6-2|A|ONESET
+2026-09-20T13:00|7|Dipesh Dar:3.28>3.28+Shubham Goel:3.23>3.23|Conor Bell:4.18>4.18+Brandon Reznicek:4.18>4.18|4-6|B|ONESET
+2026-09-20T20:00|7|Dipesh Dar:3.28>3.32+Shubham Goel:3.23>3.28|Mads Holstebro:3.33>3.24+Eliot Kadouri:3.37>3.28|7-5|A|ONESET
+2026-09-23T05:01|1|Chirag Gupta:3.69>3.65+Raz Gilat:2.94>2.92|Ashly Popper:3.47>3.51+Shubham Goel:3.28>3.31|6-7|B|ONESET
+2026-09-23T05:21|1|Ashly Popper:3.51>3.45+Daibo Chen:2.81>2.78|Shubham Goel:3.31>3.35+Franchesca Budiman:2.93>2.99|4-6|B|ONESET
+2026-09-23T05:41|1|Shubham Goel:3.35>3.39+Marcella Budiman:2.41>2.45|Raz Gilat:3.05>2.99+Franchesca Budiman:2.99>2.94|7-6|A|ONESET

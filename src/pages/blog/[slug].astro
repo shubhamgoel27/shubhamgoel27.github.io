@@ -5,7 +5,7 @@ import { minutesRead } from "../../utils/reading";
 
 export async function getStaticPaths() {
   const posts = (await getCollection("blog"))
-    .filter((p) => !p.data.draft)
+    .filter((p) => !p.data.draft || import.meta.env.DEV)
     .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
   return posts.map((post, i) => {
     const newer = posts[i - 1]; // more recent
