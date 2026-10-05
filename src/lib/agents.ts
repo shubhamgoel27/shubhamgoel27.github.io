@@ -43,7 +43,7 @@ export async function llmsTxt() {
 
   return `# Shubham Goel
 
-> Machine learning engineer with about eight years across computer vision, multimodal models, and recommender systems, most recently a Senior MLE at Meta on Instagram Ads ranking. Focused on multimodal LLMs, post-training, and evals. Based in the San Francisco Bay Area.
+> Machine learning engineer with about eight years across computer vision, multimodal models, and recommender systems, previously a Senior MLE at Meta on Instagram Ads ranking, joining Pinterest Ads as a Senior MLE in December 2026. Focused on multimodal LLMs, post-training, and evals. Based in the San Francisco Bay Area.
 
 He builds small, focused models and the eval harnesses that check whether they actually work, and he tends to turn real-world annoyances into ML projects. First-author paper at RecSys 2026 (industry track) on using the text rendered inside video ads as a ranking signal.
 
