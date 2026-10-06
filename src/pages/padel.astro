@@ -1,118 +1,257 @@
 ---
 import Base from "../layouts/Base.astro";
 import Squiggle from "../components/Squiggle.astro";
-import { matches, summary, months, byKind, friendlies } from "../lib/padel";
+import {
+  matches, summary, months, byKind, friendlies,
+  bands, milestones, projection, form, calendar, scorelines, weekdays, partnerSplit, swings, tournaments,
+} from "../lib/padel";
 
 const f2 = (n: number) => n.toFixed(2);
-const sign = (n: number) => (n >= 0 ? "+" : "") + n.toFixed(2);
-const monthName = (ym: string) =>
-  new Date(ym + "-01T12:00:00Z").toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
-const dayName = (d: string) =>
-  new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
-const pulled = summary.pulled
-  ? new Date(summary.pulled + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })
-  : "";
+const sign = (n: number) => (n >= 0 ? "+" : "−") + Math.abs(n).toFixed(2);
+const day = (d: string, opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" }) =>
+  new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { ...opts, timeZone: "UTC" });
+const monthName = (ym: string) => day(ym + "-01", { month: "long" });
 
-// ---- rating chart geometry (x = match number, y = rating after that match) ----
-const W = 720, H = 280, L = 34, R = 44, T = 18, B = 34;
-const yMax = Math.ceil(summary.peak + 0.3), yMin = 0;
+// ---- level ladder (0 to 4.5 scale) ----
+const LMAX = 4.5;
+const pos = (v: number) => Math.min(v, LMAX) / LMAX;
+
+// ---- rating chart ----
+const W = 720, H = 300, L = 34, R = 46, T = 30, B = 34;
+const yMax = 4;
 const xs = (i: number) => L + (i / matches.length) * (W - L - R);
-const ys = (v: number) => T + (1 - (v - yMin) / (yMax - yMin)) * (H - T - B);
+const ys = (v: number) => T + (1 - v / yMax) * (H - T - B);
 const pts = [{ i: 0, v: summary.start }, ...matches.map((m) => ({ i: m.i, v: m.after }))];
 const line = pts.map((p, k) => `${k ? "L" : "M"}${xs(p.i).toFixed(1)},${ys(p.v).toFixed(1)}`).join(" ");
 const area = `${line} L${xs(matches.length).toFixed(1)},${ys(0).toFixed(1)} L${xs(0).toFixed(1)},${ys(0).toFixed(1)} Z`;
-const gridVals = Array.from({ length: yMax + 1 }, (_, k) => k);
 const monthStarts = months.map((mo) => {
   const first = matches.find((m) => m.month === mo.month)!;
   return { x: xs(first.i - 1), label: monthName(mo.month).slice(0, 3) };
 });
+const m3 = milestones.find((m) => m.threshold === 3)!;
+const m3pt = matches[m3.match - 1];
 const chartData = JSON.stringify(
-  matches.map((m) => ({ x: +xs(m.i).toFixed(1), y: +ys(m.after).toFixed(1), d: dayName(m.date), w: m.won, s: m.score, b: f2(m.before), a: f2(m.after), n: m.i }))
+  matches.map((m) => ({ x: +xs(m.i).toFixed(1), y: +ys(m.after).toFixed(1), d: day(m.date), w: m.won, s: m.score, b: f2(m.before), a: f2(m.after) }))
 );
+
+// ---- form guide ----
+const lastFive = form.slice(-5);
+
+// ---- calendar: weeks as columns, Sun..Sat rows ----
+const first = new Date(matches[0].date + "T12:00:00Z");
+const lastD = new Date(matches[matches.length - 1].date + "T12:00:00Z");
+const start = new Date(first); start.setUTCDate(start.getUTCDate() - start.getUTCDay());
+const nWeeks = Math.ceil(((+lastD - +start) / 864e5 + 1) / 7);
+const CELL = 14, GAP = 3, CL = 26, CT = 18;
+const cells: { x: number; y: number; date: string; n: number; w: number }[] = [];
+const calMonths: { x: number; label: string }[] = [];
+for (let w = 0; w < nWeeks; w++) {
+  for (let d = 0; d < 7; d++) {
+    const dt = new Date(start); dt.setUTCDate(start.getUTCDate() + w * 7 + d);
+    if (dt > lastD) continue;
+    const iso = dt.toISOString().slice(0, 10);
+    const c = calendar.get(iso);
+    cells.push({ x: CL + w * (CELL + GAP), y: CT + d * (CELL + GAP), date: iso, n: c?.n ?? 0, w: c?.w ?? 0 });
+    if (d === 0 && (dt.getUTCDate() <= 7 || w === 0)) calMonths.push({ x: CL + w * (CELL + GAP), label: day(iso, { month: "short" }) });
+  }
+}
+const calW = CL + nWeeks * (CELL + GAP), calH = CT + 7 * (CELL + GAP);
+const shade = (n: number) => (n === 0 ? 0 : n === 1 ? 1 : n <= 2 ? 2 : n <= 4 ? 3 : 4);
+const busiest = weekdays.reduce((a, b) => (b.n > a.n ? b : a));
+
+// ---- scorelines ----
+const topScores = [...scorelines].sort((a, b) => b.n - a.n).slice(0, 8);
+const maxScore = topScores[0].n;
 const maxKind = Math.max(...byKind.map((k) => k.played));
 ---
-<Base title="Padel" description="Learning padel since June 2026: my rating, record, and month-by-month numbers from the World Padel Rating app.">
+<Base title="Padel" description="Learning padel since June 2026: my WPR rating, record, form, and the numbers behind it, from the World Padel Rating app.">
   <section class="wrap narrow head">
     <p class="eyebrow">Padel</p>
     <h1>Learning padel, in numbers<Squiggle width="min(15rem, 60%)" /></h1>
     <p class="lede">
-      I picked up a padel racket on June 14 and I haven't really put it down since. These are my
-      rated games from the World Padel Rating app, mostly Sunnyvale open plays plus a South Bay
-      league and a couple of tournaments.
+      I picked up a padel racket on June 14 and haven't really put it down since. Every rated game
+      I play goes into the <strong>World Padel Rating (WPR)</strong> app, which moves my rating up
+      or down after each match. This page is that history, mostly Sunnyvale open plays, a South
+      Bay league, and a couple of tournaments.
     </p>
-    <p class="updated">Data through {pulled}. Updated every month.</p>
+    <p class="updated">WPR data through {day(summary.pulled, { month: "long", day: "numeric", year: "numeric" })} · refreshed monthly</p>
+  </section>
+
+  <!-- the ladder: where I started, where I am, what's next -->
+  <section class="wrap narrow ladder-wrap" data-reveal>
+    <div class="ladder-top">
+      <div>
+        <span class="big-label">WPR rating</span>
+        <span class="big"><span data-count={summary.now} data-from={summary.start} data-dp="2">{f2(summary.now)}</span></span>
+        <span class="big-sub">up from {f2(summary.start)} on day one</span>
+      </div>
+      <p class="next">
+        <strong>{f2(projection.toGo)}</strong> from {f2(projection.next)}.
+        {projection.matches && <> At my recent pace (about {sign(projection.pace)} a match), that's roughly <strong>{projection.matches} more matches</strong>.</>}
+      </p>
+    </div>
+
+    <div class="ladder" role="img" aria-label={`WPR rating ladder: started at ${f2(summary.start)}, now ${f2(summary.now)}, ${f2(projection.toGo)} below the ${f2(projection.next)} band.`}>
+      <div class="track">
+        {bands.map((b) => (
+          <div class:list={["band", { future: b.from > summary.now }]} style={`flex:${Math.min(b.to, LMAX) - b.from}`}>
+            <span class="band-name">{b.label}</span>
+            <span class="band-range">{b.range}</span>
+          </div>
+        ))}
+        <span class="trail" style={`--a:${pos(summary.start)};--b:${pos(summary.now)}`}></span>
+        <span class="ghost" style={`--p:${pos(summary.start)}`} title={`Day one: ${f2(summary.start)}`}></span>
+        <span class="ball" style={`--from:${pos(summary.start)};--p:${pos(summary.now)}`} aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M5 6.5c3.5 2.5 3.5 8.5 0 11M19 6.5c-3.5 2.5-3.5 8.5 0 11" /></svg>
+        </span>
+      </div>
+      <div class="ticks">
+        {milestones.map((m) => (
+          <span class="tick" style={`--p:${pos(m.threshold)}`}>
+            <b>{f2(m.threshold)}</b>
+            <span>{day(m.date)} · match {m.match}</span>
+          </span>
+        ))}
+      </div>
+    </div>
   </section>
 
   <section class="wrap narrow tiles" aria-label="Headline numbers">
-    <div class="tile">
-      <span class="t-label">Rating</span>
-      <span class="t-value">{f2(summary.now)}</span>
-      <span class="t-sub">from {f2(summary.start)} on day one</span>
-    </div>
-    <div class="tile">
-      <span class="t-label">Record</span>
-      <span class="t-value">{summary.w}–{summary.l}</span>
-      <span class="t-sub">{summary.pct}% of matches won</span>
-    </div>
-    <div class="tile">
-      <span class="t-label">Played</span>
-      <span class="t-value">{summary.played}</span>
-      <span class="t-sub">matches over {summary.days} days on court</span>
-    </div>
-    <div class="tile">
-      <span class="t-label">Close ones</span>
-      <span class="t-value">{summary.close.w}–{summary.close.l}</span>
-      <span class="t-sub">in sets decided by two games or fewer</span>
-    </div>
+    <div class="tile"><span class="t-label">Record</span><span class="t-value">{summary.w}–{summary.l}</span><span class="t-sub">{summary.pct}% won</span></div>
+    <div class="tile"><span class="t-label">Matches</span><span class="t-value" data-count={summary.played} data-dp="0">{summary.played}</span><span class="t-sub">over {summary.days} days</span></div>
+    <div class="tile"><span class="t-label">Close sets</span><span class="t-value">{summary.close.w}–{summary.close.l}</span><span class="t-sub">decided by ≤2 games</span></div>
+    <div class="tile"><span class="t-label">Best streak</span><span class="t-value">{summary.bestStreak}</span><span class="t-sub">wins in a row</span></div>
   </section>
 
+  <!-- rating over time -->
   <section class="wrap narrow block">
     <div class="block-head">
-      <h2>Rating after every match</h2>
+      <h2>My WPR, match by match</h2>
       <p class="key" aria-hidden="true"><span class="k-win"></span> win <span class="k-loss"></span> loss</p>
     </div>
-    <figure class="chart" id="rating-chart" data-points={chartData}>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`WPR social rating after each of ${matches.length} matches, from ${f2(summary.start)} to ${f2(summary.now)}.`}>
-        {gridVals.map((v) => (
-          <g class="grid">
-            <line x1={L} x2={W - R} y1={ys(v)} y2={ys(v)} />
-            <text x={L - 8} y={ys(v) + 4} text-anchor="end">{v}</text>
-          </g>
+    <figure class="chart" id="rating-chart" data-points={chartData} data-reveal>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`WPR rating after each of ${matches.length} matches, from ${f2(summary.start)} to ${f2(summary.now)}.`}>
+        {[0, 1, 2, 3, 4].map((v) => (
+          <g class="grid"><line x1={L} x2={W - R} y1={ys(v)} y2={ys(v)} /><text x={L - 8} y={ys(v) + 4} text-anchor="end">{v}</text></g>
+        ))}
+        {[1.5, 3.5].map((v) => (
+          <g class="band-line"><line x1={L} x2={W - R} y1={ys(v)} y2={ys(v)} /><text x={W - R - 8} y={ys(v) - 5} text-anchor="end">{v === 1.5 ? "1.5 band" : "3.5 band"}</text></g>
         ))}
         {monthStarts.map((m) => (
-          <g class="month">
-            <line x1={m.x} x2={m.x} y1={T} y2={H - B} />
-            <text x={m.x + 4} y={H - B + 18}>{m.label}</text>
+          <g class="month"><line x1={m.x} x2={m.x} y1={T} y2={H - B} /><text x={m.x + 4} y={H - B + 18}>{m.label}</text></g>
+        ))}
+        {tournaments.map((t) => (
+          <g class="tourney">
+            <line x1={xs(t.match)} x2={xs(t.match)} y1={T - 6} y2={ys(matches[t.match - 1].after) - 8} />
+            <text x={xs(t.match)} y={T - 12} text-anchor="middle">🏆 {day(t.date)}</text>
           </g>
         ))}
         <path class="area" d={area} />
-        <path class="line" d={line} />
-        {matches.map((m) => (
-          <circle class:list={["dot", m.won ? "win" : "loss"]} cx={xs(m.i)} cy={ys(m.after)} r="4" />
-        ))}
-        <text class="end-label" x={xs(0) + 8} y={ys(summary.start) + 16}>{f2(summary.start)}</text>
-        <text class="end-label strong" x={xs(matches.length) + 7} y={ys(summary.now) + 4}>{f2(summary.now)}</text>
-        <g class="cursor" aria-hidden="true">
-          <line class="cross" y1={T} y2={H - B} />
-          <circle class="ring" r="7" />
+        <path class="line" d={line} pathLength="1" />
+        <g class="dots">
+          {matches.map((m) => (
+            <circle class:list={["dot", m.won ? "win" : "loss"]} cx={xs(m.i)} cy={ys(m.after)} r="4" />
+          ))}
         </g>
+        <g class="note">
+          <path d={`M${xs(m3.match) - 4},${ys(m3pt.after) + 14} q -18 26 -48 30`} />
+          <text x={xs(m3.match) - 56} y={ys(m3pt.after) + 50} text-anchor="end">crossed 3.0, {day(m3.date)}</text>
+        </g>
+        <text class="end-label" x={xs(0) + 8} y={ys(summary.start) + 16}>day one, {f2(summary.start)}</text>
+        <text class="end-label strong" x={xs(matches.length) + 7} y={ys(summary.now) + 4}>{f2(summary.now)}</text>
+        <g class="cursor" aria-hidden="true"><line class="cross" y1={T} y2={H - B} /><circle class="ring" r="7" /></g>
       </svg>
       <div class="tip" role="status" aria-live="polite"></div>
-      <figcaption>Each dot is one rated match. The line is my WPR social rating right after it.</figcaption>
+      <figcaption>Each dot is one rated match; hover for the score. Dashed lines are the WPR open-play bands.</figcaption>
     </figure>
+  </section>
+
+  <!-- form guide -->
+  <section class="wrap narrow block">
+    <div class="block-head">
+      <h2>The form guide</h2>
+      <p class="current">current form {lastFive.map((f) => <span class:list={["fg", "sm", f.won ? "w" : "l"]}>{f.won ? "W" : "L"}</span>)}</p>
+    </div>
+    <ol class="form" data-reveal aria-label={`All ${form.length} results in order, oldest first.`}>
+      {form.map((f, k) => (
+        <li class:list={["fg", f.won ? "w" : "l"]} style={`--k:${k}`} title={`Match ${f.i} · ${day(f.date)} · ${f.won ? "won" : "lost"} ${f.score}`}>{f.won ? "W" : "L"}</li>
+      ))}
+    </ol>
+    <p class="small-note">All {form.length} rated matches, oldest first, read like a football table.</p>
+  </section>
+
+  <!-- calendar + scorelines side by side on wide screens -->
+  <section class="wrap narrow block two-up">
+    <div>
+      <h2>Days on court</h2>
+      <svg class="cal" viewBox={`0 0 ${calW} ${calH}`} role="img" aria-label={`Calendar of days played. ${busiest.day} is the busiest day with ${busiest.n} matches.`}>
+        {["S", "M", "T", "W", "T", "F", "S"].map((d, k) => <text class:list={["cal-day", { hot: k === 2 }]} x={CL - 8} y={CT + k * (CELL + GAP) + 11} text-anchor="end">{d}</text>)}
+        {calMonths.map((m) => <text class="cal-month" x={m.x} y={CT - 6}>{m.label}</text>)}
+        {cells.map((c) => (
+          <rect class:list={["cell", `s${shade(c.n)}`]} x={c.x} y={c.y} width={CELL} height={CELL} rx="3">
+            <title>{day(c.date)}{c.n ? ` · ${c.n} match${c.n > 1 ? "es" : ""}, ${c.w} won` : " · rest day"}</title>
+          </rect>
+        ))}
+      </svg>
+      <p class="small-note"><strong>{busiest.day}</strong> is padel night: {busiest.n} of {summary.played} matches.</p>
+    </div>
+    <div>
+      <h2>Favourite scorelines</h2>
+      <ul class="scores">
+        {topScores.map((s) => (
+          <li>
+            <span class:list={["sc", s.f > s.a ? "w" : "l"]}>{s.f}–{s.a}</span>
+            <span class="sc-bar"><span style={`--v:${s.n / maxScore}`} class={s.f > s.a ? "w" : "l"}></span></span>
+            <span class="sc-n">×{s.n}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="small-note">My games first. Filled = won the set.</p>
+    </div>
+  </section>
+
+  <!-- fun facts -->
+  <section class="wrap narrow block">
+    <h2>Odds and ends</h2>
+    <div class="cards">
+      <div class="card">
+        <span class="c-num">{partnerSplit.higher.pct}%</span>
+        <span class="c-txt">win rate with a partner rated above me ({partnerSplit.higher.w}–{partnerSplit.higher.l}), versus {partnerSplit.lower.pct}% otherwise. Good partners are a cheat code.</span>
+      </div>
+      <div class="card">
+        <span class="c-num">{sign(swings.up.d)}</span>
+        <span class="c-txt">biggest single-match jump, on {day(swings.up.date)}. Worst drop: {sign(swings.down.d)} on {day(swings.down.date)}.</span>
+      </div>
+      <div class="card">
+        <span class="c-num">{summary.tiebreaks.w}–{summary.tiebreaks.l}</span>
+        <span class="c-txt">in tiebreak sets. I'll take that.</span>
+      </div>
+      {summary.biggestUpset && (
+        <div class="card">
+          <span class="c-num">+{f2(summary.biggestUpset.gap)}</span>
+          <span class="c-txt">biggest upset: beat a pair rated that much higher on average, {day(summary.biggestUpset.date)}.</span>
+        </div>
+      )}
+      <div class="card">
+        <span class="c-num">{summary.gamesPct}%</span>
+        <span class="c-txt">of all games won. Matches are a lot closer than the record makes them look.</span>
+      </div>
+      <div class="card">
+        <span class="c-num">{summary.partners}</span>
+        <span class="c-txt">different partners and {summary.opponents} different opponents. Open play is a great way to meet people.</span>
+      </div>
+    </div>
   </section>
 
   <section class="wrap narrow block">
     <h2>Month by month</h2>
     <div class="table-wrap">
       <table class="stats">
-        <thead><tr><th>Month</th><th>Days</th><th>Matches</th><th>Record</th><th>Rating</th><th>Change</th></tr></thead>
+        <thead><tr><th>Month</th><th>Days</th><th>Matches</th><th>Record</th><th>WPR</th><th>Change</th></tr></thead>
         <tbody>
           {months.map((m) => (
             <tr>
-              <td>{monthName(m.month)}</td>
-              <td>{m.days}</td>
-              <td>{m.played}</td>
+              <td>{monthName(m.month)}</td><td>{m.days}</td><td>{m.played}</td>
               <td>{m.w}–{m.l} <span class="muted-n">{m.pct}%</span></td>
               <td>{f2(m.from)} → {f2(m.to)}</td>
               <td class:list={["chg", { up: m.to >= m.from }]}>{sign(m.to - m.from)}</td>
@@ -121,40 +260,22 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
         </tbody>
       </table>
     </div>
-  </section>
-
-  <section class="wrap narrow block">
-    <h2>Where I played</h2>
     <ul class="kinds">
       {byKind.filter((k) => k.played > 0).map((k) => (
         <li>
           <span class="k-name">{k.label}</span>
           <span class="k-bar"><span style={`--v:${k.played / maxKind}`}></span></span>
-          <span class="k-num">{k.played} matches · {k.w}–{k.l}</span>
+          <span class="k-num">{k.played} · {k.w}–{k.l}</span>
         </li>
       ))}
     </ul>
-  </section>
-
-  <section class="wrap narrow block">
-    <h2>Odds and ends</h2>
-    <dl class="facts">
-      <div><dt>Longest win streak</dt><dd>{summary.bestStreak}</dd></div>
-      <div><dt>Games won</dt><dd>{summary.gamesPct}%</dd></div>
-      <div><dt>Tiebreak sets</dt><dd>{summary.tiebreaks.w}–{summary.tiebreaks.l}</dd></div>
-      {summary.biggestUpset && (
-        <div><dt>Biggest upset, {dayName(summary.biggestUpset.date)}</dt><dd>beat a pair rated +{f2(summary.biggestUpset.gap)}</dd></div>
-      )}
-      <div><dt>Different partners</dt><dd>{summary.partners}</dd></div>
-      <div><dt>Different opponents</dt><dd>{summary.opponents}</dd></div>
-    </dl>
   </section>
 
   {friendlies.sets > 0 && (
     <section class="wrap narrow block">
       <h2>Off the books</h2>
       <p class="muted">
-        Friendlies don't count toward the rating, so I log them by hand: {friendlies.sets} sets
+        Friendlies don't count toward my WPR, so I log them by hand: {friendlies.sets} sets
         over {friendlies.days} {friendlies.days === 1 ? "day" : "days"} so far, {friendlies.w}–{friendlies.l}.
         {friendlies.notes.length > 0 && <> Most honest note in the log: <em>"{friendlies.notes[friendlies.notes.length - 1]}."</em></>}
       </p>
@@ -166,21 +287,18 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
       <summary>Every match ({matches.length})</summary>
       <div class="table-wrap">
         <table class="stats">
-          <thead><tr><th>#</th><th>Date</th><th>Result</th><th>Score</th><th>Rating</th></tr></thead>
+          <thead><tr><th>#</th><th>Date</th><th>Result</th><th>Score</th><th>WPR</th></tr></thead>
           <tbody>
             {[...matches].reverse().map((m) => (
-              <tr>
-                <td>{m.i}</td><td>{dayName(m.date)}</td><td>{m.won ? "Won" : "Lost"}</td><td>{m.score}</td>
-                <td>{f2(m.before)} → {f2(m.after)}</td>
-              </tr>
+              <tr><td>{m.i}</td><td>{day(m.date)}</td><td>{m.won ? "Won" : "Lost"}</td><td>{m.score}</td><td>{f2(m.before)} → {f2(m.after)}</td></tr>
             ))}
           </tbody>
         </table>
       </div>
     </details>
     <p class="source">
-      Source: my own match history from the World Padel Rating app. Ratings are WPR-s, the social rating.
-      Other players are counted, never named.
+      Source: my own match history from the World Padel Rating (WPR) app. The number shown is
+      WPR-s, the social rating. Other players are counted, never named.
     </p>
   </section>
 </Base>
@@ -189,53 +307,162 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
   .head { padding-top: var(--space-2xl); }
   .head h1 { display: flex; flex-direction: column; align-items: flex-start; }
   .lede { margin-top: var(--space-m); font-size: var(--step-1); color: var(--ink-soft); }
-  .updated { margin-top: var(--space-xs); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-faint); }
+  .lede strong { color: var(--ink); font-weight: 600; }
+  .updated { margin-top: var(--space-xs); font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); }
 
-  .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-s); margin-top: var(--space-l); }
-  @media (min-width: 40rem) { .tiles { grid-template-columns: repeat(4, 1fr); } }
-  .tile {
-    display: flex; flex-direction: column; gap: 0.2rem;
-    padding: var(--space-s) var(--space-s) var(--space-s);
-    background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius-m);
+  /* ---------- ladder ---------- */
+  .ladder-wrap {
+    margin-top: var(--space-l);
+    padding: var(--space-m) var(--space-m) var(--space-l);
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius-l);
   }
-  .t-label { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+  .ladder-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-s) var(--space-l); }
+  .big-label { display: block; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-ink); }
+  .big { display: block; font-family: var(--font-serif); font-size: clamp(3.6rem, 12vw, 5.4rem); font-weight: 600; line-height: 0.95; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; font-variation-settings: "opsz" 144; }
+  .big-sub { display: block; margin-top: 0.3rem; color: var(--ink-soft); font-size: 0.92rem; }
+  .next { max-width: 17rem; font-size: 0.95rem; line-height: 1.5; color: var(--ink-soft); margin: 0; }
+  .next strong { color: var(--accent-ink); }
+
+  .ladder { margin-top: var(--space-l); }
+  .track { position: relative; display: flex; height: 3.2rem; border-radius: var(--radius-m); overflow: visible; }
+  .band {
+    position: relative; display: flex; flex-direction: column; justify-content: center; padding: 0 0.7rem;
+    background: color-mix(in srgb, var(--accent) 10%, var(--paper-sunk)); border-right: 2px solid var(--paper-raised);
+  }
+  .band:first-child { border-radius: var(--radius-m) 0 0 var(--radius-m); background: color-mix(in srgb, var(--accent) 6%, var(--paper-sunk)); }
+  .band:nth-child(2) { background: color-mix(in srgb, var(--accent) 16%, var(--paper-sunk)); }
+  .band.future { border-right: 0; border-radius: 0 var(--radius-m) var(--radius-m) 0; background: repeating-linear-gradient(135deg, var(--paper-sunk) 0 6px, color-mix(in srgb, var(--accent) 8%, var(--paper-sunk)) 6px 12px); }
+  .band-name { font-size: 0.78rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .band-range { font-family: var(--font-mono); font-size: 0.66rem; color: var(--ink-faint); }
+  .trail {
+    position: absolute; top: 50%; height: 4px; transform: translateY(-50%);
+    left: calc(var(--a) * 100%); width: calc((var(--b) - var(--a)) * 100%);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 20%, transparent), var(--accent));
+    border-radius: 2px; transform-origin: left center;
+  }
+  .ghost { position: absolute; top: 50%; left: calc(var(--p) * 100%); width: 12px; height: 12px; transform: translate(-50%, -50%); border-radius: 50%; border: 2px dashed var(--ink-faint); background: var(--paper-raised); }
+  .ball {
+    position: absolute; top: 50%; left: calc(var(--p) * 100%); width: 30px; height: 30px; transform: translate(-50%, -50%);
+    filter: drop-shadow(0 3px 4px rgb(0 0 0 / 0.22));
+  }
+  .ball svg { width: 100%; height: 100%; display: block; }
+  .ball circle { fill: #dff05a; stroke: #6d7a12; stroke-width: 1.4; }
+  .ball path { fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: round; }
+  .ticks { position: relative; height: 4.2rem; margin-top: 0.5rem; }
+  .tick { position: absolute; left: calc(var(--p) * 100%); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; color: var(--ink-faint); white-space: nowrap; }
+  .tick::before { content: ""; width: 1px; height: 6px; background: var(--ink-faint); margin-bottom: 2px; }
+  .tick b { font-family: var(--font-mono); color: var(--ink-soft); font-weight: 600; }
+  .tick:nth-child(even) { top: 1.55rem; }
+  .tick:nth-child(even)::before { height: 1.9rem; margin-top: -1.55rem; }
+  @media (max-width: 34rem) {
+    .band-range { display: none; }
+    .band-name { font-size: 0.68rem; }
+    .tick span { display: none; }
+  }
+
+  /* ladder entrance: the ball rolls from day one to now (only once JS has armed it) */
+  :global(html.padel-armed) .ladder-wrap:not(.in) .ball { left: calc(var(--from) * 100%); }
+  :global(html.padel-armed) .ladder-wrap:not(.in) .trail { transform: translateY(-50%) scaleX(0); }
+  :global(html.padel-armed) .ball { transition: left 1.6s cubic-bezier(0.3, 0.7, 0.2, 1) 0.2s; }
+  :global(html.padel-armed) .ball svg { transition: transform 1.6s cubic-bezier(0.3, 0.7, 0.2, 1) 0.2s; }
+  :global(html.padel-armed) .ladder-wrap.in .ball svg { transform: rotate(720deg); }
+  :global(html.padel-armed) .trail { transition: transform 1.6s cubic-bezier(0.3, 0.7, 0.2, 1) 0.2s; }
+
+  /* ---------- tiles ---------- */
+  .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-s); margin-top: var(--space-s); }
+  @media (min-width: 40rem) { .tiles { grid-template-columns: repeat(4, 1fr); } }
+  .tile { display: flex; flex-direction: column; gap: 0.15rem; padding: var(--space-s); background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius-m); }
+  .t-label { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
   .t-value { font-family: var(--font-serif); font-size: var(--step-3); font-weight: 600; line-height: 1.1; color: var(--ink); font-variant-numeric: tabular-nums; }
-  .t-sub { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.35; }
+  .t-sub { font-size: 0.8rem; color: var(--ink-soft); }
 
   .block { padding-top: var(--space-xl); }
   .block h2 { font-size: var(--step-2); margin-bottom: var(--space-s); }
   .block-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-s); flex-wrap: wrap; }
+  .small-note { margin-top: 0.6rem; font-size: 0.85rem; color: var(--ink-soft); }
+  .small-note strong { color: var(--ink); }
+
+  /* ---------- chart ---------- */
   .key { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); display: flex; align-items: center; gap: 0.4rem; }
   .k-win, .k-loss { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
   .k-win { background: var(--accent); }
   .k-loss { border: 1.5px solid var(--accent); background: var(--paper); margin-left: 0.5rem; }
-
   .chart { position: relative; margin: 0; }
   .chart svg { width: 100%; height: auto; display: block; overflow: visible; }
-  .grid line { stroke: var(--line); stroke-width: 1; }
-  .grid text, .month text { font-family: var(--font-mono); font-size: 11px; fill: var(--ink-faint); }
+  .grid line { stroke: var(--line); }
+  .grid text, .month text, .band-line text { font-family: var(--font-mono); font-size: 11px; fill: var(--ink-faint); }
+  .band-line line { stroke: var(--accent); stroke-opacity: 0.45; stroke-dasharray: 5 5; }
   .month line { stroke: var(--line); stroke-dasharray: 2 4; }
+  .tourney line { stroke: var(--ink-faint); stroke-dasharray: 2 3; }
+  .tourney text { font-family: var(--font-mono); font-size: 10.5px; fill: var(--ink-soft); }
   .area { fill: color-mix(in srgb, var(--accent) 9%, transparent); }
-  .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .line { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
   .dot.win { fill: var(--accent); stroke: var(--paper); stroke-width: 2; }
   .dot.loss { fill: var(--paper); stroke: var(--accent); stroke-width: 1.5; }
+  .note path { fill: none; stroke: var(--ink-soft); stroke-width: 1.2; stroke-linecap: round; }
+  .note text { font-family: var(--font-serif); font-style: italic; font-size: 13px; fill: var(--ink-soft); }
   .end-label { font-family: var(--font-mono); font-size: 11px; fill: var(--ink-soft); }
   .end-label.strong { font-weight: 600; fill: var(--ink); font-size: 12px; }
   .cursor { opacity: 0; transition: opacity 0.12s; pointer-events: none; }
   .chart.hovering .cursor { opacity: 1; }
-  .cross { stroke: var(--ink-faint); stroke-width: 1; stroke-dasharray: 3 3; }
+  .cross { stroke: var(--ink-faint); stroke-dasharray: 3 3; }
   .ring { fill: none; stroke: var(--ink); stroke-width: 1.5; }
-  .tip {
-    position: absolute; top: 0; left: 0; pointer-events: none; opacity: 0;
-    transform: translate(-50%, calc(-100% - 12px));
-    background: var(--ink); color: var(--paper);
-    font-size: 0.8rem; line-height: 1.4; padding: 0.4rem 0.6rem; border-radius: var(--radius-s);
-    white-space: nowrap; box-shadow: var(--shadow-md); transition: opacity 0.12s;
-  }
+  .tip { position: absolute; top: 0; left: 0; pointer-events: none; opacity: 0; transform: translate(-50%, calc(-100% - 12px)); background: var(--ink); color: var(--paper); font-size: 0.8rem; line-height: 1.4; padding: 0.4rem 0.6rem; border-radius: var(--radius-s); white-space: nowrap; box-shadow: var(--shadow-md); transition: opacity 0.12s; }
   .tip b { font-weight: 600; }
   .chart.hovering .tip { opacity: 1; }
   .chart figcaption { margin-top: 0.6rem; font-family: var(--font-serif); font-style: italic; font-size: 0.88rem; color: var(--ink-soft); }
+  /* draw the line in when the chart scrolls into view */
+  :global(html.padel-armed) .chart:not(.in) .line { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  :global(html.padel-armed) .chart .line { stroke-dasharray: 1; transition: stroke-dashoffset 1.8s cubic-bezier(0.4, 0, 0.2, 1); }
+  :global(html.padel-armed) .chart:not(.in) .dots, :global(html.padel-armed) .chart:not(.in) .area, :global(html.padel-armed) .chart:not(.in) .note { opacity: 0; }
+  :global(html.padel-armed) .chart .dots, :global(html.padel-armed) .chart .area, :global(html.padel-armed) .chart .note { transition: opacity 0.6s ease 1.3s; }
 
+  /* ---------- form guide ---------- */
+  .current { display: flex; align-items: center; gap: 0.25rem; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); margin: 0; }
+  .current .fg { margin-left: 0.1rem; }
+  .form { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+  .fg {
+    display: inline-grid; place-items: center; width: 1.45rem; height: 1.45rem; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.66rem; font-weight: 600; cursor: default;
+  }
+  .fg.sm { width: 1.2rem; height: 1.2rem; font-size: 0.6rem; }
+  .fg.w { background: var(--accent); color: #fff; }
+  .fg.l { background: transparent; color: var(--ink-soft); box-shadow: inset 0 0 0 1.5px var(--line-strong); }
+  :global(html.padel-armed) .form:not(.in) .fg { opacity: 0; transform: scale(0.4); }
+  :global(html.padel-armed) .form .fg { transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.2, 1.4, 0.4, 1); transition-delay: calc(var(--k) * 14ms); }
+
+  /* ---------- calendar + scorelines ---------- */
+  .two-up { display: grid; grid-template-columns: 1fr; gap: var(--space-l); }
+  @media (min-width: 46rem) { .two-up { grid-template-columns: 1.1fr 1fr; } }
+  .cal { width: 100%; max-width: 26rem; height: auto; display: block; }
+  .cal-day, .cal-month { font-family: var(--font-mono); font-size: 9px; fill: var(--ink-faint); }
+  .cal-day.hot { fill: var(--accent-ink); font-weight: 700; }
+  .cell { stroke: none; }
+  .cell.s0 { fill: var(--paper-sunk); }
+  .cell.s1 { fill: color-mix(in srgb, var(--accent) 35%, var(--paper-sunk)); }
+  .cell.s2 { fill: color-mix(in srgb, var(--accent) 55%, var(--paper-sunk)); }
+  .cell.s3 { fill: color-mix(in srgb, var(--accent) 78%, var(--paper-sunk)); }
+  .cell.s4 { fill: var(--accent); }
+  .scores { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.45rem; }
+  .scores li { display: grid; grid-template-columns: 3.2rem 1fr 2.2rem; align-items: center; gap: 0.6rem; }
+  .sc { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600; text-align: center; padding: 0.15rem 0; border-radius: 4px; }
+  .sc.w { background: var(--accent); color: #fff; }
+  .sc.l { color: var(--ink-soft); box-shadow: inset 0 0 0 1.5px var(--line-strong); }
+  .sc-bar { height: 8px; border-radius: 4px; background: var(--paper-sunk); overflow: hidden; }
+  .sc-bar span { display: block; height: 100%; width: calc(var(--v) * 100%); border-radius: 4px; }
+  .sc-bar span.w { background: var(--accent); }
+  .sc-bar span.l { background: var(--line-strong); }
+  .sc-n { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft); text-align: right; }
+
+  /* ---------- fun-fact cards ---------- */
+  .cards { display: grid; grid-template-columns: 1fr; gap: var(--space-s); }
+  @media (min-width: 40rem) { .cards { grid-template-columns: repeat(3, 1fr); } }
+  .card { padding: var(--space-s); border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--paper-raised); display: flex; flex-direction: column; gap: 0.35rem; transition: transform var(--t-fast), border-color var(--t-fast); }
+  .card:hover { transform: translateY(-2px) rotate(-0.4deg); border-color: var(--accent); }
+  .c-num { font-family: var(--font-serif); font-size: var(--step-3); font-weight: 600; color: var(--accent-ink); line-height: 1; font-variant-numeric: tabular-nums; }
+  .c-txt { font-size: 0.88rem; line-height: 1.45; color: var(--ink-soft); }
+
+  /* ---------- tables ---------- */
   .table-wrap { overflow-x: auto; }
   .stats { width: 100%; border-collapse: collapse; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
   .stats th { text-align: left; font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-faint); padding: 0 0.7em 0.55em 0; border-bottom: 1.5px solid var(--ink); }
@@ -244,29 +471,58 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
   .muted-n { color: var(--ink-faint); font-size: 0.85em; margin-left: 0.3em; }
   .chg { font-family: var(--font-mono); font-size: 0.85rem; color: var(--ink-soft); }
   .chg.up::before { content: "▲ "; font-size: 0.7em; color: var(--accent); }
-
-  .kinds { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
-  .kinds li { display: grid; grid-template-columns: 7.5rem 1fr auto; align-items: center; gap: var(--space-s); }
-  .k-name { font-weight: 500; }
+  .kinds { list-style: none; padding: 0; margin: var(--space-m) 0 0; display: grid; gap: 0.6rem; }
+  .kinds li { display: grid; grid-template-columns: 7rem 1fr 5.5rem; align-items: center; gap: var(--space-s); }
+  .k-name { font-weight: 500; font-size: 0.92rem; }
   .k-bar { height: 8px; background: var(--paper-sunk); border-radius: 4px; overflow: hidden; }
   .k-bar span { display: block; height: 100%; width: calc(var(--v) * 100%); background: var(--accent); border-radius: 4px; }
-  .k-num { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft); }
-  @media (max-width: 34rem) { .kinds li { grid-template-columns: 1fr auto; } .k-bar { grid-column: 1 / -1; grid-row: 2; } }
-
-  .facts { display: grid; grid-template-columns: 1fr; gap: 0; margin: 0; }
-  @media (min-width: 40rem) { .facts { grid-template-columns: 1fr 1fr; column-gap: var(--space-l); } }
-  .facts div { display: flex; justify-content: space-between; gap: var(--space-s); padding: 0.65rem 0; border-bottom: 1px solid var(--line); }
-  .facts dt { color: var(--ink-soft); }
-  .facts dd { margin: 0; text-align: right; color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
-
+  .k-num { font-family: var(--font-mono); font-size: 0.76rem; color: var(--ink-soft); text-align: right; }
   .all summary { cursor: pointer; font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.05em; color: var(--accent-ink); }
   .all .table-wrap { margin-top: var(--space-s); max-height: 28rem; overflow-y: auto; }
   .source { margin-top: var(--space-l); padding-bottom: var(--space-xl); font-size: 0.82rem; color: var(--ink-faint); }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.padel-armed) * { transition: none !important; }
+    .card:hover { transform: none; }
+  }
 </style>
 
 <script>
-  // crosshair + tooltip: snaps to the nearest match on the x axis
-  function initPadelChart() {
+  function initPadel() {
+    const root = document.documentElement;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // reveal-on-scroll: everything is fully visible without JS; JS arms the entrance states
+    const targets = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+    if (!reduce && "IntersectionObserver" in window && targets.length) {
+      root.classList.add("padel-armed");
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          e.target.classList.add("in");
+          e.target.querySelectorAll<HTMLElement>("[data-count]").forEach(countUp);
+          io.unobserve(e.target);
+        });
+      }, { threshold: 0.3 });
+      targets.forEach((t) => io.observe(t));
+    } else {
+      targets.forEach((t) => t.classList.add("in"));
+    }
+
+    function countUp(el: HTMLElement) {
+      const to = Number(el.dataset.count), from = Number(el.dataset.from ?? 0), dp = Number(el.dataset.dp ?? 0);
+      const t0 = performance.now(), dur = 1600;
+      const tick = (now: number) => {
+        const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = (from + (to - from) * e).toFixed(dp);
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      // never leave a half-counted number behind (throttled background tabs, etc.)
+      setTimeout(() => (el.textContent = to.toFixed(dp)), dur + 300);
+    }
+
+    // chart crosshair + tooltip
     const fig = document.getElementById("rating-chart");
     if (!fig || (fig as any)._wired) return;
     (fig as any)._wired = true;
@@ -274,20 +530,16 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
     const tip = fig.querySelector<HTMLElement>(".tip")!;
     const cross = fig.querySelector<SVGLineElement>(".cross")!;
     const ring = fig.querySelector<SVGCircleElement>(".ring")!;
-    const pts: { x: number; y: number; d: string; w: boolean; s: string; b: string; a: string; n: number }[] =
-      JSON.parse(fig.dataset.points || "[]");
+    const pts: { x: number; y: number; d: string; w: boolean; s: string; b: string; a: string }[] = JSON.parse(fig.dataset.points || "[]");
     const vb = svg.viewBox.baseVal;
-
     const show = (clientX: number) => {
       const r = svg.getBoundingClientRect();
       const x = ((clientX - r.left) / r.width) * vb.width;
       let best = pts[0];
       for (const p of pts) if (Math.abs(p.x - x) < Math.abs(best.x - x)) best = p;
-      cross.setAttribute("x1", String(best.x));
-      cross.setAttribute("x2", String(best.x));
-      ring.setAttribute("cx", String(best.x));
-      ring.setAttribute("cy", String(best.y));
-      tip.innerHTML = `<b>${best.w ? "Won" : "Lost"} ${best.s}</b> · ${best.d}<br>rating ${best.b} → ${best.a}`;
+      cross.setAttribute("x1", String(best.x)); cross.setAttribute("x2", String(best.x));
+      ring.setAttribute("cx", String(best.x)); ring.setAttribute("cy", String(best.y));
+      tip.innerHTML = `<b>${best.w ? "Won" : "Lost"} ${best.s}</b> · ${best.d}<br>WPR ${best.b} → ${best.a}`;
       const px = (best.x / vb.width) * r.width, py = (best.y / vb.height) * r.height;
       tip.style.left = `${Math.min(Math.max(px, 70), r.width - 70)}px`;
       tip.style.top = `${py}px`;
@@ -297,6 +549,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
     svg.addEventListener("pointerdown", (e) => show(e.clientX));
     svg.addEventListener("pointerleave", () => fig.classList.remove("hovering"));
   }
-  initPadelChart();
-  document.addEventListener("astro:page-load", initPadelChart);
+  initPadel();
+  document.addEventListener("astro:page-load", initPadel);
+  document.addEventListener("astro:before-swap", () => document.documentElement.classList.remove("padel-armed"));
 </script>

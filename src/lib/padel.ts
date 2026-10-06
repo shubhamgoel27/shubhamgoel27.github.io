@@ -22,6 +22,7 @@ export interface Match {
   tiebreak: boolean; // a set went 7-6
   close: boolean; // decided by 2 games or fewer, or a tiebreak
   gap: number; // opponents' average rating minus my team's average, before the match
+  partnerBefore: number; // my partner's rating before the match (number only, never the name)
 }
 
 const psv = (raw: string) => {
@@ -78,6 +79,7 @@ export const matches: Match[] = psv(wprRaw).map((r, i) => {
     tiebreak,
     close: tiebreak || own.every(([x, y]) => Math.abs(x - y) <= 2),
     gap: avg(theirs) - avg(mine),
+    partnerBefore: mine.find((p) => p.name !== ME)!.before,
   };
 });
 
@@ -143,3 +145,69 @@ export const friendlies = {
   days: new Set(fr.map((r) => r.date)).size,
   notes: fr.map((r) => r.note).filter(Boolean),
 };
+
+// ---- the fun stuff ----
+
+// WPR open-play bands, from the event names in the export ("Beginner 0-1.49", "High Beginner 1.5-3.49")
+export const bands = [
+  { from: 0, to: 1.5, label: "Beginner", range: "0 – 1.49" },
+  { from: 1.5, to: 3.5, label: "High beginner", range: "1.50 – 3.49" },
+  { from: 3.5, to: 5, label: "Next level", range: "3.50+" },
+];
+
+export const milestones = [1.5, 2.5, 3.0].map((t) => {
+  const m = matches.find((x) => x.after >= t)!;
+  return { threshold: t, match: m.i, date: m.date };
+});
+
+// pace over the last 20 matches, and what it implies for the next band
+const recent = matches.slice(-20);
+const pace = (recent[recent.length - 1].after - recent[0].before) / recent.length;
+const nextBand = bands.find((b) => b.from > summary.now)!;
+export const projection = {
+  pace,
+  next: nextBand.from,
+  toGo: nextBand.from - summary.now,
+  matches: pace > 0 ? Math.ceil((nextBand.from - summary.now) / pace) : null,
+};
+
+export const form = matches.map((m) => ({ i: m.i, won: m.won, date: m.date, score: m.score }));
+
+// days on court, for the calendar
+export const calendar = (() => {
+  const counts = new Map<string, { n: number; w: number }>();
+  for (const m of matches) {
+    const c = counts.get(m.date) ?? { n: 0, w: 0 };
+    c.n++; if (m.won) c.w++;
+    counts.set(m.date, c);
+  }
+  return counts;
+})();
+
+// single-set scorelines, my games first
+export const scorelines = (() => {
+  const c = new Map<string, number>();
+  for (const m of matches) if (!m.score.includes(" ")) c.set(m.score, (c.get(m.score) ?? 0) + 1);
+  return [...c.entries()].map(([k, n]) => { const [f, a] = k.split("-").map(Number); return { f, a, n }; });
+})();
+
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+export const weekdays = days.map((d, k) => ({
+  day: d,
+  n: matches.filter((m) => new Date(m.date + "T12:00:00Z").getUTCDay() === k).length,
+}));
+
+const hp = matches.filter((m) => m.partnerBefore > m.before);
+const lp = matches.filter((m) => m.partnerBefore <= m.before);
+export const partnerSplit = { higher: record(hp), higherN: hp.length, lower: record(lp), lowerN: lp.length };
+
+const jumps = matches.map((m) => ({ d: m.after - m.before, date: m.date }));
+export const swings = {
+  up: jumps.reduce((a, b) => (b.d > a.d ? b : a)),
+  down: jumps.reduce((a, b) => (b.d < a.d ? b : a)),
+};
+
+export const tournaments = [...new Set(matches.filter((m) => m.kind === "tournament").map((m) => m.date))].map((date) => {
+  const first = matches.find((m) => m.kind === "tournament" && m.date === date)!;
+  return { date, match: first.i };
+});
