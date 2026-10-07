@@ -3,7 +3,7 @@ import Base from "../layouts/Base.astro";
 import Squiggle from "../components/Squiggle.astro";
 import {
   matches, summary, months, byKind, friendlies,
-  bands, milestones, projection, form, calendar, scorelines, weekdays, partnerSplit, swings, tournaments,
+  bands, milestones, form, calendar, scorelines, weekdays, partnerSplit, swings, tournaments,
 } from "../lib/padel";
 
 const f2 = (n: number) => n.toFixed(2);
@@ -86,12 +86,12 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
         <span class="big-sub">up from {f2(summary.start)} on day one</span>
       </div>
       <p class="next">
-        <strong>{f2(projection.toGo)}</strong> from {f2(projection.next)}.
-        {projection.matches && <> At my recent pace (about {sign(projection.pace)} a match), that's roughly <strong>{projection.matches} more matches</strong>.</>}
+        Easily <strong>50+ hours</strong> on court since June, most of it after 9 pm.
+        That's the extended Lord of the Rings trilogy, four times over.
       </p>
     </div>
 
-    <div class="ladder" role="img" aria-label={`WPR rating ladder: started at ${f2(summary.start)}, now ${f2(summary.now)}, ${f2(projection.toGo)} below the ${f2(projection.next)} band.`}>
+    <div class="ladder" role="img" aria-label={`WPR rating ladder: started at ${f2(summary.start)}, now ${f2(summary.now)}, next band starts at ${f2(bands.find((b) => b.from > summary.now)!.from)}.`}>
       <div class="track">
         {bands.map((b) => (
           <div class:list={["band", { future: b.from > summary.now }]} style={`flex:${Math.min(b.to, LMAX) - b.from}`}>

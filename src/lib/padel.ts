@@ -160,17 +160,6 @@ export const milestones = [1.5, 2.5, 3.0].map((t) => {
   return { threshold: t, match: m.i, date: m.date };
 });
 
-// pace over the last 20 matches, and what it implies for the next band
-const recent = matches.slice(-20);
-const pace = (recent[recent.length - 1].after - recent[0].before) / recent.length;
-const nextBand = bands.find((b) => b.from > summary.now)!;
-export const projection = {
-  pace,
-  next: nextBand.from,
-  toGo: nextBand.from - summary.now,
-  matches: pace > 0 ? Math.ceil((nextBand.from - summary.now) / pace) : null,
-};
-
 export const form = matches.map((m) => ({ i: m.i, won: m.won, date: m.date, score: m.score }));
 
 // days on court, for the calendar
