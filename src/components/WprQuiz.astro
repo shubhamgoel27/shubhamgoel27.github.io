@@ -1,0 +1,93 @@
+---
+// "Guess the change": three real WPR-s matches (ratings only, no names). Readers guess before the reveal.
+const QS = [
+  { who: "Me, July 2026", us: [2.56, 2.83], op: [3.03, 1.18], score: "6-4", won: true, d: 0.009,
+    why: "We were favourites by 0.6, and a 6-4 is about what favourites are supposed to do. So almost nothing." },
+  { who: "A friend, July 2026", us: [3.44, 3.24], op: [2.25, 1.83], score: "6-4", won: true, d: -0.009,
+    why: "Favourites by 1.3. At that gap a 6-4 is just short of break-even, so the win cost them a little." },
+  { who: "Another player, June 2026", us: [2.58, 3.65], op: [2.52, 4.84], score: "6-7", won: false, d: 0.008,
+    why: "Underdogs by 0.6, and they took it to a tiebreak. Losing that close to a better team goes up." },
+];
+---
+<div class="quiz" data-wpr-quiz>
+  <p class="q-kicker">Guess before you scroll: did their rating go up or down?</p>
+  {QS.map((q, i) => (
+    <div class="q" data-answer={q.d > 0.015 ? "up" : q.d < -0.015 ? "down" : q.d >= 0 ? "flat-up" : "flat-down"}>
+      <div class="q-top">
+        <span class="q-n">{i + 1}</span>
+        <span class="q-who">{q.who}</span>
+      </div>
+      <div class="q-match">
+        <span class="team"><b>{q.us[0].toFixed(2)}</b> + <b>{q.us[1].toFixed(2)}</b></span>
+        <span class="q-score" data-won={q.won ? "1" : "0"}>{q.won ? "won" : "lost"} {q.score}</span>
+        <span class="team"><b>{q.op[0].toFixed(2)}</b> + <b>{q.op[1].toFixed(2)}</b></span>
+      </div>
+      <div class="q-btns" role="group" aria-label={`Guess for match ${i + 1}`}>
+        <button type="button" data-guess="up">Went up</button>
+        <button type="button" data-guess="flat">Barely moved</button>
+        <button type="button" data-guess="down">Went down</button>
+      </div>
+      <p class="q-reveal" aria-live="polite" hidden>
+        <span class="q-d" data-sign={q.d >= 0 ? "up" : "down"}>{q.d >= 0 ? "+" : "−"}{Math.abs(q.d).toFixed(3)}</span>
+        <span class="q-verdict"></span> {q.why}
+      </p>
+    </div>
+  ))}
+</div>
+
+<style>
+  .quiz { display: grid; gap: var(--space-s); margin: var(--space-m) 0; }
+  .q-kicker { margin: 0; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-ink); }
+  .q { padding: 0.9rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-l); background: var(--paper-raised); }
+  .q-top { display: flex; align-items: center; gap: 0.6rem; }
+  .q-n { display: inline-grid; place-items: center; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: var(--accent); color: var(--paper); font-size: 0.75rem; font-weight: 600; }
+  .q-who { font-size: 0.85rem; color: var(--ink-faint); }
+  .q-match { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; margin: 0.7rem 0; font-variant-numeric: tabular-nums; }
+  .team { font-size: 0.95rem; color: var(--ink-soft); }
+  .team b { font-weight: 600; color: var(--ink); }
+  .q-score { font-family: var(--font-serif); font-size: 1.35rem; font-weight: 600; color: var(--ink); }
+  .q-btns { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .q-btns button {
+    font: inherit; font-size: 0.85rem; cursor: pointer; color: var(--ink-soft);
+    background: var(--paper); border: 1px solid var(--line-strong); border-radius: 999px; padding: 0.3rem 0.8rem;
+    transition: background 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s;
+  }
+  .q-btns button:hover:not(:disabled) { border-color: var(--accent); color: var(--ink); }
+  .q-btns button:disabled { cursor: default; opacity: 0.45; }
+  .q-btns button.picked { opacity: 1; border-color: var(--ink); color: var(--ink); }
+  .q-btns button.right { opacity: 1; background: var(--accent); border-color: var(--accent); color: var(--paper); }
+  .q-reveal { margin: 0.7rem 0 0; font-size: 0.92rem; line-height: 1.5; color: var(--ink-soft); animation: q-in 0.35s ease-out; }
+  .q-d { font-family: var(--font-serif); font-size: 1.15rem; font-weight: 600; margin-right: 0.3rem; font-variant-numeric: tabular-nums; }
+  .q-d[data-sign="up"] { color: var(--accent-ink); }
+  .q-d[data-sign="down"] { color: var(--ink); }
+  .q-verdict { font-weight: 600; color: var(--ink); }
+  @keyframes q-in { from { opacity: 0; transform: translateY(-4px); } }
+  @media (prefers-reduced-motion: reduce) { .q-reveal { animation: none; } }
+</style>
+
+<script>
+  function initQuiz(root: HTMLElement) {
+    if ((root as any)._wired) return;
+    (root as any)._wired = true;
+    root.querySelectorAll<HTMLElement>(".q").forEach((q) => {
+      const ans = q.dataset.answer!; // up | down | flat-up | flat-down
+      const ok = (g: string) => ans === g || ans.startsWith(g);
+      q.querySelectorAll<HTMLButtonElement>("[data-guess]").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          const g = btn.dataset.guess!;
+          q.querySelectorAll<HTMLButtonElement>("[data-guess]").forEach((b) => {
+            b.disabled = true;
+            if (ok(b.dataset.guess!)) b.classList.add("right");
+          });
+          btn.classList.add("picked");
+          const r = q.querySelector<HTMLElement>(".q-reveal")!;
+          r.querySelector(".q-verdict")!.textContent = ok(g) ? "Nice." : "Nope.";
+          r.hidden = false;
+        })
+      );
+    });
+  }
+  const boot = () => document.querySelectorAll<HTMLElement>("[data-wpr-quiz]").forEach(initQuiz);
+  boot();
+  document.addEventListener("astro:page-load", boot);
+</script>

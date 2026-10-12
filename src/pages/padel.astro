@@ -244,6 +244,14 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
   </section>
 
   <section class="wrap narrow block">
+    <a class="calc-callout" href="/blog/wpr-rating">
+      <span class="cc-kicker">New post</span>
+      <span class="cc-title">I cracked the World Padel Rating formula</span>
+      <span class="cc-sub">What actually moves your WPR, a quiz with real matches, and a calculator for your next one →</span>
+    </a>
+  </section>
+
+  <section class="wrap narrow block">
     <h2>Month by month</h2>
     <div class="table-wrap">
       <table class="stats">
@@ -485,6 +493,11 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
     :global(html.padel-armed) * { transition: none !important; }
     .card:hover { transform: none; }
   }
+  .calc-callout { display: grid; gap: 0.25rem; padding: var(--space-s) var(--space-m); border: 1px solid var(--accent); border-radius: var(--radius-m); background: color-mix(in srgb, var(--accent) 7%, var(--paper-raised)); color: var(--ink); transition: transform var(--t-fast), box-shadow var(--t-norm); }
+  .calc-callout:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+  .cc-kicker { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-ink); }
+  .cc-title { font-family: var(--font-serif); font-size: var(--step-1); font-weight: 600; }
+  .cc-sub { font-size: 0.9rem; color: var(--ink-soft); }
 </style>
 
 <script>

@@ -12,6 +12,14 @@ export async function publishedPosts() {
 
 const day = (d: Date) => d.toISOString().slice(0, 10);
 
+// interactive components in mdx posts, named for readers of the plain-markdown copy
+const WIDGETS: Record<string, string> = {
+  WprCalculator: "WPR rating calculator",
+  WprQuiz: "quiz with three real matches",
+  WprTicker: "animation of a set played game by game",
+  WprBreakEven: "break-even slider",
+};
+
 /** A post as clean markdown: title, metadata, then the original body. */
 export function postMarkdown(post: CollectionEntry<"blog">) {
   const { title, description, pubDate, updatedDate, tags } = post.data;
@@ -23,6 +31,8 @@ export function postMarkdown(post: CollectionEntry<"blog">) {
     `Canonical: ${SITE}/blog/${post.id}`,
   ].filter(Boolean);
   const body = (post.body ?? "")
+    .replace(/^import .*$\n?/gm, "") // mdx imports
+    .replace(/<(Wpr\w+)[^>]*\/>/g, (_, name) => `[Interactive ${WIDGETS[name] ?? "widget"}: ${SITE}/blog/${post.id}]`)
     .replace(/<span class="sn">([\s\S]*?)<\/span>/g, " ($1)") // sidenotes back to inline asides
     .replace(/<\/?mark>/g, "")
     .trim();

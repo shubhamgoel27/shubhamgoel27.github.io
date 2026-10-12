@@ -1,0 +1,80 @@
+---
+// Break-even slider: drag the rating gap between the teams and watch which one-set scores move you up or down.
+---
+<figure class="be" data-wpr-breakeven>
+  <label class="be-label" for="be-gap">
+    <span>Your team vs theirs</span>
+    <output data-gaptxt>Even match</output>
+  </label>
+  <input id="be-gap" type="range" min="-1.5" max="1.5" step="0.1" value="1" data-gap />
+  <div class="be-ends" aria-hidden="true"><span>1.5 worse</span><span>even</span><span>1.5 better</span></div>
+
+  <p class="be-head" data-head aria-live="polite"></p>
+
+  <div class="be-chips" data-chips></div>
+  <figcaption>For a player with 20+ rated matches. Orange goes up, grey goes down.</figcaption>
+</figure>
+
+<style>
+  .be { margin: var(--space-m) 0; padding: var(--space-m); border: 1px solid var(--line); border-radius: var(--radius-l); background: var(--paper-raised); }
+  .be-label { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-s); font-size: 0.92rem; color: var(--ink-soft); }
+  .be-label output { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+  input[type="range"] { width: 100%; margin: 0.7rem 0 0.2rem; accent-color: var(--accent); cursor: pointer; }
+  .be-ends { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.65rem; color: var(--ink-faint); }
+  .be-head { margin: var(--space-s) 0; font-size: 1rem; line-height: 1.5; color: var(--ink); min-height: 3em; }
+  .be-head :global(b) { color: var(--accent-ink); }
+  .be-chips { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.35rem; }
+  .be-chips :global(.c) {
+    display: grid; justify-items: center; gap: 0.1rem; padding: 0.4rem 0.1rem; border-radius: var(--radius-s);
+    background: var(--paper); border: 1px solid var(--line); color: var(--ink-soft);
+    transition: background 0.3s, color 0.3s, border-color 0.3s, transform 0.3s;
+  }
+  .be-chips :global(.c.up) { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+  .be-chips :global(.c.flip) { transform: scale(1.08); }
+  .be-chips :global(.c .s) { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600; }
+  .be-chips :global(.c .v) { font-family: var(--font-mono); font-size: 0.62rem; opacity: 0.85; font-variant-numeric: tabular-nums; }
+  figcaption { margin-top: var(--space-s); font-size: 0.8rem; color: var(--ink-faint); }
+  @media (prefers-reduced-motion: reduce) { .be-chips :global(.c) { transition: none; } }
+</style>
+
+<script>
+  import { change, expectedShare, fmt, ONESET, P } from "../lib/wpr";
+
+  function initBE(root: HTMLElement) {
+    if ((root as any)._wired) return;
+    (root as any)._wired = true;
+    const gapEl = root.querySelector<HTMLInputElement>("[data-gap]")!;
+    const gapTxt = root.querySelector<HTMLElement>("[data-gaptxt]")!;
+    const head = root.querySelector<HTMLElement>("[data-head]")!;
+    const chips = root.querySelector<HTMLElement>("[data-chips]")!;
+    chips.innerHTML = ONESET.map(([f, a]) => `<span class="c"><span class="s">${f}-${a}</span><span class="v"></span></span>`).join("");
+    const els = [...chips.children] as HTMLElement[];
+    const pct = (x: number) => `${Math.round(x * 100)}%`;
+
+    const render = () => {
+      const gap = +gapEl.value;
+      gapTxt.textContent = Math.abs(gap) < 0.05 ? "Even match" : `${Math.abs(gap).toFixed(1)} ${gap > 0 ? "better" : "worse"}`;
+      ONESET.forEach(([f, a], i) => {
+        const v = change({ me: 3.4, gap, n: 40, win: f > a ? 1 : 0, share: f / (f + a) });
+        const el = els[i], was = el.classList.contains("up");
+        el.classList.toggle("up", v > 0);
+        el.querySelector(".v")!.textContent = fmt(v);
+        if (was !== v > 0) { el.classList.add("flip"); setTimeout(() => el.classList.remove("flip"), 300); }
+      });
+      // games share where a win (or a loss) stops costing you
+      const E = expectedShare(gap);
+      const winBE = (E - P.a) / (1 - P.a), lossBE = E / (1 - P.a);
+      head.innerHTML =
+        winBE > 7 / 13
+          ? `To go up after a win you need <b>${pct(winBE)}</b> of the games. A 7-6 win (54%) <b>loses</b> you rating.`
+          : lossBE < 6 / 13
+            ? `Any win goes up, and a loss still goes up if you take more than <b>${pct(lossBE)}</b> of the games. A 6-7 loss <b>gains</b> rating.`
+            : `Any win goes up, any loss goes down. The <b>margin</b> decides how far.`;
+    };
+    gapEl.addEventListener("input", render);
+    render();
+  }
+  const boot = () => document.querySelectorAll<HTMLElement>("[data-wpr-breakeven]").forEach(initBE);
+  boot();
+  document.addEventListener("astro:page-load", boot);
+</script>

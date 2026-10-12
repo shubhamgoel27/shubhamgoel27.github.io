@@ -1,0 +1,234 @@
+---
+// WPR-s rating change calculator, built on a reverse-engineered model of how World Padel Rating moves ratings.
+// Model: change = K × setsScale × (actual − expected); details in the copy below and in ~/work/padel-ai/MODEL.md.
+interface Props { defaultRating?: number; }
+const { defaultRating = 3.47 } = Astro.props;
+const d = defaultRating.toFixed(2);
+---
+<div class="calc" data-wpr-calc>
+  <div class="calc-grid">
+    <fieldset class="side">
+      <legend>Your team</legend>
+      <label>You <input type="number" name="me" min="0" max="8" step="0.01" value={d} inputmode="decimal" /></label>
+      <label>Partner <input type="number" name="partner" min="0" max="8" step="0.01" value={d} inputmode="decimal" /></label>
+    </fieldset>
+    <fieldset class="side">
+      <legend>Opponents</legend>
+      <label>Opponent 1 <input type="number" name="o1" min="0" max="8" step="0.01" value={d} inputmode="decimal" /></label>
+      <label>Opponent 2 <input type="number" name="o2" min="0" max="8" step="0.01" value={d} inputmode="decimal" /></label>
+    </fieldset>
+  </div>
+
+  <div class="calc-row">
+    <label class="exp">Rated matches you've played
+      <select name="n">
+        <option value="0">This is my first</option>
+        <option value="2">2 or so</option>
+        <option value="5">About 5</option>
+        <option value="10">About 10</option>
+        <option value="40" selected>20 or more</option>
+      </select>
+    </label>
+    <div class="fmt" role="radiogroup" aria-label="Format">
+      <label><input type="radio" name="fmt" value="1" checked /> One set</label>
+      <label><input type="radio" name="fmt" value="3" /> Best of three</label>
+    </div>
+  </div>
+
+  <div class="score">
+    <span class="score-label">Score <small>(your games first)</small></span>
+    <div class="sets">
+      {[0, 1, 2].map((i) => (
+        <span class:list={["set", { extra: i > 0 }]} data-set={i}>
+          <select name={`f${i}`} aria-label={`Set ${i + 1}, your games`}>{[0,1,2,3,4,5,6,7].map((g) => <option value={g} selected={i === 0 ? g === 6 : g === 0}>{g}</option>)}</select>
+          <span aria-hidden="true">–</span>
+          <select name={`a${i}`} aria-label={`Set ${i + 1}, their games`}>{[0,1,2,3,4,5,6,7].map((g) => <option value={g} selected={i === 0 ? g === 4 : g === 0}>{g}</option>)}</select>
+        </span>
+      ))}
+    </div>
+  </div>
+
+  <output class="result" aria-live="polite">
+    <span class="r-label">Predicted change</span>
+    <span class="r-delta" data-out="delta">+0.04</span>
+    <span class="r-new" data-out="new"></span>
+    <span class="r-note" data-out="note"></span>
+  </output>
+
+  <figure class="whatif">
+    <figcaption>Same match, every possible one-set score</figcaption>
+    <div class="bars" data-out="bars"></div>
+  </figure>
+
+  <div class="share">
+    <p class="share-text" data-out="share"></p>
+    <button type="button" class="share-btn" data-copy>Copy for the group chat</button>
+  </div>
+
+  <p class="fine">
+    An estimate, not WPR's official math. It's a model I fitted to about 735 real rating updates. It's usually within
+    about ±0.04 of the real change, a bit looser for players above 5, and it doesn't know WPR's internal confidence
+    score, so very new or long-inactive accounts can move differently.
+  </p>
+</div>
+
+<style>
+  .calc {
+    padding: var(--space-m);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--paper-raised);
+  }
+  .calc-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-s); }
+  @media (min-width: 36rem) { .calc-grid { grid-template-columns: 1fr 1fr; } }
+  fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+  legend { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 0.4rem; }
+  label { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-size: 0.92rem; color: var(--ink-soft); }
+  input[type="number"], select {
+    font: inherit; font-variant-numeric: tabular-nums; color: var(--ink);
+    background: var(--paper); border: 1px solid var(--line-strong); border-radius: var(--radius-s);
+    padding: 0.35rem 0.5rem;
+  }
+  input[type="number"] { width: 5.5rem; text-align: right; }
+  input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .calc-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-s); margin-top: var(--space-m); }
+  .exp { justify-content: flex-start; }
+  .fmt { display: flex; gap: var(--space-s); }
+  .fmt label { gap: 0.35rem; cursor: pointer; }
+  .score { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-s); margin-top: var(--space-m); }
+  .score-label { font-size: 0.92rem; color: var(--ink-soft); }
+  .score-label small { color: var(--ink-faint); }
+  .sets { display: flex; gap: var(--space-s); }
+  .set { display: inline-flex; align-items: center; gap: 0.3rem; font-family: var(--font-mono); color: var(--ink-faint); }
+  .set.extra { display: none; }
+  :global(.calc.bo3) .set.extra { display: inline-flex; }
+
+  .result {
+    display: grid; grid-template-columns: auto 1fr; align-items: baseline; column-gap: var(--space-s);
+    margin-top: var(--space-m); padding-top: var(--space-m); border-top: 1px dashed var(--line);
+  }
+  .r-label { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+  .r-delta { font-family: var(--font-serif); font-size: clamp(2.6rem, 9vw, 3.6rem); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .r-delta.up { color: var(--accent-ink); }
+  .r-new { font-size: 1rem; color: var(--ink-soft); }
+  .r-note { grid-column: 1 / -1; margin-top: 0.5rem; font-size: 0.9rem; line-height: 1.5; color: var(--ink-soft); }
+
+  .whatif { margin: var(--space-m) 0 0; }
+  .whatif figcaption { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.5rem; }
+  .bars { display: grid; grid-template-columns: repeat(14, 1fr); gap: 3px; align-items: center; height: 9rem; }
+  .bars :global(.b) { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  .bars :global(.b .fill) { position: absolute; left: 12%; right: 12%; border-radius: 3px; }
+  .bars :global(.b .fill.pos) { bottom: 50%; background: var(--accent); }
+  .bars :global(.b .fill.neg) { top: 50%; background: var(--line-strong); }
+  .bars :global(.b.cur .fill) { outline: 2px solid var(--ink); outline-offset: 1px; }
+  .bars :global(.b .lab) { position: absolute; bottom: -1.3rem; font-family: var(--font-mono); font-size: 0.62rem; color: var(--ink-faint); white-space: nowrap; }
+  .bars :global(.b .val) { position: absolute; font-family: var(--font-mono); font-size: 0.6rem; color: var(--ink-soft); }
+  .bars { position: relative; margin-bottom: 1.6rem; border-top: 0; background: linear-gradient(var(--line), var(--line)) no-repeat 0 50% / 100% 1px; }
+  @media (max-width: 34rem) { .bars :global(.b .val) { display: none; } .bars :global(.b .lab) { font-size: 0.55rem; } }
+
+  .share {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-s);
+    margin-top: var(--space-s); padding: 0.7rem 0.9rem; border-radius: var(--radius-m, 10px);
+    background: var(--paper); border: 1px dashed var(--line-strong);
+  }
+  .share-text { margin: 0; flex: 1 1 16rem; font-size: 0.92rem; line-height: 1.45; color: var(--ink); }
+  .share-btn {
+    font: inherit; font-size: 0.82rem; cursor: pointer; white-space: nowrap;
+    color: var(--accent-ink); background: transparent; border: 1px solid var(--accent); border-radius: 999px;
+    padding: 0.3rem 0.8rem; transition: background 0.2s, color 0.2s;
+  }
+  .share-btn:hover, .share-btn.done { background: var(--accent); color: var(--paper); }
+  :global(.bagel) {
+    position: fixed; bottom: 12vh; left: 0; z-index: 60; font-size: 2.6rem; pointer-events: none;
+    animation: bagel-roll 2.2s cubic-bezier(.3,.1,.4,1) forwards;
+  }
+  :global(.bagel.rev) { animation-name: bagel-roll-rev; }
+  @keyframes bagel-roll { from { transform: translateX(-4rem) rotate(0); } to { transform: translateX(calc(100vw + 4rem)) rotate(1080deg); } }
+  @keyframes bagel-roll-rev { from { transform: translateX(calc(100vw + 4rem)) rotate(0); } to { transform: translateX(-4rem) rotate(-1080deg); } }
+
+  .fine { margin-top: var(--space-m); font-size: 0.82rem; line-height: 1.5; color: var(--ink-faint); }
+</style>
+
+<script>
+  import { predict, fmt, ONESET } from "../lib/wpr";
+
+  function initCalc(root: HTMLElement) {
+    if ((root as any)._wired) return;
+    (root as any)._wired = true;
+    const q = (n: string) => root.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${n}"]`)!;
+    const num = (n: string) => Math.min(8, Math.max(0, parseFloat(q(n).value) || 0));
+    const out = (k: string) => root.querySelector<HTMLElement>(`[data-out="${k}"]`)!;
+
+    let lastBagel = "";
+    const render = (ev?: Event) => {
+      const bo3 = (root.querySelector<HTMLInputElement>('[name="fmt"]:checked')!.value) === "3";
+      root.classList.toggle("bo3", bo3);
+      const me = num("me"), us = (me + num("partner")) / 2, op = (num("o1") + num("o2")) / 2, n = +q("n").value;
+      let sets: [number, number][] = [0, 1, 2].map((i) => [+q(`f${i}`).value, +q(`a${i}`).value] as [number, number]);
+      sets = bo3 ? sets.filter(([f, a], i) => i < 2 || f + a > 0).filter(([f, a]) => f + a > 0) : [sets[0]];
+      if (!sets.length) sets = [[0, 0]];
+
+      const r = predict(me, us, op, n, sets);
+      const dEl = out("delta");
+      dEl.textContent = fmt(r.delta);
+      dEl.classList.toggle("up", r.delta >= 0);
+      out("new").textContent = `→ ${(me + r.delta).toFixed(2)}`;
+      const exp = Math.round(r.expected * 100);
+      const fav = us - op;
+      out("note").textContent =
+        `WPR expects your team to win about ${exp}% of the games` +
+        (Math.abs(fav) >= 0.05 ? ` (you're the ${fav > 0 ? "favourites" : "underdogs"} by ${Math.abs(fav).toFixed(2)})` : " (an even match)") +
+        `. You won ${Math.round(100 * sets.reduce((s, [f]) => s + f, 0) / Math.max(1, sets.reduce((s, [f, a]) => s + f + a, 0)))}%` +
+        (r.win ? ", and the match." : ", but not the match.");
+
+      // what-if strip: every one-set score for this matchup
+      const vals = ONESET.map(([f, a]) => predict(me, us, op, n, [[f, a]]).delta);
+      const max = Math.max(0.05, ...vals.map(Math.abs));
+      const cur = !bo3 ? `${sets[0][0]}-${sets[0][1]}` : "";
+      out("bars").innerHTML = ONESET.map(([f, a], i) => {
+        const v = vals[i], h = (Math.abs(v) / max) * 38;
+        return `<span class="b${`${f}-${a}` === cur ? " cur" : ""}" title="${f}-${a}: ${fmt(v)}">` +
+          `<span class="fill ${v >= 0 ? "pos" : "neg"}" style="height:${h}%"></span>` +
+          `<span class="val" style="${v >= 0 ? `bottom:calc(50% + ${h}% + 2px)` : `top:calc(50% + ${h}% + 2px)`}">${fmt(v)}</span>` +
+          `<span class="lab">${f}-${a}</span></span>`;
+      }).join("");
+
+      // one line for the group chat: the worst win that still moves you up
+      const wins = vals.slice(0, 7), worstWin = wins.map((v) => v > 0).lastIndexOf(true);
+      const [wf, wa] = ONESET[worstWin] ?? [6, 0];
+      out("share").textContent =
+        vals[7] > 0 ? `WPR math says even a 6-7 loss moves me up tonight 😎`
+        : worstWin === 6 ? `WPR math says any win moves me up tonight. A 6-4 is worth ${fmt(vals[4])}.`
+        : worstWin < 0 ? `WPR math says I can't go up tonight even with a 6-0. Playing anyway.`
+        : `WPR math says I need ${wf}-${wa} or better tonight just to go up 😅`;
+
+      // 6-0 in any set: a bagel rolls by (the other way if it's yours)
+      const bagel = sets.find(([f, a]) => (f === 6 && a === 0) || (f === 0 && a === 6));
+      const key = bagel ? bagel.join("-") : "";
+      if (ev && key && key !== lastBagel && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        const b = document.createElement("span");
+        b.className = "bagel" + (bagel![0] === 0 ? " rev" : "");
+        b.textContent = "🥯";
+        b.setAttribute("aria-hidden", "true");
+        b.addEventListener("animationend", () => b.remove());
+        document.body.append(b);
+      }
+      lastBagel = key;
+    };
+    root.querySelector<HTMLButtonElement>("[data-copy]")!.addEventListener("click", async (e) => {
+      const btn = e.currentTarget as HTMLButtonElement;
+      const text = `${out("share").textContent} (via shubham.gg/padel/calculator)`;
+      try { await navigator.clipboard.writeText(text); btn.textContent = "Copied ✓"; }
+      catch { btn.textContent = "Couldn't copy"; }
+      btn.classList.add("done");
+      setTimeout(() => { btn.textContent = "Copy for the group chat"; btn.classList.remove("done"); }, 1800);
+    });
+    root.addEventListener("input", render);
+    root.addEventListener("change", render);
+    render();
+  }
+
+  const boot = () => document.querySelectorAll<HTMLElement>("[data-wpr-calc]").forEach(initCalc);
+  boot();
+  document.addEventListener("astro:page-load", boot);
+</script>

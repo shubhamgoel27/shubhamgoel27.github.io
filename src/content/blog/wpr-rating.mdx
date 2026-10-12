@@ -1,0 +1,88 @@
+---
+title: "I cracked the World Padel Rating formula"
+description: "WPR doesn't publish how your rating moves, so I worked it out from 735 real rating changes. Five things every player should know, a calculator for your next match, and how I cracked it."
+pubDate: 2026-10-12
+tags: ["padel", "machine learning", "side projects"]
+---
+import WprCalculator from "../../components/WprCalculator.astro";
+import WprQuiz from "../../components/WprQuiz.astro";
+import WprTicker from "../../components/WprTicker.astro";
+import WprBreakEven from "../../components/WprBreakEven.astro";
+
+I started playing padel in June. Somewhere along the way I got addicted to my rating. I kept playing with better and better players, and watching the number go up became half the fun. I care about challenging myself and getting better over time, and this sport gives me the perfect way to do it.
+
+Then one evening in July I won 6-4 and my rating went up by 0.009. Basically nothing. I had won! So I went looking for how the World Padel Rating (the social one, WPR-s) actually works. WPR doesn't publish the formula, and I couldn't find anyone online who had worked it out. So I did, from about 735 real rating changes.
+
+Before I explain anything, try these. Three real matches, ratings before the match, no names:
+
+<WprQuiz />
+
+If you just play padel and want to know what moves your number, here's what I found.
+
+## Five things to know about your WPR
+
+**1. It counts games, not just wins.** About 80% of the update comes from your share of games won. Winning is a small bonus on top. In an even match, for someone with a few dozen matches:
+
+| Score | Rating change |
+|---|---|
+| 6-0 | +0.13 |
+| 6-2 | +0.08 |
+| 6-4 | +0.05 |
+| 7-6 | +0.03 |
+| 6-7 | -0.03 |
+| 4-6 | -0.05 |
+
+So a 7-6 loss costs you less than a 6-4 win earns you. Every game matters, even when the set is already won. Here's an even set where you're up 5-1 and then switch off:
+
+<WprTicker />
+
+**2. Winning can lower your rating.** Before the match, the system works out how many games your team should win, based on both teams' average ratings. If your team is 1.0 higher, you need about 56% of the games just to break even. A 7-6 win is 54%, so your rating goes down a bit. It works the other way too: lose 6-7 to a team 1.0 above you and you go up. Drag the slider and watch which scores flip:
+
+<WprBreakEven />
+
+**3. Only the team average counts.** Your own rating vs your partner's doesn't matter, only the average of the two. A strong partner raises what's expected of your team.
+
+**4. Best of three counts about twice as much.** Winning 6-4 6-4 is worth about +0.10, against +0.05 for a single 6-4 set. If you're playing well, go for the longer match.
+
+**5. New players and top players move more.** In your first few matches, a win moves you about twice as much as a loss (+0.20 for a first 6-4 win, -0.11 for a 6-4 loss), and that fades after about five matches. At the other end, players above about 5.8 move more per match the higher they are.
+
+## Does it pay to play up?
+
+This is the question I care about most, because playing with better people is how I got better. Here's a 6-4 set against different opponents, for a player with a few dozen matches:
+
+| Your team vs theirs | Win 6-4 | Lose 4-6 | Lose 6-7 |
+|---|---|---|---|
+| 1.0 lower | +0.08 | -0.01 | +0.004 |
+| 0.5 lower | +0.06 | -0.03 | -0.01 |
+| Even | +0.05 | -0.05 | -0.03 |
+| 0.5 higher | +0.03 | -0.06 | -0.05 |
+| 1.0 higher | +0.01 | -0.08 | -0.07 |
+
+Losing to a much better team barely costs you, and a close loss can even go up. Beating weaker teams barely helps. So playing up is close to free for your rating, and it's the best way to improve anyway.
+
+## Try your own match
+
+Put in the four ratings and the score. The bars below show every possible one-set score for the same match, so you can see where the line between going up and going down is.
+
+<WprCalculator defaultRating={3.47} />
+
+## How I figured it out
+
+WPR has an API behind its app, so I pulled every match for me and the five people I play with most: 272 matches, each with every player's rating before and after. Later I added full histories for eight players rated 4 to 6.7, so the model wasn't only fit on people at my level.
+
+Then I tried formulas and checked how much of the real rating changes each one explained, always on matches it hadn't seen:
+
+| Formula | Explained |
+|---|---|
+| Plain Elo: win or lose, one step size | 46% |
+| Count games won, step gets smaller with experience | 83% |
+| Best of three counts more | 89% |
+| New players get bigger wins than losses | 93% |
+
+The first jump was the big one. Once I switched from wins to games, most of it fell into place.
+
+## Where it's wrong
+
+Across all 735 rating changes it explains about 88%. For players above 6 it's closer to 82%, and that part rests on only two or three players, so I trust it less. WPR also keeps a hidden confidence score for each player that the API doesn't show. If you haven't played in a while, or you're brand new, your rating can move differently from what the calculator says.
+
+It's still close enough to answer the question that started all this. My 6-4 in July was against a team about 0.6 below us, and a 6-4 was just about what we were supposed to do.

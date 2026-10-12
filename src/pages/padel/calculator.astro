@@ -1,0 +1,28 @@
+---
+import Base from "../../layouts/Base.astro";
+import Squiggle from "../../components/Squiggle.astro";
+import WprCalculator from "../../components/WprCalculator.astro";
+import { summary } from "../../lib/padel";
+---
+<Base title="WPR rating calculator" description="Estimate how a padel match will move your World Padel Rating (WPR): enter the four ratings and the score.">
+  <section class="wrap narrow head">
+    <p class="eyebrow"><a href="/padel" class="body-link">Padel</a></p>
+    <h1>How much will this match move my WPR?<Squiggle width="min(16rem, 60%)" /></h1>
+    <p class="lede">
+      Put in the four ratings and the score, and this estimates how your World Padel Rating will move.
+      Below that is every possible one-set score for the same matchup, so you can see what a 6-4 is
+      worth versus a 7-6.
+    </p>
+  </section>
+  <section class="wrap narrow block">
+    <WprCalculator defaultRating={summary.now} />
+  </section>
+</Base>
+
+<style>
+  .head { padding-top: var(--space-2xl); }
+  .head h1 { display: flex; flex-direction: column; align-items: flex-start; }
+  .eyebrow a { color: inherit; }
+  .lede { margin-top: var(--space-m); font-size: var(--step-1); color: var(--ink-soft); }
+  .block { padding-top: var(--space-l); padding-bottom: var(--space-2xl); }
+</style>
