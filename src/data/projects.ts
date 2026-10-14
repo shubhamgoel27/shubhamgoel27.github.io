@@ -33,6 +33,15 @@ export interface Project {
 export const projects: Project[] = [
   // ---------- Shipped ----------
   {
+    name: "Say Yes to Soup",
+    tagline: "A cozy, Pokémon-style browser RPG about walking the world's villages and letting culture arrive sideways: through soup, slang, and the small corrections people give you. No combat, no timers, nothing to lose.",
+    result: "Ten illustrated chapters across five continents, with generative art and nine regional music styles",
+    tags: ["TypeScript", "Vite", "generative art", "browser game"],
+    links: [{ label: "Play", href: "/say-yes-to-soup/", raw: true }],
+    status: "shipped",
+    image: sayYesToSoupImg,
+  },
+  {
     name: "curbcheck",
     tagline: "Can a small VLM tell you if you can park in San Francisco? A parking-sign benchmark plus QLoRA-tuned 3B and 7B students that read the pole; a deterministic resolver does the logic.",
     result: "7B student reads real SF sign poles at 0.83 F1 (base: 0.22); verdicts right ~0.9 via the resolver",
@@ -90,15 +99,6 @@ export const projects: Project[] = [
     links: [{ label: "GitHub", href: "https://github.com/shubhamgoel27/tavern-nights" }],
     status: "shipped",
     image: tavernImg,
-  },
-  {
-    name: "Say Yes to Soup",
-    tagline: "A cozy, Pokémon-style browser RPG about walking the world's villages and letting culture arrive sideways: through soup, slang, and the small corrections people give you. No combat, no timers, nothing to lose.",
-    result: "Ten illustrated chapters across five continents, with generative art and nine regional music styles",
-    tags: ["TypeScript", "Vite", "generative art", "browser game"],
-    links: [{ label: "GitHub", href: "https://github.com/shubhamgoel27/say-yes-to-soup" }],
-    status: "shipped",
-    image: sayYesToSoupImg,
   },
   // ---------- Building ----------
   {
