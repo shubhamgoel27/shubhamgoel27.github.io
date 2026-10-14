@@ -17,8 +17,8 @@ const titleOf = (md) => {
 };
 
 const posts = readdirSync("src/content/blog")
-  .filter((f) => f.endsWith(".md"))
-  .map((f) => ({ slug: f.replace(/\.md$/, ""), title: titleOf(`src/content/blog/${f}`) }))
+  .filter((f) => /\.mdx?$/.test(f))
+  .map((f) => ({ slug: f.replace(/\.mdx?$/, ""), title: titleOf(`src/content/blog/${f}`) }))
   .filter((p) => p.title);
 
 const jobs = [
