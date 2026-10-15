@@ -13,8 +13,13 @@ const day = (d: string, opts: Intl.DateTimeFormatOptions = { month: "short", day
 const monthName = (ym: string) => day(ym + "-01", { month: "long" });
 
 // ---- level ladder (0 to 4.5 scale) ----
-const LMAX = 4.5;
-const pos = (v: number) => Math.min(v, LMAX) / LMAX;
+// ladder: the bands up to the next one ahead, drawn at equal widths (WPR bands get wider as they go up)
+const shown = bands.slice(0, bands.findIndex((b) => b.from > summary.now) + 1 || bands.length);
+const pos = (v: number) => {
+  const i = shown.findIndex((b) => v < b.to);
+  if (i === -1) return 1;
+  return (i + Math.max(0, v - shown[i].from) / (shown[i].to - shown[i].from)) / shown.length;
+};
 const nextBand = bands.find((b) => b.from > summary.now);
 
 // ---- rating chart ----
@@ -94,8 +99,8 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
 
     <div class="ladder" role="img" aria-label={`WPR rating ladder: started at ${f2(summary.start)}, now ${f2(summary.now)}, ${nextBand ? `next band starts at ${f2(nextBand.from)}` : `now in the ${bands[bands.length - 1].range} band`}.`}>
       <div class="track">
-        {bands.map((b) => (
-          <div class:list={["band", { future: b.from > summary.now }]} style={`flex:${Math.min(b.to, LMAX) - b.from}`}>
+        {shown.map((b) => (
+          <div class:list={["band", { future: b.from > summary.now }]} style="flex:1">
             <span class="band-name">{b.label}</span>
             <span class="band-range">{b.range}</span>
           </div>
@@ -107,7 +112,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
         </span>
       </div>
       <div class="ticks">
-        {milestones.map((m) => (
+        {milestones.filter((m) => bands.some((b) => b.from === m.threshold)).map((m) => (
           <span class="tick" style={`--p:${pos(m.threshold)}`}>
             <b>{f2(m.threshold)}</b>
             <span>{day(m.date)} · match {m.match}</span>
@@ -340,7 +345,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
   }
   .band:first-child { border-radius: var(--radius-m) 0 0 var(--radius-m); background: color-mix(in srgb, var(--accent) 6%, var(--paper-sunk)); }
   .band:nth-child(2) { background: color-mix(in srgb, var(--accent) 16%, var(--paper-sunk)); }
-  .band:nth-child(3) { padding-left: 2.2rem; border-right: 0; border-radius: 0 var(--radius-m) var(--radius-m) 0; background: color-mix(in srgb, var(--accent) 26%, var(--paper-sunk)); }
+  .band:nth-child(3) { padding-left: 2.2rem; background: color-mix(in srgb, var(--accent) 26%, var(--paper-sunk)); }
   .band.future { border-right: 0; border-radius: 0 var(--radius-m) var(--radius-m) 0; background: repeating-linear-gradient(135deg, var(--paper-sunk) 0 6px, color-mix(in srgb, var(--accent) 8%, var(--paper-sunk)) 6px 12px); }
   .band-name { font-size: 0.78rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
   .band-range { font-family: var(--font-mono); font-size: 0.66rem; color: var(--ink-faint); }
@@ -368,6 +373,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
     .band-range { display: none; }
     .band-name { font-size: 0.68rem; }
     .tick span { display: none; }
+    .ghost { display: none; }
   }
 
   /* ladder entrance: the ball rolls from day one to now (only once JS has armed it) */

@@ -152,10 +152,12 @@ export const friendlies = {
 export const bands = [
   { from: 0, to: 1.5, label: "Beginner", range: "0 – 1.49" },
   { from: 1.5, to: 3.5, label: "High beginner", range: "1.50 – 3.49" },
-  { from: 3.5, to: 5, label: "Next level", range: "3.50+" },
+  { from: 3.5, to: 6, label: "Intermediate", range: "3.50 – 5.99" },
+  { from: 6, to: 8.5, label: "High intermediate", range: "6.00 – 8.49" },
+  { from: 8.5, to: 10, label: "Advanced", range: "8.50+" },
 ];
 
-export const milestones = [1.5, 2.5, 3.0, 3.5].map((t) => {
+export const milestones = [1.5, 3.0, 3.5].map((t) => {
   const m = matches.find((x) => x.after >= t)!;
   return { threshold: t, match: m.i, date: m.date };
 });
