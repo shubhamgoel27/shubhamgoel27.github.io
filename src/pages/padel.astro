@@ -15,6 +15,7 @@ const monthName = (ym: string) => day(ym + "-01", { month: "long" });
 // ---- level ladder (0 to 4.5 scale) ----
 const LMAX = 4.5;
 const pos = (v: number) => Math.min(v, LMAX) / LMAX;
+const nextBand = bands.find((b) => b.from > summary.now);
 
 // ---- rating chart ----
 const W = 720, H = 300, L = 34, R = 46, T = 30, B = 34;
@@ -91,7 +92,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
       </p>
     </div>
 
-    <div class="ladder" role="img" aria-label={`WPR rating ladder: started at ${f2(summary.start)}, now ${f2(summary.now)}, next band starts at ${f2(bands.find((b) => b.from > summary.now)!.from)}.`}>
+    <div class="ladder" role="img" aria-label={`WPR rating ladder: started at ${f2(summary.start)}, now ${f2(summary.now)}, ${nextBand ? `next band starts at ${f2(nextBand.from)}` : `now in the ${bands[bands.length - 1].range} band`}.`}>
       <div class="track">
         {bands.map((b) => (
           <div class:list={["band", { future: b.from > summary.now }]} style={`flex:${Math.min(b.to, LMAX) - b.from}`}>
@@ -339,6 +340,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
   }
   .band:first-child { border-radius: var(--radius-m) 0 0 var(--radius-m); background: color-mix(in srgb, var(--accent) 6%, var(--paper-sunk)); }
   .band:nth-child(2) { background: color-mix(in srgb, var(--accent) 16%, var(--paper-sunk)); }
+  .band:nth-child(3) { padding-left: 2.2rem; border-right: 0; border-radius: 0 var(--radius-m) var(--radius-m) 0; background: color-mix(in srgb, var(--accent) 26%, var(--paper-sunk)); }
   .band.future { border-right: 0; border-radius: 0 var(--radius-m) var(--radius-m) 0; background: repeating-linear-gradient(135deg, var(--paper-sunk) 0 6px, color-mix(in srgb, var(--accent) 8%, var(--paper-sunk)) 6px 12px); }
   .band-name { font-size: 0.78rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
   .band-range { font-family: var(--font-mono); font-size: 0.66rem; color: var(--ink-faint); }

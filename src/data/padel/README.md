@@ -1,6 +1,6 @@
 # WPR match export
 
-Source: World Padel Rating app (api.redpadel.com GraphQL `getMatches`, my user id, no status filter), pulled 2026-10-03.
+Source: World Padel Rating app (api.redpadel.com GraphQL `getMatches`, my user id, no status filter), pulled 2026-10-15.
 The app UI shows only 10 of these 75 matches.
 
 `wpr_matches.psv`: pipe-separated. Players are `Name:ratingBefore>ratingAfter` (WPR-s social rating), joined by `+`.
@@ -15,6 +15,8 @@ event_id:
 5 High Beginner Open Play 1.5-3.49 (SV) [8.25]
 6 High Beginner Open Play 1.5-3.49 (SV) [9/1]
 7 Bay Padel Tournament - September 20th - Treasure Island
+8 High Beginner Open Play 1.5-3.49 (SJ)
+9 High Beginner Open Play 1.5-3.49 (Sunnyvale) 10/13 8PM
 
 # Friendlies (not on WPR)
 

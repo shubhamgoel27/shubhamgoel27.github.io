@@ -155,7 +155,7 @@ export const bands = [
   { from: 3.5, to: 5, label: "Next level", range: "3.50+" },
 ];
 
-export const milestones = [1.5, 2.5, 3.0].map((t) => {
+export const milestones = [1.5, 2.5, 3.0, 3.5].map((t) => {
   const m = matches.find((x) => x.after >= t)!;
   return { threshold: t, match: m.i, date: m.date };
 });
