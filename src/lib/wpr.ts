@@ -1,11 +1,18 @@
 // Reverse-engineered WPR-s update rule, shared by the calculator and the blog widgets.
-// Fitted on 735 rating updates (players rated 0.4-6.7); details in ~/work/padel-ai/MODEL.md.
-// change = K × top × setsScale × (actual − expected)
-export const P = { K0up: 1.133, K0down: 0.617, s: 1.746, c: 5.2, kmin: 0.262, a: 0.184, b3: 1.223, kh: 0.705, r0: 5.776 };
+// Fitted on ~7,200 rating updates (254 players with full histories, plus 8 rated 4-6.7); details in
+// ~/work/padel-ai/MODEL.md (v6, site fit). change = K × top × setsScale × (actual − expected).
+// expected comes from "your gap": your team average, pulled toward your own rating by lam (70% you, 30% partner).
+export const P = { K0up: 1.179, K0down: 0.845, s: 1.294, c: 5.824, kmin: 0.242, a: 0.19, b3: 0.804, kh: 0.276, r0: 7.334, lam: 0.407 };
 
 const sig = (x: number) => 1 / (1 + Math.exp(-x));
 
-/** games share your team needs for an expected result, given the team-average gap */
+/** your gap vs the opponents' average: the team average, moved toward your own rating */
+export const myGap = (me: number, partner: number, op: number) => {
+  const us = (me + partner) / 2;
+  return us + P.lam * (me - us) - op;
+};
+
+/** games share WPR expects from you, given your gap */
 export const expectedShare = (gap: number) => sig(gap / P.s);
 
 /** the core rule; win can be 0.5 for a set that isn't decided yet */
@@ -18,11 +25,12 @@ export function change(o: { me: number; gap: number; n: number; win: number; sha
 }
 
 /** a full match from its set scores */
-export function predict(me: number, us: number, op: number, n: number, sets: [number, number][]) {
+export function predict(me: number, partner: number, op: number, n: number, sets: [number, number][]) {
   const gf = sets.reduce((s, [f]) => s + f, 0), ga = sets.reduce((s, [, a]) => s + a, 0);
   const win = sets.filter(([f, a]) => f > a).length * 2 > sets.length ? 1 : 0;
   const share = gf + ga ? gf / (gf + ga) : 0.5;
-  return { delta: change({ me, gap: us - op, n, win, share, nsets: sets.length }), expected: expectedShare(us - op), win, share };
+  const gap = myGap(me, partner, op);
+  return { delta: change({ me, gap, n, win, share, nsets: sets.length }), expected: expectedShare(gap), win, share };
 }
 
 // tiny changes get a third decimal so a −0.004 doesn't read as "−0.00"

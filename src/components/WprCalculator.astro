@@ -66,9 +66,9 @@ const d = defaultRating.toFixed(2);
   </div>
 
   <p class="fine">
-    An estimate, not WPR's official math. It's a model I fitted to about 735 real rating updates. It's usually within
-    about ±0.04 of the real change, a bit looser for players above 5, and it doesn't know WPR's internal confidence
-    score, so very new or long-inactive accounts can move differently.
+    An estimate, not WPR's official math. It's a model I fitted to about 7,000 real rating updates. It's usually within
+    about ±0.04 of the real change, and it doesn't know WPR's internal confidence score, so very new or long-inactive
+    accounts can move differently.
   </p>
 </div>
 
@@ -163,26 +163,29 @@ const d = defaultRating.toFixed(2);
     const render = (ev?: Event) => {
       const bo3 = (root.querySelector<HTMLInputElement>('[name="fmt"]:checked')!.value) === "3";
       root.classList.toggle("bo3", bo3);
-      const me = num("me"), us = (me + num("partner")) / 2, op = (num("o1") + num("o2")) / 2, n = +q("n").value;
+      const me = num("me"), partner = num("partner"), us = (me + partner) / 2, op = (num("o1") + num("o2")) / 2, n = +q("n").value;
       let sets: [number, number][] = [0, 1, 2].map((i) => [+q(`f${i}`).value, +q(`a${i}`).value] as [number, number]);
       sets = bo3 ? sets.filter(([f, a], i) => i < 2 || f + a > 0).filter(([f, a]) => f + a > 0) : [sets[0]];
       if (!sets.length) sets = [[0, 0]];
 
-      const r = predict(me, us, op, n, sets);
+      const r = predict(me, partner, op, n, sets);
       const dEl = out("delta");
       dEl.textContent = fmt(r.delta);
       dEl.classList.toggle("up", r.delta >= 0);
       out("new").textContent = `→ ${(me + r.delta).toFixed(2)}`;
       const exp = Math.round(r.expected * 100);
       const fav = us - op;
+      const split = Math.abs(me - partner) >= 0.1
+        ? ` Your partner's bar is ${Math.round(predict(partner, me, op, n, sets).expected * 100)}%: the stronger partner gets the higher bar.`
+        : "";
       out("note").textContent =
-        `WPR expects your team to win about ${exp}% of the games` +
-        (Math.abs(fav) >= 0.05 ? ` (you're the ${fav > 0 ? "favourites" : "underdogs"} by ${Math.abs(fav).toFixed(2)})` : " (an even match)") +
+        `WPR's bar for you is about ${exp}% of the games` +
+        (Math.abs(fav) >= 0.05 ? ` (your team is the ${fav > 0 ? "favourite" : "underdog"} by ${Math.abs(fav).toFixed(2)})` : " (an even match)") +
         `. You won ${Math.round(100 * sets.reduce((s, [f]) => s + f, 0) / Math.max(1, sets.reduce((s, [f, a]) => s + f + a, 0)))}%` +
-        (r.win ? ", and the match." : ", but not the match.");
+        (r.win ? ", and the match." : ", but not the match.") + split;
 
       // what-if strip: every one-set score for this matchup
-      const vals = ONESET.map(([f, a]) => predict(me, us, op, n, [[f, a]]).delta);
+      const vals = ONESET.map(([f, a]) => predict(me, partner, op, n, [[f, a]]).delta);
       const max = Math.max(0.05, ...vals.map(Math.abs));
       const cur = !bo3 ? `${sets[0][0]}-${sets[0][1]}` : "";
       out("bars").innerHTML = ONESET.map(([f, a], i) => {
