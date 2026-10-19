@@ -198,7 +198,9 @@ export const swings = {
   down: jumps.reduce((a, b) => (b.d < a.d ? b : a)),
 };
 
+const TOURNAMENTS_WON = new Set(["2026-10-18"]); // Pacific dates; WPR doesn't say who won the event
+
 export const tournaments = [...new Set(matches.filter((m) => m.kind === "tournament").map((m) => m.date))].map((date) => {
   const first = matches.find((m) => m.kind === "tournament" && m.date === date)!;
-  return { date, match: first.i };
+  return { date, match: first.i, won: TOURNAMENTS_WON.has(date) };
 });
