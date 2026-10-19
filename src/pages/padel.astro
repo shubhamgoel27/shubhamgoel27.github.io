@@ -12,6 +12,9 @@ const day = (d: string, opts: Intl.DateTimeFormatOptions = { month: "short", day
   new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { ...opts, timeZone: "UTC" });
 const monthName = (ym: string) => day(ym + "-01", { month: "long" });
 
+// first tournament win: San Jose, Oct 18
+const firstWin = matches.filter((m) => m.kind === "tournament" && m.date === "2026-10-18");
+
 // ---- level ladder (0 to 4.5 scale) ----
 // ladder: the bands up to the next one ahead, drawn at equal widths (WPR bands get wider as they go up)
 const shown = bands.slice(0, bands.findIndex((b) => b.from > summary.now) + 1 || bands.length);
@@ -170,6 +173,28 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
       <div class="tip" role="status" aria-live="polite"></div>
       <figcaption>Each dot is one rated match; hover for the score. Dashed lines are the WPR open-play bands.</figcaption>
     </figure>
+  </section>
+
+  <!-- first tournament win -->
+  <section class="wrap narrow block">
+    <div class="trophy" data-reveal>
+      <p class="trophy-kicker">🏆 {day("2026-10-18", { month: "long", day: "numeric" })} · San Jose · D3 (High Beginner)</p>
+      <h2>My first tournament win</h2>
+      <p>
+        I played this one with Chirag, and we both played really well all day. We won every group
+        game, then got a bit nervy in the final. We were down 4-5 and they had a couple of set points.
+        We just tried to stay in the game, got it back to 5-5, and won it 7-5.
+      </p>
+      <ol class="trophy-run" aria-label="Results on the day">
+        {firstWin.map((m, k) => (
+          <li class:list={{ final: k === firstWin.length - 1 }}>
+            <span class="tr-round">{k === firstWin.length - 1 ? "Final" : `Group ${k + 1}`}</span>
+            <span class="tr-score">{m.score}</span>
+          </li>
+        ))}
+      </ol>
+      <p class="small-note">Rating on the day: {f2(firstWin[0].before)} → {f2(firstWin[firstWin.length - 1].after)}.</p>
+    </div>
   </section>
 
   <!-- form guide -->
@@ -394,6 +419,21 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
 
   .block { padding-top: var(--space-xl); }
   .block h2 { font-size: var(--step-2); margin-bottom: var(--space-s); }
+  .trophy {
+    padding: var(--space-m) var(--space-l); border: 1px solid var(--line); border-radius: var(--radius-l);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 9%, var(--paper-raised)), var(--paper-raised) 60%);
+  }
+  .trophy-kicker { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-ink); }
+  .trophy h2 { margin-top: 0.3rem; }
+  .trophy-run { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: var(--space-m) 0 var(--space-s); padding: 0; list-style: none; }
+  .trophy-run li {
+    display: grid; justify-items: center; gap: 0.1rem; min-width: 4.4rem; padding: 0.45rem 0.6rem;
+    border: 1px solid var(--line); border-radius: var(--radius-m); background: var(--paper);
+  }
+  .trophy-run li.final { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--paper)); }
+  .tr-round { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); }
+  .final .tr-round { color: var(--accent-ink); }
+  .tr-score { font-family: var(--font-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
   .block-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-s); flex-wrap: wrap; }
   .small-note { margin-top: 0.6rem; font-size: 0.85rem; color: var(--ink-soft); }
   .small-note strong { color: var(--ink); }
