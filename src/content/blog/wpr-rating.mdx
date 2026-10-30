@@ -16,7 +16,7 @@ Then one evening in July I won 6-4 and my rating went up by 0.009. Basically not
 
 *Update, Oct 17: the first version of this post said only your team's average rating matters. I pulled ten times more data and that was wrong: your own rating counts more than your partner's. Point 3 is new, and every number on this page is updated.*
 
-*Update, Oct 30: the more often you play, the less each match moves you. The calculator now asks how many matches you played in the last two weeks, and point 5 explains it.*
+*Update, Oct 30: the more often you play, the less each match moves you. The calculator now asks how many matches you played in the last two weeks, and point 5 explains it. I also rebuilt the model from scratch to check I hadn't started from the wrong place. The basics held up.*
 
 Before I explain anything, try these. Three real matches, ratings before the match, no names:
 
@@ -99,8 +99,10 @@ That first dataset had a blind spot. The six of us mostly played with partners n
 
 Two weeks later I noticed the calculator was overshooting my own changes by about a fifth. So I pulled the full histories of 61 people I'd played with or against recently. On their matches from the past two weeks, which the model had never seen, it still explained about 92% of the changes, so nothing had broken. But people who played a lot moved less. Adding "matches in the last two weeks" cut the error on those new matches by another 16%, and for my own matches it halved it.
 
+Then I started over, to check the first formula wasn't wrong from the start. Without assuming any formula, I measured, for each rating gap, the score where your rating stops moving, and how the change grows with each game you win. The bar rises smoothly with the gap, the change is a straight line in games won, and the win adds a small bonus on top. That's what the model already said. I also tried a different idea: each player has a hidden step size that shrinks with every match and grows back when they take time off. If you know someone's full match history, that's about 7% more accurate. But the calculator only asks two questions, and with just those, it wasn't any better. So the calculator stays as it is.
+
 ## Where it's wrong
 
-On matches it hadn't seen, it explains about 90% of rating changes. On eight players rated 4 to 6.7 that I kept as a separate check, about 85%. WPR also keeps a hidden confidence score for each player that the API doesn't show. Some players move about 20% more or less than the calculator says, match after match, and nothing in the public data explains it. If you haven't played in a while, or you're brand new, your rating can move differently from what the calculator says.
+On matches it hadn't seen, it explains about 90% of rating changes. On eight players rated 4 to 6.7 that I kept as a separate check, about 85%. WPR also keeps a hidden confidence score for each player that the API doesn't show. Some players move about 20% more or less than the calculator says, match after match, and nothing in the public data explains it. If you've been away for two weeks or more, expect your next changes to be about 15% bigger than it says. And if you're brand new, your rating can move differently from what the calculator says.
 
 It's still close enough to answer the question that started all this. My 6-4 in July was against a team about 0.6 below us, and a 6-4 was just about what we were supposed to do.
