@@ -1,7 +1,7 @@
 # WPR match export
 
-Source: World Padel Rating app (api.redpadel.com GraphQL `getMatches`, my user id, no status filter), pulled 2026-10-28.
-The app UI shows only 10 of these 101 matches.
+Source: World Padel Rating app (api.redpadel.com GraphQL `getMatches`, my user id, no status filter), pulled 2026-10-29.
+The app UI shows only 10 of these 105 matches.
 
 `wpr_matches.psv`: pipe-separated. Players are `Name:ratingBefore>ratingAfter` (WPR-s social rating), joined by `+`.
 Sets are teamA-teamB. `winner` is A or B. Dates are UTC (Pacific = UTC-7).
@@ -21,6 +21,7 @@ event_id:
 11 Bay Padel Tournament - San Jose (Oct 18, D3 High Beginner, with Chirag: won)
 12 INTERMEDIATE Open Play 3.5-5.99 San Jose
 13 High Beginner Open Play 1.5-3.49 (Sunnyvale) 10/27
+14 INTERMEDIATE Open Play 3.5-5.99 (Sunnyvale) [10/29]
 
 # Friendlies (not on WPR)
 
