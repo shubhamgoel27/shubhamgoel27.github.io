@@ -2,7 +2,7 @@
 title: "I cracked the World Padel Rating formula"
 description: "WPR doesn't publish how your rating moves, so I worked it out from about 7,000 real rating changes. Five things every player should know, a calculator for your next match, and how I cracked it."
 pubDate: 2026-10-12
-updatedDate: 2026-10-17
+updatedDate: 2026-10-30
 tags: ["padel", "machine learning", "side projects"]
 ---
 import WprCalculator from "../../components/WprCalculator.astro";
@@ -16,6 +16,8 @@ Then one evening in July I won 6-4 and my rating went up by 0.009. Basically not
 
 *Update, Oct 17: the first version of this post said only your team's average rating matters. I pulled ten times more data and that was wrong: your own rating counts more than your partner's. Point 3 is new, and every number on this page is updated.*
 
+*Update, Oct 30: the more often you play, the less each match moves you. The calculator now asks how many matches you played in the last two weeks, and point 5 explains it.*
+
 Before I explain anything, try these. Three real matches, ratings before the match, no names:
 
 <WprQuiz />
@@ -24,18 +26,18 @@ If you just play padel and want to know what moves your number, here's what I fo
 
 ## Five things to know about your WPR
 
-**1. It counts games, not just wins.** About 80% of the update comes from your share of games won. Winning is a small bonus on top. In an even match, for someone with a few dozen matches:
+**1. It counts games, not just wins.** About 80% of the update comes from your share of games won. Winning is a small bonus on top. In an even match, for someone with a few dozen matches who plays a few times a week:
 
 | Score | Rating change |
 |---|---|
-| 6-0 | +0.12 |
-| 6-2 | +0.07 |
-| 6-4 | +0.04 |
+| 6-0 | +0.13 |
+| 6-2 | +0.08 |
+| 6-4 | +0.05 |
 | 7-6 | +0.03 |
 | 6-7 | -0.03 |
-| 4-6 | -0.04 |
+| 4-6 | -0.05 |
 
-So a 7-6 loss costs you less than a 6-4 win earns you. Every game matters, even when the set is already won. Here's an even set where you're up 5-1 and then switch off:
+So a 6-7 loss costs you less than a 6-4 win earns you. Every game matters, even when the set is already won. Here's an even set where you're up 5-1 and then switch off:
 
 <WprTicker />
 
@@ -47,27 +49,27 @@ So a 7-6 loss costs you less than a 6-4 win earns you. Every game matters, even 
 
 | Score | 5.5 player | 3.6 player |
 |---|---|---|
-| Win 6-2 | +0.05 | +0.09 |
-| Win 6-4 | +0.03 | +0.06 |
-| Lose 4-6 | -0.06 | -0.03 |
-| Lose 2-6 | -0.09 | -0.05 |
+| Win 6-2 | +0.06 | +0.10 |
+| Win 6-4 | +0.03 | +0.07 |
+| Lose 4-6 | -0.07 | -0.03 |
+| Lose 2-6 | -0.10 | -0.06 |
 
 I've seen this happen to me. In October I won 6-4 with a partner rated 5.70. I went up 0.04, and my partner went down 0.01 for the same win.
 
-**4. Best of three counts almost twice as much.** Winning 6-4 6-4 is worth about +0.08, against +0.04 for a single 6-4 set. If you're playing well, go for the longer match.
+**4. Best of three counts a lot more.** Winning 6-4 6-4 is worth about +0.08, against +0.05 for a single 6-4 set. If you're playing well, go for the longer match.
 
-**5. New players move more, and gain more than they lose.** In your first match, a 6-4 win is worth about +0.21 and a 4-6 loss about -0.15. Both shrink fast: to about half after six matches, and to about a fifth after twenty. I used to think players above about 5.8 also moved more. With far more data from strong players, that mostly went away.
+**5. New players move more, and gain more than they lose.** In your first match, a 6-4 win is worth about +0.22 and a 4-6 loss about -0.14. Both shrink fast: to about half after six matches, and to about a quarter after twenty. After that, how often you play matters. Each match you played in the last two weeks, beyond four, makes the next change about 3% smaller. So if you play four times a week, a 6-4 moves you about 15% less than it moves someone who plays once a week. I used to think players above about 5.8 also moved more. With far more data from strong players, that mostly went away.
 
 ## Does it pay to play up?
 
-This is the question I care about most, because playing with better people is how I got better. Here's a 6-4 set against different opponents, for a player with a few dozen matches:
+This is the question I care about most, because playing with better people is how I got better. Here's a 6-4 set against different opponents, for a player with a few dozen matches who plays a few times a week:
 
 | Your team vs theirs | Win 6-4 | Lose 4-6 | Lose 6-7 |
 |---|---|---|---|
-| 1.0 lower | +0.09 | +0.002 | +0.01 |
+| 1.0 lower | +0.09 | +0.002 | +0.02 |
 | 0.5 lower | +0.07 | -0.02 | -0.01 |
-| Even | +0.04 | -0.04 | -0.03 |
-| 0.5 higher | +0.02 | -0.07 | -0.05 |
+| Even | +0.05 | -0.05 | -0.03 |
+| 0.5 higher | +0.02 | -0.07 | -0.06 |
 | 1.0 higher | -0.002 | -0.09 | -0.08 |
 
 That's for two partners at the same level. A 4-6 loss to a team 1.0 better costs you nothing, and a 6-7 goes up. Beating a much weaker team can even cost you. And from point 3, it's even better to be the weaker partner on a strong team. So playing up is close to free for your rating, and it's the best way to improve anyway.
@@ -95,8 +97,10 @@ The first jump was the big one. Once I switched from wins to games, most of it f
 
 That first dataset had a blind spot. The six of us mostly played with partners near our own level, so it couldn't tell "team average" apart from "your own rating". In October I pulled a lot more: everyone I'd played with or against, then everyone they'd played with or against. That's 260 players' full histories and about 7,000 rating changes, a third of them with partners more than a full point apart. With that, the gap showed up clearly. Partners on the same team, same result, and the stronger one moved about 0.02 less per point of difference, win or lose. Letting your own rating count 70% cut the model's error by 17%.
 
+Two weeks later I noticed the calculator was overshooting my own changes by about a fifth. So I pulled the full histories of 61 people I'd played with or against recently. On their matches from the past two weeks, which the model had never seen, it still explained about 92% of the changes, so nothing had broken. But people who played a lot moved less. Adding "matches in the last two weeks" cut the error on those new matches by another 16%, and for my own matches it halved it.
+
 ## Where it's wrong
 
-On matches it hadn't seen, it explains about 90% of rating changes. On eight players rated 4 to 6.7 that I kept as a separate check, about 85%. WPR also keeps a hidden confidence score for each player that the API doesn't show. If you haven't played in a while, or you're brand new, your rating can move differently from what the calculator says.
+On matches it hadn't seen, it explains about 90% of rating changes. On eight players rated 4 to 6.7 that I kept as a separate check, about 85%. WPR also keeps a hidden confidence score for each player that the API doesn't show. Some players move about 20% more or less than the calculator says, match after match, and nothing in the public data explains it. If you haven't played in a while, or you're brand new, your rating can move differently from what the calculator says.
 
 It's still close enough to answer the question that started all this. My 6-4 in July was against a team about 0.6 below us, and a 6-4 was just about what we were supposed to do.

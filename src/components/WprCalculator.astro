@@ -20,15 +20,26 @@ const d = defaultRating.toFixed(2);
   </div>
 
   <div class="calc-row">
-    <label class="exp">Rated matches you've played
-      <select name="n">
-        <option value="0">This is my first</option>
-        <option value="2">2 or so</option>
-        <option value="5">About 5</option>
-        <option value="10">About 10</option>
-        <option value="40" selected>20 or more</option>
-      </select>
-    </label>
+    <div class="exps">
+      <label class="exp">Rated matches you've played
+        <select name="n">
+          <option value="0">This is my first</option>
+          <option value="2">2 or so</option>
+          <option value="5">About 5</option>
+          <option value="10">About 10</option>
+          <option value="40" selected>20 or more</option>
+        </select>
+      </label>
+      <label class="exp">Matches in the last 2 weeks
+        <select name="freq">
+          <option value="1">0 to 2</option>
+          <option value="4">3 to 5</option>
+          <option value="8" selected>6 to 10</option>
+          <option value="13">11 to 15</option>
+          <option value="18">16 or more</option>
+        </select>
+      </label>
+    </div>
     <div class="fmt" role="radiogroup" aria-label="Format">
       <label><input type="radio" name="fmt" value="1" checked /> One set</label>
       <label><input type="radio" name="fmt" value="3" /> Best of three</label>
@@ -92,7 +103,8 @@ const d = defaultRating.toFixed(2);
   input[type="number"] { width: 5.5rem; text-align: right; }
   input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   .calc-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-s); margin-top: var(--space-m); }
-  .exp { justify-content: flex-start; }
+  .exps { display: grid; gap: var(--space-2xs, 0.5rem); }
+  .exp { justify-content: space-between; }
   .fmt { display: flex; gap: var(--space-s); }
   .fmt label { gap: 0.35rem; cursor: pointer; }
   .score { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-s); margin-top: var(--space-m); }
@@ -163,12 +175,12 @@ const d = defaultRating.toFixed(2);
     const render = (ev?: Event) => {
       const bo3 = (root.querySelector<HTMLInputElement>('[name="fmt"]:checked')!.value) === "3";
       root.classList.toggle("bo3", bo3);
-      const me = num("me"), partner = num("partner"), us = (me + partner) / 2, op = (num("o1") + num("o2")) / 2, n = +q("n").value;
+      const me = num("me"), partner = num("partner"), us = (me + partner) / 2, op = (num("o1") + num("o2")) / 2, n = +q("n").value, freq = +q("freq").value;
       let sets: [number, number][] = [0, 1, 2].map((i) => [+q(`f${i}`).value, +q(`a${i}`).value] as [number, number]);
       sets = bo3 ? sets.filter(([f, a], i) => i < 2 || f + a > 0).filter(([f, a]) => f + a > 0) : [sets[0]];
       if (!sets.length) sets = [[0, 0]];
 
-      const r = predict(me, partner, op, n, sets);
+      const r = predict(me, partner, op, n, sets, freq);
       const dEl = out("delta");
       dEl.textContent = fmt(r.delta);
       dEl.classList.toggle("up", r.delta >= 0);
@@ -176,7 +188,7 @@ const d = defaultRating.toFixed(2);
       const exp = Math.round(r.expected * 100);
       const fav = us - op;
       const split = Math.abs(me - partner) >= 0.1
-        ? ` Your partner's bar is ${Math.round(predict(partner, me, op, n, sets).expected * 100)}%: the stronger partner gets the higher bar.`
+        ? ` Your partner's bar is ${Math.round(predict(partner, me, op, n, sets, freq).expected * 100)}%: the stronger partner gets the higher bar.`
         : "";
       out("note").textContent =
         `WPR's bar for you is about ${exp}% of the games` +
@@ -185,7 +197,7 @@ const d = defaultRating.toFixed(2);
         (r.win ? ", and the match." : ", but not the match.") + split;
 
       // what-if strip: every one-set score for this matchup
-      const vals = ONESET.map(([f, a]) => predict(me, partner, op, n, [[f, a]]).delta);
+      const vals = ONESET.map(([f, a]) => predict(me, partner, op, n, [[f, a]], freq).delta);
       const max = Math.max(0.05, ...vals.map(Math.abs));
       const cur = !bo3 ? `${sets[0][0]}-${sets[0][1]}` : "";
       out("bars").innerHTML = ONESET.map(([f, a], i) => {
