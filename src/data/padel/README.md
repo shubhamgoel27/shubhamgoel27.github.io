@@ -29,3 +29,6 @@ event_id:
 `friendlies.psv`: one row per set, logged by hand. Scores are from my team's side (games_for = my team).
 Kept separate from the WPR export on purpose: friendlies have no rating changes and are not in WPR's model fit.
 `note` holds anything useful about how the set went (leads lost, comebacks, conditions).
+
+`wpr_competition.psv`: my competition (verified) matches, same columns as `wpr_matches.psv`. These move the
+competition WPR, a separate rating chain from WPR-s, so they are kept apart. First entries: USA Padel 500, Oct 31.

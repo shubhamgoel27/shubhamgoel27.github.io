@@ -5,7 +5,6 @@ import friendliesRaw from "../data/padel/friendlies.psv?raw";
 import readmeRaw from "../data/padel/README.md?raw";
 
 const ME = "Shubham Goel";
-const PT_OFFSET_H = -7; // export is UTC; the season so far is all PDT
 
 type Kind = "open" | "league" | "tournament";
 export interface Match {
@@ -48,11 +47,9 @@ const players = (team: string) =>
     return { name, before: b, after: a };
   });
 
-const toPacific = (utc: string) => {
-  const d = new Date(utc + ":00Z");
-  d.setUTCHours(d.getUTCHours() + PT_OFFSET_H);
-  return d.toISOString().slice(0, 10);
-};
+// en-CA formats as YYYY-MM-DD; the time zone handles PDT/PST
+const pacificDay = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit" });
+const toPacific = (utc: string) => pacificDay.format(new Date(utc + ":00Z"));
 
 export const matches: Match[] = psv(wprRaw).map((r, i) => {
   const a = players(r.team_a), b = players(r.team_b);
