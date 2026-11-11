@@ -1,7 +1,7 @@
 # WPR match export
 
-Source: World Padel Rating app (api.redpadel.com GraphQL `getMatches`, my user id, no status filter), pulled 2026-11-05.
-The app UI shows only 10 of these 105 matches.
+Source: World Padel Rating app (api.redpadel.com GraphQL `getMatches`, my user id, no status filter), pulled 2026-11-11.
+The app UI shows only 10 of these 109 matches.
 
 `wpr_matches.psv`: pipe-separated. Players are `Name:ratingBefore>ratingAfter` (WPR-s social rating), joined by `+`.
 Sets are teamA-teamB. `winner` is A or B. Dates are UTC (Pacific = UTC-7).
@@ -23,6 +23,7 @@ event_id:
 13 High Beginner Open Play 1.5-3.49 (Sunnyvale) 10/27
 14 INTERMEDIATE Open Play 3.5-5.99 (Sunnyvale) [10/29]
 15 USA PADEL 500 BAY PADEL SAN FRANCISCO
+16 INTERMEDIATE Open Play 3.5-5.99 (Sunnyvale) [11/5]
 
 # Friendlies (not on WPR)
 
