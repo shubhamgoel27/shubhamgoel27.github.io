@@ -13,6 +13,7 @@ export interface Match {
   month: string; // YYYY-MM
   kind: Kind;
   won: boolean;
+  draw: boolean; // a level points round (12-12): winner "D", rated by WPR as half a win
   before: number;
   after: number;
   score: string; // my side first, e.g. "6-4" or "3-6 6-7"; points rounds read "16-8 pts"
@@ -70,6 +71,7 @@ export const matches: Match[] = psv(wprRaw).map((r, i) => {
     month: date.slice(0, 7),
     kind: kindOf(r.event_id),
     won: r.winner === (mineA ? "A" : "B"),
+    draw: r.winner === "D",
     before: me.before,
     after: me.after,
     score: own.map(([x, y]) => `${x}-${y}`).join(" ") + (points ? " pts" : ""),
@@ -93,8 +95,9 @@ for (const r of psv(wprRaw)) {
 }
 
 const record = (ms: Match[]) => {
-  const w = ms.filter((m) => m.won).length;
-  return { w, l: ms.length - w, pct: ms.length ? Math.round((100 * w) / ms.length) : 0 };
+  const w = ms.filter((m) => m.won).length, d = ms.filter((m) => m.draw).length, l = ms.length - w - d;
+  // win % over decided matches; draws (level points rounds) are counted apart
+  return { w, l, d, pct: w + l ? Math.round((100 * w) / (w + l)) : 0 };
 };
 
 const sets = matches.filter((m) => !m.points);
@@ -165,7 +168,7 @@ export const milestones = [1.5, 3.0, 3.5].map((t) => {
   return { threshold: t, match: m.i, date: m.date };
 });
 
-export const form = matches.map((m) => ({ i: m.i, won: m.won, date: m.date, score: m.score }));
+export const form = matches.map((m) => ({ i: m.i, won: m.won, draw: m.draw, date: m.date, score: m.score }));
 
 // days on court, for the calendar
 export const calendar = (() => {

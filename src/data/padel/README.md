@@ -6,6 +6,7 @@ The app UI shows only 10 of these 125 matches.
 `wpr_matches.psv`: pipe-separated. Players are `Name:ratingBefore>ratingAfter` (WPR-s social rating), joined by `+`.
 Sets are teamA-teamB. `winner` is A or B.
 Format `POINTS` (Mexicano, from Nov 11 2026) has no sets: `sets` holds the round's points, e.g. 16-8 out of 24.
+A level points round (12-12) has winner `D`: WPR names a winner for it but rates it as a draw (half a win).
 WPR re-rates past matches now and then; `merge.py --refresh` copies its current ratings onto stored rows (last done 2026-11-12).
 Dates are UTC; the site converts them to Pacific time (UTC-7 in summer, UTC-8 in winter).
 

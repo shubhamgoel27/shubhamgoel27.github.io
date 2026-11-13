@@ -40,7 +40,7 @@ const monthStarts = months.map((mo) => {
 const m3 = milestones.find((m) => m.threshold === 3)!;
 const m3pt = matches[m3.match - 1];
 const chartData = JSON.stringify(
-  matches.map((m) => ({ x: +xs(m.i).toFixed(1), y: +ys(m.after).toFixed(1), d: day(m.date), w: m.won, s: m.score, b: f2(m.before), a: f2(m.after) }))
+  matches.map((m) => ({ x: +xs(m.i).toFixed(1), y: +ys(m.after).toFixed(1), d: day(m.date), w: m.won, dr: m.draw, s: m.score, b: f2(m.before), a: f2(m.after) }))
 );
 
 // ---- form guide ----
@@ -126,7 +126,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
   </section>
 
   <section class="wrap narrow tiles" aria-label="Headline numbers">
-    <div class="tile"><span class="t-label">Record</span><span class="t-value">{summary.w}–{summary.l}</span><span class="t-sub">{summary.pct}% won</span></div>
+    <div class="tile"><span class="t-label">Record</span><span class="t-value">{summary.w}–{summary.l}</span><span class="t-sub">{summary.pct}% won{summary.d > 0 && ` · ${summary.d} drawn`}</span></div>
     <div class="tile"><span class="t-label">Matches</span><span class="t-value" data-count={summary.played} data-dp="0">{summary.played}</span><span class="t-sub">over {summary.days} days</span></div>
     <div class="tile"><span class="t-label">Close sets</span><span class="t-value">{summary.close.w}–{summary.close.l}</span><span class="t-sub">decided by ≤2 games</span></div>
     <div class="tile"><span class="t-label">Best streak</span><span class="t-value">{summary.bestStreak}</span><span class="t-sub">wins in a row</span></div>
@@ -159,7 +159,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
         <path class="line" d={line} pathLength="1" />
         <g class="dots">
           {matches.map((m) => (
-            <circle class:list={["dot", m.won ? "win" : "loss"]} cx={xs(m.i)} cy={ys(m.after)} r="4" />
+            <circle class:list={["dot", m.won ? "win" : m.draw ? "draw" : "loss"]} cx={xs(m.i)} cy={ys(m.after)} r="4" />
           ))}
         </g>
         <g class="note">
@@ -201,11 +201,11 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
   <section class="wrap narrow block">
     <div class="block-head">
       <h2>The form guide</h2>
-      <p class="current">current form {lastFive.map((f) => <span class:list={["fg", "sm", f.won ? "w" : "l"]}>{f.won ? "W" : "L"}</span>)}</p>
+      <p class="current">current form {lastFive.map((f) => <span class:list={["fg", "sm", f.won ? "w" : f.draw ? "d" : "l"]}>{f.won ? "W" : f.draw ? "D" : "L"}</span>)}</p>
     </div>
     <ol class="form" data-reveal aria-label={`All ${form.length} results in order, oldest first.`}>
       {form.map((f, k) => (
-        <li class:list={["fg", f.won ? "w" : "l"]} style={`--k:${k}`} title={`Match ${f.i} · ${day(f.date)} · ${f.won ? "won" : "lost"} ${f.score}`}>{f.won ? "W" : "L"}</li>
+        <li class:list={["fg", f.won ? "w" : f.draw ? "d" : "l"]} style={`--k:${k}`} title={`Match ${f.i} · ${day(f.date)} · ${f.won ? "won" : f.draw ? "drew" : "lost"} ${f.score}`}>{f.won ? "W" : f.draw ? "D" : "L"}</li>
       ))}
     </ol>
     <p class="small-note">All {form.length} rated matches, oldest first, read like a football table.</p>
@@ -329,7 +329,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
           <thead><tr><th>#</th><th>Date</th><th>Result</th><th>Score</th><th>WPR</th></tr></thead>
           <tbody>
             {[...matches].reverse().map((m) => (
-              <tr><td>{m.i}</td><td>{day(m.date)}</td><td>{m.won ? "Won" : "Lost"}</td><td>{m.score}</td><td>{f2(m.before)} → {f2(m.after)}</td></tr>
+              <tr><td>{m.i}</td><td>{day(m.date)}</td><td>{m.won ? "Won" : m.draw ? "Drew" : "Lost"}</td><td>{m.score}</td><td>{f2(m.before)} → {f2(m.after)}</td></tr>
             ))}
           </tbody>
         </table>
@@ -456,6 +456,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
   .line { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
   .dot.win { fill: var(--accent); stroke: var(--paper); stroke-width: 2; }
   .dot.loss { fill: var(--paper); stroke: var(--accent); stroke-width: 1.5; }
+  .dot.draw { fill: var(--paper); stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 2 1.5; }
   .note path { fill: none; stroke: var(--ink-soft); stroke-width: 1.2; stroke-linecap: round; }
   .note text { font-family: var(--font-serif); font-style: italic; font-size: 13px; fill: var(--ink-soft); }
   .end-label { font-family: var(--font-mono); font-size: 11px; fill: var(--ink-soft); }
@@ -485,6 +486,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
   .fg.sm { width: 1.2rem; height: 1.2rem; font-size: 0.6rem; }
   .fg.w { background: var(--accent); color: #fff; }
   .fg.l { background: transparent; color: var(--ink-soft); box-shadow: inset 0 0 0 1.5px var(--line-strong); }
+  .fg.d { background: transparent; color: var(--ink-soft); outline: 1.5px dashed var(--line-strong); outline-offset: -1.5px; }
   :global(html.padel-armed) .form:not(.in) .fg { opacity: 0; transform: scale(0.4); }
   :global(html.padel-armed) .form .fg { transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.2, 1.4, 0.4, 1); transition-delay: calc(var(--k) * 14ms); }
 
@@ -592,7 +594,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
     const tip = fig.querySelector<HTMLElement>(".tip")!;
     const cross = fig.querySelector<SVGLineElement>(".cross")!;
     const ring = fig.querySelector<SVGCircleElement>(".ring")!;
-    const pts: { x: number; y: number; d: string; w: boolean; s: string; b: string; a: string }[] = JSON.parse(fig.dataset.points || "[]");
+    const pts: { x: number; y: number; d: string; w: boolean; dr: boolean; s: string; b: string; a: string }[] = JSON.parse(fig.dataset.points || "[]");
     const vb = svg.viewBox.baseVal;
     const show = (clientX: number) => {
       const r = svg.getBoundingClientRect();
@@ -601,7 +603,7 @@ const maxKind = Math.max(...byKind.map((k) => k.played));
       for (const p of pts) if (Math.abs(p.x - x) < Math.abs(best.x - x)) best = p;
       cross.setAttribute("x1", String(best.x)); cross.setAttribute("x2", String(best.x));
       ring.setAttribute("cx", String(best.x)); ring.setAttribute("cy", String(best.y));
-      tip.innerHTML = `<b>${best.w ? "Won" : "Lost"} ${best.s}</b> · ${best.d}<br>WPR ${best.b} → ${best.a}`;
+      tip.innerHTML = `<b>${best.w ? "Won" : best.dr ? "Drew" : "Lost"} ${best.s}</b> · ${best.d}<br>WPR ${best.b} → ${best.a}`;
       const px = (best.x / vb.width) * r.width, py = (best.y / vb.height) * r.height;
       tip.style.left = `${Math.min(Math.max(px, 70), r.width - 70)}px`;
       tip.style.top = `${py}px`;
