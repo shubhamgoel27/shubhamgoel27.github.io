@@ -4,7 +4,10 @@ Source: World Padel Rating app (api.redpadel.com GraphQL `getMatches`, my user i
 The app UI shows only 10 of these 117 matches.
 
 `wpr_matches.psv`: pipe-separated. Players are `Name:ratingBefore>ratingAfter` (WPR-s social rating), joined by `+`.
-Sets are teamA-teamB. `winner` is A or B. Dates are UTC (Pacific = UTC-7).
+Sets are teamA-teamB. `winner` is A or B.
+Format `POINTS` (Mexicano, from Nov 11 2026) has no sets: `sets` holds the round's points, e.g. 16-8 out of 24.
+WPR re-rates past matches now and then; `merge.py --refresh` copies its current ratings onto stored rows (last done 2026-11-12).
+Dates are UTC; the site converts them to Pacific time (UTC-7 in summer, UTC-8 in winter).
 
 event_id:
 0 Beginner Open Play 0-1.49 (Sunnyvale)

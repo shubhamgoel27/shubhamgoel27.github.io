@@ -15,7 +15,8 @@ export interface Match {
   won: boolean;
   before: number;
   after: number;
-  score: string; // my side first, e.g. "6-4" or "3-6 6-7"
+  score: string; // my side first, e.g. "6-4" or "3-6 6-7"; points rounds read "16-8 pts"
+  points: boolean; // a points round (Mexicano, Americano): one race to 24 points, no sets or games
   gamesFor: number;
   gamesAgainst: number;
   tiebreak: boolean; // a set went 7-6
@@ -60,7 +61,8 @@ export const matches: Match[] = psv(wprRaw).map((r, i) => {
   const own = sets.map(([x, y]) => (mineA ? [x, y] : [y, x]));
   const gf = own.reduce((s, [x]) => s + x, 0), ga = own.reduce((s, [, y]) => s + y, 0);
   const avg = (t: { before: number }[]) => t.reduce((s, p) => s + p.before, 0) / t.length;
-  const tiebreak = own.some(([x, y]) => x + y === 13);
+  const points = r.format === "POINTS";
+  const tiebreak = !points && own.some(([x, y]) => x + y === 13);
   const date = toPacific(r.date_utc);
   return {
     i: i + 1,
@@ -70,11 +72,12 @@ export const matches: Match[] = psv(wprRaw).map((r, i) => {
     won: r.winner === (mineA ? "A" : "B"),
     before: me.before,
     after: me.after,
-    score: own.map(([x, y]) => `${x}-${y}`).join(" "),
+    score: own.map(([x, y]) => `${x}-${y}`).join(" ") + (points ? " pts" : ""),
+    points,
     gamesFor: gf,
     gamesAgainst: ga,
     tiebreak,
-    close: tiebreak || own.every(([x, y]) => Math.abs(x - y) <= 2),
+    close: !points && (tiebreak || own.every(([x, y]) => Math.abs(x - y) <= 2)),
     gap: avg(theirs) - avg(mine),
     partnerBefore: mine.find((p) => p.name !== ME)!.before,
   };
@@ -94,6 +97,8 @@ const record = (ms: Match[]) => {
   return { w, l: ms.length - w, pct: ms.length ? Math.round((100 * w) / ms.length) : 0 };
 };
 
+const sets = matches.filter((m) => !m.points);
+
 let streak = 0, best = 0;
 for (const m of matches) { streak = m.won ? streak + 1 : 0; best = Math.max(best, streak); }
 
@@ -111,8 +116,9 @@ export const summary = {
   partners: partnerSet.size,
   opponents: oppSet.size,
   bestStreak: best,
-  gamesPct: Math.round((100 * matches.reduce((s, m) => s + m.gamesFor, 0)) /
-    matches.reduce((s, m) => s + m.gamesFor + m.gamesAgainst, 0)),
+  // games only: a points round's 16-8 is points, not games
+  gamesPct: Math.round((100 * sets.reduce((s, m) => s + m.gamesFor, 0)) /
+    sets.reduce((s, m) => s + m.gamesFor + m.gamesAgainst, 0)),
   close: record(matches.filter((m) => m.close)),
   tiebreaks: record(matches.filter((m) => m.tiebreak)),
   biggestUpset: upsets[0] ?? null,
@@ -175,7 +181,7 @@ export const calendar = (() => {
 // single-set scorelines, my games first
 export const scorelines = (() => {
   const c = new Map<string, number>();
-  for (const m of matches) if (!m.score.includes(" ")) c.set(m.score, (c.get(m.score) ?? 0) + 1);
+  for (const m of matches) if (!m.points && !m.score.includes(" ")) c.set(m.score, (c.get(m.score) ?? 0) + 1);
   return [...c.entries()].map(([k, n]) => { const [f, a] = k.split("-").map(Number); return { f, a, n }; });
 })();
 
