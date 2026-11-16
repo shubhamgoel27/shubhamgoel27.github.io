@@ -1,7 +1,7 @@
 # WPR match export
 
-Source: World Padel Rating app (api.redpadel.com GraphQL `getMatches`, my user id, no status filter), pulled 2026-11-13.
-The app UI shows only 10 of these 125 matches.
+Source: World Padel Rating app (api.redpadel.com GraphQL `getMatches`, my user id, no status filter), pulled 2026-11-15.
+The app UI shows only 10 of these 131 matches.
 
 `wpr_matches.psv`: pipe-separated. Players are `Name:ratingBefore>ratingAfter` (WPR-s social rating), joined by `+`.
 Sets are teamA-teamB. `winner` is A or B.
